@@ -32,31 +32,36 @@ class MatteCubeMaterialCfg(sim_utils.PreviewSurfaceCfg):
     clearcoat: float = 0.0
 
 
+def install_table55(scene):
+    """Install the shared table and protective board without changing task logic."""
+    def slab(name, bounds, thickness, center_z):
+        x0, x1, y0, y1 = bounds
+        return AssetBaseCfg(
+            prim_path="{ENV_REGEX_NS}/" + name,
+            spawn=sim_utils.CuboidCfg(
+                size=(x1-x0, y1-y0, thickness),
+                collision_props=sim_utils.CollisionPropertiesCfg(collision_enabled=True),
+                visual_material=sim_utils.PreviewSurfaceCfg(diffuse_color=(1., 1., 1.)),
+            ),
+            init_state=AssetBaseCfg.InitialStateCfg(pos=((x0+x1)/2, (y0+y1)/2, center_z)),
+        )
+    x0, x1 = TABLE_BOUNDS_X
+    hx0, hx1 = OPENING_X
+    hy0, hy1 = OPENING_Y
+    ey0, ey1 = EXTENSION_Y
+    pieces = ((x0, x1, -.6, .6), (hx1, x0, ey0, ey1),
+              (EXTENSION_BACK_X, hx0, ey0, ey1),
+              (hx0, hx1, ey0, hy0), (hx0, hx1, hy1, ey1))
+    for prefix, thickness, z in (("table", TABLE_THICKNESS, TABLE_TOP_Z-TABLE_THICKNESS/2),
+                                  ("protective_board", BOARD_THICKNESS, TABLE_TOP_Z+BOARD_THICKNESS/2)):
+        for index, bounds in enumerate(pieces):
+            name = prefix if index == 0 else f"{prefix}_{index}"
+            setattr(scene, name, slab(name, bounds, thickness, z))
+
+
 class _Table55Mixin:
     def _configure_table55(self):
-        def slab(name, bounds, thickness, center_z):
-            x0, x1, y0, y1 = bounds
-            return AssetBaseCfg(
-                prim_path="{ENV_REGEX_NS}/" + name,
-                spawn=sim_utils.CuboidCfg(
-                    size=(x1-x0, y1-y0, thickness),
-                    collision_props=sim_utils.CollisionPropertiesCfg(collision_enabled=True),
-                    visual_material=sim_utils.PreviewSurfaceCfg(diffuse_color=(1., 1., 1.)),
-                ),
-                init_state=AssetBaseCfg.InitialStateCfg(pos=((x0+x1)/2, (y0+y1)/2, center_z)),
-            )
-        x0, x1 = TABLE_BOUNDS_X
-        hx0, hx1 = OPENING_X
-        hy0, hy1 = OPENING_Y
-        ey0, ey1 = EXTENSION_Y
-        pieces = ((x0, x1, -.6, .6), (hx1, x0, ey0, ey1),
-                  (EXTENSION_BACK_X, hx0, ey0, ey1),
-                  (hx0, hx1, ey0, hy0), (hx0, hx1, hy1, ey1))
-        for prefix, thickness, z in (("table", TABLE_THICKNESS, TABLE_TOP_Z-TABLE_THICKNESS/2),
-                                      ("protective_board", BOARD_THICKNESS, TABLE_TOP_Z+BOARD_THICKNESS/2)):
-            for index, bounds in enumerate(pieces):
-                name = prefix if index == 0 else f"{prefix}_{index}"
-                setattr(self.scene, name, slab(name, bounds, thickness, z))
+        install_table55(self.scene)
         self.scene.object.spawn.visual_material = MatteCubeMaterialCfg()
         self.scene.object.init_state.pos = (0.45, 0., WORK_SURFACE_Z + 0.049 / 2)
         goal_z = WORK_SURFACE_Z + 0.049 / 2 + 0.15 - self.scene.robot.init_state.pos[2]

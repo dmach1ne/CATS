@@ -110,6 +110,11 @@ gradually rather than jumping immediately to the open position. See
 
 ## Tasks and Rewards
 
+Reach and Place Cube use the same Table55 table and protective-board geometry.
+Reach retains its free-space targets and has no cube. Both Reach training and
+its evaluation command use this layout; use checkpoints trained with the same
+layout when reproducing these commands. See the [Reach scene configuration][reach-scene].
+
 **Reach** tracks successive targets in free space. Training episodes last
 18 seconds, with a new target every 6 seconds. The reward combines position
 tracking, fine-grained position tracking and orientation tracking. The selected
@@ -155,7 +160,7 @@ use the saved `agent.yaml` from each run when evaluating its checkpoint.
 
 ```bash
 python scripts/rl_games/train.py \
-  --task ER-Reach-Franka-CNN-RealAsIs-Overlay2D-Proprio-LegacyController-NoHeightPenalty-GoalFixedScale-v0 \
+  --task ER-Reach-Franka-CNN-RealAsIs-Overlay2D-Proprio-LegacyController-NoHeightPenalty-GoalFixedScale-LiftTable55-v0 \
   --agent rl_games_goal_fixed_scale_cfg_entry_point \
   --mode base \
   --seed "$SEED" --num_envs 128 --max_iterations 3000 \
@@ -166,7 +171,7 @@ python scripts/rl_games/train.py \
 
 ```bash
 python scripts/rl_games/train.py \
-  --task ER-Reach-Franka-CNN-RealAsIs-Overlay2D-Proprio-LegacyController-NoHeightPenalty-GoalFixedScale-v0 \
+  --task ER-Reach-Franka-CNN-RealAsIs-Overlay2D-Proprio-LegacyController-NoHeightPenalty-GoalFixedScale-LiftTable55-v0 \
   --agent rl_games_goal_fixed_scale_cfg_entry_point \
   --mode caps \
   --seed "$SEED" --num_envs 128 --max_iterations 3000 \
@@ -181,7 +186,7 @@ python scripts/rl_games/train.py \
 
 ```bash
 python scripts/rl_games/train.py \
-  --task ER-Reach-Franka-CNN-RealAsIs-Overlay2D-Proprio-LegacyController-NoHeightPenalty-GoalFixedScale-v0 \
+  --task ER-Reach-Franka-CNN-RealAsIs-Overlay2D-Proprio-LegacyController-NoHeightPenalty-GoalFixedScale-LiftTable55-v0 \
   --agent rl_games_goal_fixed_scale_cfg_entry_point \
   --mode cats \
   --seed "$SEED" --num_envs 128 --max_iterations 3000 \
@@ -195,7 +200,7 @@ python scripts/rl_games/train.py \
 python scripts/eval_success.py \
   --checkpoint "$CHECKPOINT" \
   --agent-cfg "$AGENT_CFG" \
-  --task ER-Reach-Franka-CNN-RealAsIs-Overlay2D-Proprio-Eval-LegacyController-NoHeightPenalty-GoalFixedScale-v0 \
+  --task ER-Reach-Franka-CNN-RealAsIs-Overlay2D-Proprio-Eval-LegacyController-NoHeightPenalty-GoalFixedScale-LiftTable55-v0 \
   --headless --enable_cameras \
   --targets 30 \
   --eval-seeds 652165 709797 242820 579787 70701 \
@@ -351,3 +356,5 @@ intervals. Keep the per-training-seed evaluation outputs for this aggregation.
 [reach-agent]: source/er_isaac/er_isaac/tasks/manager_based/er_isaac/config/franka/agents/rl_games_visual_reach_compact_proprio_goal_fixed_scale_ppo_cfg.yaml
 [place-agent]: source/er_isaac/er_isaac/tasks/manager_based/er_isaac/config/franka/agents/rl_games_visual_lift_compact_proprio_goal_fixed_scale_ppo_cfg.yaml
 [metrics]: scripts/evaluation/lift_metrics.py
+
+[reach-scene]: source/er_isaac/er_isaac/tasks/manager_based/er_isaac/config/franka/reach_lift_table55_env_cfg.py

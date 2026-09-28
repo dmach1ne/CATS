@@ -24,22 +24,22 @@ for _placement_id, _placement_cfg in (
     )
 
 gym.register(
-    id="ER-Reach-Franka-CNN-RealAsIs-Overlay2D-Proprio-LegacyController-NoHeightPenalty-GoalFixedScale-v0",
+    id="ER-Reach-Franka-CNN-RealAsIs-Overlay2D-Proprio-LegacyController-NoHeightPenalty-GoalFixedScale-LiftTable55-v0",
     entry_point="isaaclab.envs:ManagerBasedRLEnv",
     disable_env_checker=True,
     kwargs={
-        "env_cfg_entry_point": f"{__name__}.goal_fixed_scale_env_cfg:FrankaReachCNNRealAsIsOverlay2DProprioLegacyControllerNoHeightPenaltyGoalFixedScaleEnvCfg",
+        "env_cfg_entry_point": f"{__name__}.reach_lift_table55_env_cfg:FrankaReachGoalFixedScaleLiftTable55EnvCfg",
         "rl_games_cfg_entry_point": f"{agents.__name__}:rl_games_visual_reach_compact_proprio_goal_fixed_scale_ppo_cfg.yaml",
         "rl_games_goal_fixed_scale_cfg_entry_point": f"{agents.__name__}:rl_games_visual_reach_compact_proprio_goal_fixed_scale_ppo_cfg.yaml",
     },
 )
 
 gym.register(
-    id="ER-Reach-Franka-CNN-RealAsIs-Overlay2D-Proprio-Eval-LegacyController-NoHeightPenalty-GoalFixedScale-v0",
+    id="ER-Reach-Franka-CNN-RealAsIs-Overlay2D-Proprio-Eval-LegacyController-NoHeightPenalty-GoalFixedScale-LiftTable55-v0",
     entry_point="isaaclab.envs:ManagerBasedRLEnv",
     disable_env_checker=True,
     kwargs={
-        "env_cfg_entry_point": f"{__name__}.goal_fixed_scale_env_cfg:FrankaReachCNNRealAsIsOverlay2DProprioLegacyControllerNoHeightPenaltyEvalGoalFixedScaleEnvCfg",
+        "env_cfg_entry_point": f"{__name__}.reach_lift_table55_env_cfg:FrankaReachGoalFixedScaleLiftTable55EvalEnvCfg",
         "rl_games_cfg_entry_point": f"{agents.__name__}:rl_games_visual_reach_compact_proprio_goal_fixed_scale_ppo_cfg.yaml",
         "rl_games_goal_fixed_scale_cfg_entry_point": f"{agents.__name__}:rl_games_visual_reach_compact_proprio_goal_fixed_scale_ppo_cfg.yaml",
     },
