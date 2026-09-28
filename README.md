@@ -30,7 +30,8 @@ export PYTHONPATH="$PWD:$PWD/$ALG:$PWD/$ALG/tests:$PWD/$ALG/models"
 
 Training scripts read `$ALG/tests/seeds.txt`; evaluation uses
 `$ALG/tests/validation_seeds.txt`. In training commands, `--seeds` specifies the
-number of runs. `--workers` controls concurrent training jobs.
+number of runs. `--workers` controls concurrent training jobs and defaults to
+the number of training seeds.
 
 ## Experiments
 
@@ -42,14 +43,14 @@ with Base, CATS, CAPS, L2C2, Grad-CAPS (GRAD), ASAP and LipsNet++.
 Train CATS on PPO Hopper:
 
 ```bash
-python ppo/tests/train_cats.py --env hopper --workers 5 --device auto
+python ppo/tests/train_cats.py --env hopper --device auto
 ```
 
 Train the comparison methods:
 
 ```bash
 python ppo/tests/test_all.py \
-  --envs hopper --algs vanilla caps l2c2 grad asap --workers 5 --device auto
+  --envs hopper --algs vanilla caps l2c2 grad asap --device auto
 ```
 
 These scripts run full-budget training and then evaluate the saved policies.
@@ -59,7 +60,7 @@ CATS and LipsNet++ load their selected hyperparameters directly from
 To train and evaluate LipsNet++ on PPO Hopper:
 
 ```bash
-python ppo/tests/train_lipsnetpp.py --env hopper --workers 5
+python ppo/tests/train_lipsnetpp.py --env hopper
 python ppo/tests/evaluate_lipsnetpp.py --env hopper
 ```
 
@@ -135,7 +136,7 @@ the Base and CATS policies trained in Section 1:
 
 ```bash
 for TASK in lunar pendulum; do
-  python "$ALG/tests/train_cats_next_noise.py" --env "$TASK" --workers 5
+  python "$ALG/tests/train_cats_next_noise.py" --env "$TASK"
   python "$ALG/tests/eval_policy_output_sensitivity.py" \
     --env "$TASK" --experiment next-state-noise
 done
@@ -147,7 +148,7 @@ Compare CATS with Fixed-middle and Fixed-final on Ant, Hopper and Walker.
 For PPO Hopper:
 
 ```bash
-python ppo/tests/train_fixed_controls.py --env hopper --workers 5
+python ppo/tests/train_fixed_controls.py --env hopper
 ```
 
 Fixed-middle uses half the final CATS coefficient; Fixed-final uses the full

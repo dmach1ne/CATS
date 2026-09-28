@@ -54,10 +54,13 @@ def main() -> None:
                         choices=(0.2, 0.4, 0.6, 0.8), default=[0.2, 0.4, 0.6, 0.8])
     parser.add_argument("--seeds", type=int, default=10)
     parser.add_argument("--seed-offset", type=int, default=0)
-    parser.add_argument("--workers", type=int, default=3)
+    parser.add_argument("--workers", type=int, default=None,
+                        help="Concurrent training jobs (default: number of training seeds)")
     parser.add_argument("--evaluation-episodes", type=int, default=10)
     parser.add_argument("--device", default="cuda")
     args = parser.parse_args()
+    if args.workers is None:
+        args.workers = args.seeds
 
     if args.seeds <= 0 or args.workers <= 0 or args.seed_offset < 0:
         parser.error("seed and worker counts must be positive; offset nonnegative")

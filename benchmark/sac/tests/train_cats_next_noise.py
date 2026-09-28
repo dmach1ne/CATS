@@ -52,8 +52,13 @@ if __name__ == "__main__":
     parser.add_argument("--env", required=True, choices=("lunar", "pendulum"))
     parser.add_argument("--device", type=str, default="auto")
     parser.add_argument("--seeds", type=int, default=10)
-    parser.add_argument("--workers", type=int, default=5)
+    parser.add_argument("--workers", type=int, default=None,
+                        help="Concurrent training jobs (default: number of training seeds)")
     args = parser.parse_args()
+    if args.workers is None:
+        args.workers = args.seeds
+    if args.workers <= 0:
+        parser.error("--workers must be positive")
 
     seeds = load_seeds(seed_file_path)[:args.seeds]
     alpha_values = [float(selected_settings("sac", args.env)["cats"]["cats_alpha"])]

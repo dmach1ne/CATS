@@ -55,9 +55,14 @@ def main() -> None:
     parser.add_argument("--env", choices=TRAIN_ENVS, required=True)
     parser.add_argument("--seeds", type=int, default=10)
     parser.add_argument("--seed-offset", type=int, default=0)
-    parser.add_argument("--workers", type=int, default=5)
+    parser.add_argument("--workers", type=int, default=None,
+                        help="Concurrent training jobs (default: number of training seeds)")
     parser.add_argument("--device", default="auto")
     args = parser.parse_args()
+    if args.workers is None:
+        args.workers = args.seeds
+    if args.workers <= 0:
+        parser.error("--workers must be positive")
 
     profile = selected_profile("ppo", args.env)
     profile_names = [profile.name]

@@ -86,10 +86,14 @@ if __name__ == "__main__":
     parser.add_argument(
         "--workers",
         type=int,
-        default=5,
-        help="Number of concurrent workers."
+        default=None,
+        help="Concurrent training jobs (default: number of training seeds)."
     )
     args = parser.parse_args()
+    if args.workers is None:
+        args.workers = max_num
+    if args.workers <= 0:
+        parser.error("--workers must be positive")
     print(f"Selected envs: {args.envs}")
     print(f"Selected algs: {args.algs}")
     print(f"Selected device: {args.device}")

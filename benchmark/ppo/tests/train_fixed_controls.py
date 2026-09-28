@@ -52,9 +52,14 @@ if __name__ == "__main__":
                         help="Environment to test")
     parser.add_argument("--device", type=str, default="auto")
     parser.add_argument("--seeds", type=int, default=10, help="Number of seeds")
-    parser.add_argument("--workers", type=int, default=5, help="Max concurrent workers")
+    parser.add_argument("--workers", type=int, default=None,
+                        help="Concurrent training jobs (default: number of training seeds)")
     parser.add_argument("--control", choices=("middle", "final", "both"), default="both")
     args = parser.parse_args()
+    if args.workers is None:
+        args.workers = args.seeds
+    if args.workers <= 0:
+        parser.error("--workers must be positive")
 
     seeds = load_seeds(seed_file_path)[:args.seeds]
 
