@@ -1,55 +1,104 @@
-# Reach and Place Cube: simulation only
+# Robot Simulation
 
-Simulation tasks, visual/proprioceptive networks, Base/CAPS/CATS training and
-evaluation. No real-robot driver, checkpoint, ONNX or simulator/assets bundled.
-The impedance module is a simulation action term, not physical-robot control.
+Training and evaluation for Reach and Place Cube in Isaac Lab, comparing
+Base PPO, CAPS and CATS.
 
-## Runtime
+- **Reach:** move the end effector to a target in free space.
+- **Place Cube:** start with a grasped cube and place it at a target on the table.
 
-Install and accept Isaac Sim/Isaac Lab terms separately. Use its Python with
-isaaclab, isaaclab_assets, isaaclab_rl, isaaclab_tasks, rl_games, PyYAML, Pillow,
-NumPy and imageio-ffmpeg. The recorded Isaac Lab version is 2.2.1; full simulator
-dependency pinning remains unverified. Syntax and assembly checks passed;
-Isaac runtime has NOT been tested here.
+Policies use images, target coordinates and proprioceptive inputs.
 
-Use the original `scripts/rl_games/train.py` and evaluation entry points.
-[RECIPES.md](RECIPES.md) lists the recorded task arguments, seeds and overrides.
-The added single-policy `launch.py` wrapper has been removed. The original
-cluster scheduler is not distributed, and the direct recipes do not prescribe
-serial training. No simulator terms are automatically accepted.
+## Setup
 
-Reach: 128 environments, 3000 iterations, five training seeds. YAML horizon 48.
-CATS final coefficient 5; CAPS temporal 0.5, spatial 0.1, sigma 0.2 with target
-overlay preserved. Place: 512 environments, 1500 iterations, horizon 50, three
-training seeds; CATS coefficient 1; CAPS 0.5/0.1/0.2 without overlay preservation.
-All explicit Place training overrides are in RECIPES.md; YAML alone is incomplete.
+Use an Isaac Lab environment with Isaac Sim, `isaaclab_assets`, `isaaclab_rl`,
+`isaaclab_tasks`, `rl_games`, PyYAML, Pillow, NumPy and imageio-ffmpeg.
+The recorded Isaac Lab version is 2.2.1. The simulator and assets are not
+bundled, and runtime testing of this release is still pending.
 
-## Evaluate
-
-Use the evaluation commands in RECIPES.md and the agent.yaml saved with the checkpoint.
-Five recorded evaluation seeds, 30 Reach targets or 50 Place trials per seed.
-Place reuses the recorded paired goals.json. Original evaluators also record
-diagnostic simulation videos, so their video dependencies are required; no
-manuscript figure/animation generators are included.
-
-Recompute Place's reported zero-hold success from the 30 Hz traces:
+From the repository root:
 
 ```bash
-python robotics_sim/score_place.py /tmp/place-eval/summary.json --output /tmp/place-eval/reported_metrics.json
+cd robotics_sim
+export PYTHONPATH="$PWD/source/er_isaac:$PWD/scripts/rl_games:$PWD/scripts:$PYTHONPATH"
+SEED=178132
 ```
 
-This metric-only interface was extracted for release from the existing report
-predicate; it is not an original batch launcher or a policy-selection tool.
-Success: XY error <=5 cm, cube height 0.0505 m +/-0.005 m, table contact,
-gripper width >=0.06 m, and no finger contact in one frame. Training reward and
-success include transport-height conditions; do not substitute them for the
-reported metric. Aggregate training-seed means with untruncated 95% t-CIs.
+Use the following training seeds for each method:
 
-## Provenance
+| Task | Training seeds | Environments | Iterations |
+| --- | --- | ---: | ---: |
+| Reach | 178132, 410580, 922852, 787576, 660993 | 128 | 3000 |
+| Place Cube | 178132, 410580, 922852 | 512 | 1500 |
 
-The recorded Place payload plus training/evaluation overlays supplies the shared
-source. Only Reach/Place registrations and required local modules/configs remain.
-Automatic EULA acceptance and machine-specific defaults are removed; explicit
-saved agent config is required. Numerical implementations are otherwise retained.
-The shared snapshot contains Reach, but identity to each earlier Reach job is
-not yet verified. See the parent RELEASE_STATUS.md before making release claims.
+Run each seed with the corresponding command below. Jobs may be scheduled
+independently on available GPUs. Place commands include training overrides
+that are not fully captured by the YAML configuration alone.
+
+For evaluation, set `CHECKPOINT` to the trained checkpoint and `AGENT_CFG`
+to its saved `agent.yaml`. Each command evaluates five seeds; Reach uses
+30 targets per seed and Place Cube uses 50 trials per seed. Keep `goals.json`
+for the paired Place Cube target schedule.
+
+## Reach: BASE
+
+```bash
+python scripts/rl_games/train.py --task ER-Reach-Franka-CNN-RealAsIs-Overlay2D-Proprio-LegacyController-NoHeightPenalty-GoalFixedScale-v0 --agent rl_games_goal_fixed_scale_cfg_entry_point --mode base --seed "$SEED" --num_envs 128 --max_iterations 3000 --headless --enable_cameras
+```
+
+## Reach: CAPS
+
+```bash
+python scripts/rl_games/train.py --task ER-Reach-Franka-CNN-RealAsIs-Overlay2D-Proprio-LegacyController-NoHeightPenalty-GoalFixedScale-v0 --agent rl_games_goal_fixed_scale_cfg_entry_point --mode caps --seed "$SEED" --num_envs 128 --max_iterations 3000 --headless --enable_cameras --caps-lambda-t 0.5 --caps-lambda-s 0.1 --caps-sigma 0.2 --caps-preserve-target-overlay
+```
+
+## Reach: CATS
+
+```bash
+python scripts/rl_games/train.py --task ER-Reach-Franka-CNN-RealAsIs-Overlay2D-Proprio-LegacyController-NoHeightPenalty-GoalFixedScale-v0 --agent rl_games_goal_fixed_scale_cfg_entry_point --mode cats --seed "$SEED" --num_envs 128 --max_iterations 3000 --headless --enable_cameras --alpha-max 5.0
+```
+
+## Reach: evaluation
+
+```bash
+python scripts/eval_success.py --checkpoint "$CHECKPOINT" --agent-cfg "$AGENT_CFG" --task ER-Reach-Franka-CNN-RealAsIs-Overlay2D-Proprio-Eval-LegacyController-NoHeightPenalty-GoalFixedScale-v0 --headless --enable_cameras --targets 30 --eval-seeds 652165 709797 242820 579787 70701 --out evaluation.mp4 --summary summary.json
+```
+
+## Place: BASE
+
+```bash
+python scripts/rl_games/train.py --task ER-Place-Franka-Pregrasped-Table55-GoalFixedScale-RGB84-Front25Transport10-v0 --agent rl_games_goal_fixed_scale_cfg_entry_point --mode base --seed "$SEED" --num_envs 512 --max_iterations 1500 --headless --enable_cameras agent.params.config.horizon_length=50 agent.params.config.save_frequency=100 agent.params.config.entropy_coef=0.0 agent.params.config.lr_schedule=null agent.params.config.learning_rate=0.0003 agent.params.config.mini_epochs=4 agent.params.network.separate=false agent.params.config.gamma=0.8 agent.params.config.tau=0.9 agent.params.config.e_clip=0.2 agent.params.config.critic_coef=0.5 agent.params.config.grad_norm=0.5 agent.params.config.minibatch_size=800 'agent.params.network.image_shape=[84,84,3]'
+```
+
+## Place: CAPS
+
+```bash
+python scripts/rl_games/train.py --task ER-Place-Franka-Pregrasped-Table55-GoalFixedScale-RGB84-Front25Transport10-v0 --agent rl_games_goal_fixed_scale_cfg_entry_point --mode caps --seed "$SEED" --num_envs 512 --max_iterations 1500 --headless --enable_cameras --caps-lambda-t 0.5 --caps-lambda-s 0.1 --caps-sigma 0.2 agent.params.config.horizon_length=50 agent.params.config.save_frequency=100 agent.params.config.entropy_coef=0.0 agent.params.config.lr_schedule=null agent.params.config.learning_rate=0.0003 agent.params.config.mini_epochs=4 agent.params.network.separate=false agent.params.config.gamma=0.8 agent.params.config.tau=0.9 agent.params.config.e_clip=0.2 agent.params.config.critic_coef=0.5 agent.params.config.grad_norm=0.5 agent.params.config.minibatch_size=800 'agent.params.network.image_shape=[84,84,3]'
+```
+
+## Place: CATS
+
+```bash
+python scripts/rl_games/train.py --task ER-Place-Franka-Pregrasped-Table55-GoalFixedScale-RGB84-Front25Transport10-v0 --agent rl_games_goal_fixed_scale_cfg_entry_point --mode cats --seed "$SEED" --num_envs 512 --max_iterations 1500 --headless --enable_cameras --alpha-max 1.0 agent.params.config.horizon_length=50 agent.params.config.save_frequency=100 agent.params.config.entropy_coef=0.0 agent.params.config.lr_schedule=null agent.params.config.learning_rate=0.0003 agent.params.config.mini_epochs=4 agent.params.network.separate=false agent.params.config.gamma=0.8 agent.params.config.tau=0.9 agent.params.config.e_clip=0.2 agent.params.config.critic_coef=0.5 agent.params.config.grad_norm=0.5 agent.params.config.minibatch_size=800 'agent.params.network.image_shape=[84,84,3]'
+```
+
+## Place: evaluation
+
+```bash
+python scripts/evaluation/eval_transport10_parallel.py --checkpoint "$CHECKPOINT" --agent-cfg "$AGENT_CFG" --task ER-Place-Franka-Pregrasped-Table55-GoalFixedScale-RGB84-Front25Transport10-Eval-v0 --headless --enable_cameras --trials 50 --eval-seeds 652165 709797 242820 579787 70701 --goal-schedule goals.json --out summary.json
+```
+
+## Place Cube Success
+
+After Place evaluation, compute the reported success metric:
+
+```bash
+python score_place.py summary.json --output reported_metrics.json
+```
+
+Success requires XY error at most 5 cm, cube height within 0.0505 m +/- 0.005 m,
+table contact, gripper width at least 0.06 m and no finger contact, with no
+hold-time requirement. This differs from the training success metric.
+Report training-seed means with untruncated 95% t-confidence intervals.
+
+Only simulation code is included. The impedance action module controls the
+simulated robot; it is not a physical-robot driver.

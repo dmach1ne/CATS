@@ -1,130 +1,171 @@
 # CATS
 
-Code for the CATS paper, organized in the order of Section V. Benchmark scripts
-retain the original seed files, parallel training and evaluation workflows.
-The robotics release covers simulation only.
+CATS is a policy regularizer for smooth continuous control. It combines a
+temporal penalty with a linearly increasing coefficient, without an explicit
+spatial penalty.
 
-## Environment
+This repository contains PPO/SAC benchmark experiments and Reach/Place Cube
+simulation code. The experiment guide below follows the order of the paper.
 
-[environment-original.yml](environment-original.yml) preserves the archived
-environment, including PyTorch 2.6.0, Stable-Baselines3 2.5.0, Gymnasium 1.0.0
-and MuJoCo 3.3.3. It is not a fully pinned lockfile or a tested portable install.
-Other dependencies include NumPy, SciPy, h5py, pandas, matplotlib, tensorboard,
-imageio and Box2D support. Isaac Lab uses a separate environment.
+## Setup
 
-Local checks used PyTorch 2.9.1 on CPU, not the archived runtime. See
-[release status](RELEASE_STATUS.md) for verification limits.
+The benchmark uses Python 3.10, PyTorch, Stable-Baselines3 2.5.0, Gymnasium
+1.0.0 and MuJoCo 3.3.3. LunarLander additionally requires Box2D. Analysis scripts
+use NumPy, SciPy, h5py, pandas and matplotlib; training uses tensorboard.
 
-## V-A. Experimental Setup
+[environment-original.yml](environment-original.yml) contains the archived
+environment specification, including PyTorch 2.6.0. Fresh installation of that
+environment has not yet been validated. Robot simulation requires a separate
+Isaac Lab environment; see [robotics_sim](robotics_sim/README.md).
 
-Methods: PPO/SAC Base, CATS, CAPS, L2C2, Grad-CAPS (GRAD), ASAP and LipsNet++.
-Tasks: Ant, Hopper, Walker, continuous LunarLander and Pendulum.
-
-- Budgets and parameters: `benchmark/{ppo,sac}/tests/modules/params.py`.
-- Original seed files: `benchmark/{ppo,sac}/tests/{seeds,validation_seeds}.txt`.
-- Selected coefficients/profiles: [selected_settings.json](benchmark/selected_settings.json).
-- Detailed commands and settings: [benchmark guide](benchmark/README.md).
-
-The sweep scripts read the seed files and build parallel jobs. Their `--seeds`
-option is a count, not an individual seed. Generic sweep defaults are not
-necessarily the selected paper configurations.
-
-## V-B. Main Results
-
-### Clean Observations (Table I)
-
-From `benchmark/`, select the algorithm's import roots. These example commands
-run full-budget training, not smoke tests or the complete table:
+Run benchmark commands from `benchmark/`. Set the import paths for the algorithm
+you want to use:
 
 ```bash
 cd benchmark
-export PYTHONPATH="$PWD:$PWD/ppo:$PWD/ppo/tests:$PWD/ppo/models"
-python ppo/tests/test_all.py --envs hopper walker --algs vanilla caps l2c2 grad asap --workers 5 --device auto
-python ppo/tests/caps_linear_sweep.py --env hopper --alphas 5 --seeds 10 --workers 5 --device auto
-python ppo/tests/lipsnetpp_sweep.py --env hopper --profiles E --seeds 10 --workers 5
-python ppo/tests/evaluate_lipsnetpp.py --envs hopper --profiles E --training-seeds 10 --evaluation-episodes 10
+ALG=ppo  # ppo or sac
+export PYTHONPATH="$PWD:$PWD/$ALG:$PWD/$ALG/tests:$PWD/$ALG/models"
 ```
 
-For SAC, use its import roots, scripts and selected coefficients/profiles.
-Baseline and CATS batches invoke the original clean evaluator after training;
-LipsNet++ uses a separate evaluator. Evaluation reports return and FFT smoothness.
+Training scripts read `$ALG/tests/seeds.txt`; evaluation uses
+`$ALG/tests/validation_seeds.txt`. In sweep commands, `--seeds` specifies the
+number of runs. `--workers` controls concurrent training jobs.
 
-### Observation Noise (Table II)
+## Experiments
 
-Evaluate trained policies on Hopper and Walker with
-`benchmark/{ppo,sac}/tests/eval_noise_robustness.py`. LipsNet++ uses
-`benchmark/tools/evaluate_lipsnetpp_noise.py`. The original Base-derived feature
-scale and noise-evaluation implementation are retained.
+### 1. Main Results
 
-### Computational Cost (Table III)
+The benchmark covers Ant, Hopper, Walker, continuous LunarLander and Pendulum,
+with Base, CATS, CAPS, L2C2, Grad-CAPS (GRAD), ASAP and LipsNet++.
 
-`benchmark/ppo/tests/benchmark_training_cost.py` is the original wall-clock
-timing entry point. Matching the historical optimized snapshot and timing-run
-configuration remains necessary before claiming reproduction of the table.
+Train CATS on PPO Hopper:
 
-## V-C. Temporal and Spatial Regularization
+```bash
+python ppo/tests/caps_linear_sweep.py \
+  --env hopper --alphas 5 --seeds 10 --workers 5 --device auto
+```
 
-For the matched-smoothness comparison on Hopper and Walker (Fig. 2):
+Train the comparison methods:
 
-- Temporal-only CAPS: `benchmark/tools/train_four_target_temporal.py`.
-- Spatial-only CAPS and LipsNet++: `benchmark/tools/train_smoothness_matched.py`.
-- Original spatial-only entry point: `benchmark/tools/train_caps_spatial_only.py`.
+```bash
+python ppo/tests/test_all.py \
+  --envs hopper --algs vanilla caps l2c2 grad asap --workers 5 --device auto
+```
 
-Original coefficient/seed options remain. Historical selected coefficient grids
-are not reconstructed by guessing from the figure.
+These scripts run full-budget training and then evaluate the saved policies.
+Task budgets and method parameters are in `$ALG/tests/modules/params.py`.
+The selected CATS coefficients and LipsNet++ profiles are:
 
-## V-D. Empirical Validation of the Spatial Effect
+| Task | PPO CATS | SAC CATS | PPO LipsNet++ | SAC LipsNet++ |
+| --- | ---: | ---: | :---: | :---: |
+| Ant | 100 | 100 | F | E |
+| Hopper | 5 | 80 | E | F |
+| LunarLander | 0.25 | 30 | H | F |
+| Pendulum | 10 | 40 | C | D |
+| Walker | 1 | 40 | H | G |
 
-The Table IV pipeline consists of:
+These settings are also available in [selected_settings.json](benchmark/selected_settings.json).
+LipsNet++ profiles are defined in `afqr_common/lipsnetpp_experiment.py`.
+For PPO Hopper:
 
-1. `benchmark/{ppo,sac}/tests/collect_lsp_compact.py`: stochastic transitions.
-2. `benchmark/tools/build_lsp_compact_normalizer.py`: external pooled normalizer.
-3. `benchmark/tools/analyze_lsp_compact_cell.py`: spatial-effect estimates.
+```bash
+python ppo/tests/lipsnetpp_sweep.py --env hopper --profiles E --seeds 10 --workers 5
+python ppo/tests/evaluate_lipsnetpp.py \
+  --envs hopper --profiles E --training-seeds 10 --evaluation-episodes 10
+```
 
-The analyzer retains 20,000 queries, cross-episode pairing, collection checks
-and CPU/CUDA neighbor search. L2C2/LipsNet++ collectors are also included for
-the normalization pipeline. The exact historical normalizer cohort still needs
-verification; do not substitute an arbitrary policy subset.
+For SAC, switch the import paths and script paths to `sac` and use the SAC
+settings above. Pass the selected settings explicitly; sweep defaults may differ.
 
-## V-E. Policy Sensitivity to Observation Noise
+**Observation noise.** Evaluate the trained policies on Hopper or Walker:
 
-For Fig. 3, use `benchmark/{ppo,sac}/tests/eval_policy_output_sensitivity.py`
-and `benchmark/tools/evaluate_lipsnetpp_policy_sensitivity.py`. Evaluation uses
-each policy's own clean visited observations and half the mean squared output
-difference over ten noise draws. Shared-state evaluation is excluded.
+```bash
+python ppo/tests/eval_noise_robustness.py \
+  --env hopper --algs vanilla caps_linear_ppo_alpha5.0 \
+  --obs_scale_alg vanilla --sigmas 0,0.1,0.2,0.3,0.4,0.5
+```
 
-For the next-state-noise extension (Fig. 4), use
-`benchmark/{ppo,sac}/tests/caps_linear_nn_sweep.py` on LunarLander/Pendulum with
-the selected coefficient and `--next_noise_sigma 0.05`, followed by own-state
-sensitivity evaluation.
+Add other trained method prefixes to `--algs` for the full comparison.
+LipsNet++ uses `tools/evaluate_lipsnetpp_noise.py`.
 
-## V-F. Linear Ramp-Up Ablation
+**Training cost.** Use `ppo/tests/benchmark_training_cost.py` to measure
+wall-clock training time. Match the hardware and training configuration when
+comparing overhead.
 
-For Table V, compare CATS against Fixed-middle and Fixed-final on Ant, Hopper
-and Walker with `benchmark/{ppo,sac}/tests/caps_fixed_sweep.py`. Set `--lamS 0`
-and `--lamT` to half/full the selected CATS coefficient; keep SAC `--ps 0.0`.
-CATS uses the linear sweep from V-B.
+### 2. Temporal vs. Spatial Regularization
 
-For Table VI, evaluate PPO policies with the own-state sensitivity scripts from
-V-E. No separate evaluation bank or spatial penalty is introduced.
+Compare return at matched smoothness levels on Hopper and Walker:
 
-## V-G. Sim-to-Real Experiments: Simulation Code
+| Comparison | Script |
+| --- | --- |
+| Temporal-only CAPS | `tools/train_four_target_temporal.py` |
+| Spatial-only CAPS and LipsNet++ | `tools/train_smoothness_matched.py` |
+| Spatial-only CAPS training | `tools/train_caps_spatial_only.py` |
 
-The [robotics guide](robotics_sim/README.md) covers Reach/Place Cube environments,
-visual/proprioceptive networks and Base/CAPS/CATS training and evaluation.
-[RECIPES.md](robotics_sim/RECIPES.md) records seeds, task arguments and overrides.
-`robotics_sim/score_place.py` computes reported Place success from evaluation traces.
+Use each script's `--help` for coefficient, seed and evaluation options.
 
-Physical-robot drivers, deployment binaries and checkpoints are not included.
-Isaac runtime validation remains outstanding.
+### 3. Transition-Induced Spatial Effect
 
-## Scope and Provenance
+The spatial-effect analysis has three steps:
 
-Internal result CSVs, raw research archives, checkpoints, cluster infrastructure,
-paper/animation generators and agent logs are not distributed. No new policy
-selection or aggregation CLI is included. Reproduction settings remain with
-the code; source hashes are recorded in `source_provenance.json` and `MANIFEST.sha256`.
+1. Collect stochastic transitions with `$ALG/tests/collect_lsp_compact.py`.
+2. Build the pooled normalizer with `tools/build_lsp_compact_normalizer.py`.
+3. Run `tools/analyze_lsp_compact_cell.py` on the collected transitions.
 
-See [validation.json](validation.json), [release status](RELEASE_STATUS.md) and
-[third-party notices](THIRD_PARTY_NOTICES.md). Local checks do not establish full
-paper-result reproduction. License review is required before public upload.
+Collection seeds are in `lsp_validation_seeds.txt`. The analyzer uses 20,000
+queries by default and supports CPU/CUDA neighbor search. L2C2 and LipsNet++
+have separate collection entry points in `$ALG/tests/`.
+
+### 4. Policy Sensitivity
+
+Measure changes in policy outputs under observation noise:
+
+```bash
+python ppo/tests/eval_policy_output_sensitivity.py \
+  --env hopper --algs vanilla caps_linear_ppo_alpha5.0 \
+  --obs_scale_alg vanilla --own_only --sigmas 0,0.05,0.1,0.15,0.2,0.25,0.3
+```
+
+Each policy is evaluated on its own clean visited observations. The metric is
+half the mean squared output difference over ten noise draws per observation.
+LipsNet++ uses `tools/evaluate_lipsnetpp_policy_sensitivity.py`.
+
+For the next-state-noise extension on LunarLander and Pendulum, train with
+`$ALG/tests/caps_linear_nn_sweep.py`, the selected coefficient and
+`--next_noise_sigma 0.05`, then run the same sensitivity evaluation.
+
+### 5. Linear Ramp-Up
+
+Compare CATS with Fixed-middle and Fixed-final on Ant, Hopper and Walker.
+For PPO Hopper, whose final CATS coefficient is 5:
+
+```bash
+python ppo/tests/caps_fixed_sweep.py \
+  --env hopper --lamT 2.5,5 --lamS 0 --seeds 10 --workers 5
+```
+
+Fixed-middle uses half the final CATS coefficient; Fixed-final uses the full
+coefficient throughout training. For SAC, keep `--ps 0.0`. Evaluate the PPO
+policies with the sensitivity script above for the ramp-up sensitivity comparison.
+
+### 6. Robot Simulation
+
+See [robotics_sim/README.md](robotics_sim/README.md) for Reach and Place Cube
+training, evaluation and task settings. This release includes simulation code
+only, not checkpoints or physical-robot deployment software.
+
+## Notes
+
+Clean-evaluation CSV fields ending in `_std` contain standard deviations, not
+95% confidence intervals.
+
+Full numerical reproduction and Isaac runtime testing are still pending.
+Historical tuning/matched-smoothness grids, the exact pooled-normalizer cohort,
+the timing snapshot and PPO LunarLander CATS raw-run provenance are not yet
+fully verified.
+
+## Acknowledgments
+
+The benchmark includes modified Stable-Baselines3 code. Its
+[MIT license](licenses/Stable-Baselines3-2.5.0.txt) is retained, along with source
+copyright notices. External simulator software and assets are installed separately.
