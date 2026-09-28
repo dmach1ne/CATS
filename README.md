@@ -35,6 +35,12 @@ the number of training seeds.
 
 ## Experiments
 
+Start by training the benchmark policies in Section 1. We reuse these checkpoints
+to evaluate observation-noise robustness, the transition-induced spatial effect,
+and policy sensitivity. The regularization comparison, next-state-noise extension,
+fixed-coefficient controls, and robot experiments require additional training,
+as described below.
+
 ### 1. Main Results
 
 The benchmark covers Ant, Hopper, Walker, continuous LunarLander and Pendulum,
