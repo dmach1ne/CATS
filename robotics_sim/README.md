@@ -6,19 +6,65 @@ Base PPO, CAPS and CATS.
 - **Reach:** move the end effector to a target in free space.
 - **Place Cube:** start with a grasped cube and place it at a target on the table.
 
+[Setup](#setup) | [Policy](#policy-and-observations) |
+[Control](#actions-and-control) | [Tasks](#tasks-and-rewards) |
+[Regularization](#regularization) | [Training and Evaluation](#training-and-evaluation) |
+[Metrics](#evaluation-metrics)
+
+## Setup
+
+Use an Isaac Lab environment with Isaac Sim, `isaaclab_assets`, `isaaclab_rl`,
+`isaaclab_tasks`, `rl_games`, PyYAML, Pillow, NumPy and imageio-ffmpeg.
+The experiments used Isaac Lab 2.2.1. Install the simulator and assets separately.
+
+From the repository root:
+
+```bash
+cd robotics_sim
+export PYTHONPATH="$PWD/source/er_isaac:$PWD/scripts/rl_games:$PWD/scripts:$PYTHONPATH"
+SEED=178132
+```
+
+Use the following training seeds for each method:
+
+| Task | Training seeds | Environments | Iterations |
+| --- | --- | ---: | ---: |
+| Reach | 178132, 410580, 922852, 787576, 660993 | 128 | 3000 |
+| Place Cube | 178132, 410580, 922852 | 512 | 1500 |
+
+Run each seed with the corresponding command below. Jobs may be scheduled
+independently on available GPUs. The Place Cube commands below override the
+YAML defaults with the experiment settings.
+
+For evaluation, set `CHECKPOINT` to the trained checkpoint and `AGENT_CFG`
+to its saved `agent.yaml`. Each command evaluates five seeds; Reach uses
+30 targets per seed and Place Cube uses 50 trials per seed. Keep `goals.json`
+for the paired Place Cube target schedule.
+
 ## Policy and Observations
 
-Base, CAPS and CATS use the same visual actor-critic architecture within each
-task. Each observation contains one 84 x 84 RGB image from a fixed external
+### Inputs
+
+Each observation contains one 84 x 84 RGB image from a fixed external
 camera and a vector of robot measurements and target coordinates. The target
 is projected onto the image as a marker and is also supplied as XYZ coordinates
 in the robot base frame.
 
-The vector contains seven joint positions, seven joint velocities, the previous
-action, end-effector height relative to the environment origin, and target XYZ.
-It has 25 entries for Reach and 26 for Place Cube because Place includes a
-gripper action. Cube pose, contact flags and reward-stage variables are not
-additional policy inputs.
+Our proprioceptive inputs follow [Azimi et al.][azimi]: joint positions,
+joint velocities, previous action and end-effector height. We additionally
+provide target coordinates and a target marker in the image.
+
+| Input | Reach | Place Cube |
+| --- | --- | --- |
+| RGB image | 84 x 84 x 3 | 84 x 84 x 3 |
+| Arm joint positions / velocities | 7 / 7 | 7 / 7 |
+| Previous action | 7 arm outputs | 7 arm outputs + gripper |
+| End-effector height | 1 | 1 |
+| Target XYZ in robot base frame | 3 | 3 |
+| **Total non-image inputs** | **25** | **26** |
+
+Height is measured relative to the environment origin. Cube pose, contact
+flags and reward-stage variables are not additional policy inputs.
 
 The network divides RGB values by 255. Joint positions are scaled by 1/pi,
 joint velocities by 0.5, and height and target coordinates by 2; previous
@@ -26,13 +72,27 @@ actions are unchanged. These are fixed scales, not running observation
 statistics. See the [observation construction][observations] and
 [network implementation][network].
 
-The image encoder has four ReLU convolutional layers with 16, 32, 64 and 64
-channels, kernel sizes 6, 4, 3 and 3, and strides 2, 2, 1 and 1. Its output is
-average-pooled to a 4 x 4 grid and projected to 256 features. A separate MLP
-maps the measurement vector through 64 and 128 units. The two feature vectors
-are concatenated and passed through a 256/128-unit ReLU MLP shared by the
-policy-mean and value heads. Training uses a Gaussian policy with a learned,
-state-independent log standard deviation; evaluation uses the policy mean.
+### Network
+
+Reach and Place Cube use the same encoder and hidden-layer architecture, but
+different input and action dimensions. Each task and method is trained
+independently; weights are not shared across tasks or methods. Within each
+policy, the actor and critic share the feature extractor and fused MLP.
+
+| Component | Architecture |
+| --- | --- |
+| Image encoder | Four ReLU convolutions: channels 16/32/64/64, kernels 6/4/3/3, strides 2/2/1/1 |
+| Visual projection | Average pooling to 4 x 4, flatten, Linear(1024, 256) + ReLU |
+| Measurement encoder | MLP: 25 or 26 inputs -> 64 -> 128, ReLU |
+| Fusion | Concatenate 256 visual + 128 measurement features |
+| Shared actor-critic MLP | 384 -> 256 -> 128, ReLU |
+| Policy mean head | 128 -> 7 for Reach; 128 -> 8 for Place Cube |
+| Value head | 128 -> 1 |
+
+Training uses a Gaussian policy with a learned, state-independent log standard
+deviation. Evaluation uses the policy mean. The two registered network names
+resolve to the same [builder][network]; their task-specific dimensions are
+set in the [Reach YAML][reach-agent] and [Place YAML][place-agent].
 
 ## Actions and Control
 
@@ -87,91 +147,181 @@ Network and PPO defaults are in the [Reach YAML][reach-agent] and
 [Place YAML][place-agent]. The Place commands below override several PPO values;
 use the saved `agent.yaml` from each run when evaluating its checkpoint.
 
-## Setup
+## Training and Evaluation
 
-Use an Isaac Lab environment with Isaac Sim, `isaaclab_assets`, `isaaclab_rl`,
-`isaaclab_tasks`, `rl_games`, PyYAML, Pillow, NumPy and imageio-ffmpeg.
-The experiments used Isaac Lab 2.2.1. Install the simulator and assets separately.
+### Reach
 
-From the repository root:
+**Base PPO**
 
 ```bash
-cd robotics_sim
-export PYTHONPATH="$PWD/source/er_isaac:$PWD/scripts/rl_games:$PWD/scripts:$PYTHONPATH"
-SEED=178132
+python scripts/rl_games/train.py \
+  --task ER-Reach-Franka-CNN-RealAsIs-Overlay2D-Proprio-LegacyController-NoHeightPenalty-GoalFixedScale-v0 \
+  --agent rl_games_goal_fixed_scale_cfg_entry_point \
+  --mode base \
+  --seed "$SEED" --num_envs 128 --max_iterations 3000 \
+  --headless --enable_cameras
 ```
 
-Use the following training seeds for each method:
-
-| Task | Training seeds | Environments | Iterations |
-| --- | --- | ---: | ---: |
-| Reach | 178132, 410580, 922852, 787576, 660993 | 128 | 3000 |
-| Place Cube | 178132, 410580, 922852 | 512 | 1500 |
-
-Run each seed with the corresponding command below. Jobs may be scheduled
-independently on available GPUs. The Place Cube commands below override the
-YAML defaults with the experiment settings.
-
-For evaluation, set `CHECKPOINT` to the trained checkpoint and `AGENT_CFG`
-to its saved `agent.yaml`. Each command evaluates five seeds; Reach uses
-30 targets per seed and Place Cube uses 50 trials per seed. Keep `goals.json`
-for the paired Place Cube target schedule.
-
-## Reach: BASE
+**CAPS**
 
 ```bash
-python scripts/rl_games/train.py --task ER-Reach-Franka-CNN-RealAsIs-Overlay2D-Proprio-LegacyController-NoHeightPenalty-GoalFixedScale-v0 --agent rl_games_goal_fixed_scale_cfg_entry_point --mode base --seed "$SEED" --num_envs 128 --max_iterations 3000 --headless --enable_cameras
+python scripts/rl_games/train.py \
+  --task ER-Reach-Franka-CNN-RealAsIs-Overlay2D-Proprio-LegacyController-NoHeightPenalty-GoalFixedScale-v0 \
+  --agent rl_games_goal_fixed_scale_cfg_entry_point \
+  --mode caps \
+  --seed "$SEED" --num_envs 128 --max_iterations 3000 \
+  --headless --enable_cameras \
+  --caps-lambda-t 0.5 \
+  --caps-lambda-s 0.1 \
+  --caps-sigma 0.2 \
+  --caps-preserve-target-overlay
 ```
 
-## Reach: CAPS
+**CATS**
 
 ```bash
-python scripts/rl_games/train.py --task ER-Reach-Franka-CNN-RealAsIs-Overlay2D-Proprio-LegacyController-NoHeightPenalty-GoalFixedScale-v0 --agent rl_games_goal_fixed_scale_cfg_entry_point --mode caps --seed "$SEED" --num_envs 128 --max_iterations 3000 --headless --enable_cameras --caps-lambda-t 0.5 --caps-lambda-s 0.1 --caps-sigma 0.2 --caps-preserve-target-overlay
+python scripts/rl_games/train.py \
+  --task ER-Reach-Franka-CNN-RealAsIs-Overlay2D-Proprio-LegacyController-NoHeightPenalty-GoalFixedScale-v0 \
+  --agent rl_games_goal_fixed_scale_cfg_entry_point \
+  --mode cats \
+  --seed "$SEED" --num_envs 128 --max_iterations 3000 \
+  --headless --enable_cameras \
+  --alpha-max 5.0
 ```
 
-## Reach: CATS
+**Evaluation**
 
 ```bash
-python scripts/rl_games/train.py --task ER-Reach-Franka-CNN-RealAsIs-Overlay2D-Proprio-LegacyController-NoHeightPenalty-GoalFixedScale-v0 --agent rl_games_goal_fixed_scale_cfg_entry_point --mode cats --seed "$SEED" --num_envs 128 --max_iterations 3000 --headless --enable_cameras --alpha-max 5.0
+python scripts/eval_success.py \
+  --checkpoint "$CHECKPOINT" \
+  --agent-cfg "$AGENT_CFG" \
+  --task ER-Reach-Franka-CNN-RealAsIs-Overlay2D-Proprio-Eval-LegacyController-NoHeightPenalty-GoalFixedScale-v0 \
+  --headless --enable_cameras \
+  --targets 30 \
+  --eval-seeds 652165 709797 242820 579787 70701 \
+  --out evaluation.mp4 \
+  --summary summary.json
 ```
 
-## Reach: evaluation
+### Place Cube
+
+**Base PPO**
 
 ```bash
-python scripts/eval_success.py --checkpoint "$CHECKPOINT" --agent-cfg "$AGENT_CFG" --task ER-Reach-Franka-CNN-RealAsIs-Overlay2D-Proprio-Eval-LegacyController-NoHeightPenalty-GoalFixedScale-v0 --headless --enable_cameras --targets 30 --eval-seeds 652165 709797 242820 579787 70701 --out evaluation.mp4 --summary summary.json
+python scripts/rl_games/train.py \
+  --task ER-Place-Franka-Pregrasped-Table55-GoalFixedScale-RGB84-Front25Transport10-v0 \
+  --agent rl_games_goal_fixed_scale_cfg_entry_point \
+  --mode base \
+  --seed "$SEED" --num_envs 512 --max_iterations 1500 \
+  --headless --enable_cameras \
+  agent.params.config.horizon_length=50 \
+  agent.params.config.save_frequency=100 \
+  agent.params.config.entropy_coef=0.0 \
+  agent.params.config.lr_schedule=null \
+  agent.params.config.learning_rate=0.0003 \
+  agent.params.config.mini_epochs=4 \
+  agent.params.network.separate=false \
+  agent.params.config.gamma=0.8 \
+  agent.params.config.tau=0.9 \
+  agent.params.config.e_clip=0.2 \
+  agent.params.config.critic_coef=0.5 \
+  agent.params.config.grad_norm=0.5 \
+  agent.params.config.minibatch_size=800 \
+  'agent.params.network.image_shape=[84,84,3]'
 ```
 
-## Place: BASE
+**CAPS**
 
 ```bash
-python scripts/rl_games/train.py --task ER-Place-Franka-Pregrasped-Table55-GoalFixedScale-RGB84-Front25Transport10-v0 --agent rl_games_goal_fixed_scale_cfg_entry_point --mode base --seed "$SEED" --num_envs 512 --max_iterations 1500 --headless --enable_cameras agent.params.config.horizon_length=50 agent.params.config.save_frequency=100 agent.params.config.entropy_coef=0.0 agent.params.config.lr_schedule=null agent.params.config.learning_rate=0.0003 agent.params.config.mini_epochs=4 agent.params.network.separate=false agent.params.config.gamma=0.8 agent.params.config.tau=0.9 agent.params.config.e_clip=0.2 agent.params.config.critic_coef=0.5 agent.params.config.grad_norm=0.5 agent.params.config.minibatch_size=800 'agent.params.network.image_shape=[84,84,3]'
+python scripts/rl_games/train.py \
+  --task ER-Place-Franka-Pregrasped-Table55-GoalFixedScale-RGB84-Front25Transport10-v0 \
+  --agent rl_games_goal_fixed_scale_cfg_entry_point \
+  --mode caps \
+  --seed "$SEED" --num_envs 512 --max_iterations 1500 \
+  --headless --enable_cameras \
+  --caps-lambda-t 0.5 \
+  --caps-lambda-s 0.1 \
+  --caps-sigma 0.2 \
+  agent.params.config.horizon_length=50 \
+  agent.params.config.save_frequency=100 \
+  agent.params.config.entropy_coef=0.0 \
+  agent.params.config.lr_schedule=null \
+  agent.params.config.learning_rate=0.0003 \
+  agent.params.config.mini_epochs=4 \
+  agent.params.network.separate=false \
+  agent.params.config.gamma=0.8 \
+  agent.params.config.tau=0.9 \
+  agent.params.config.e_clip=0.2 \
+  agent.params.config.critic_coef=0.5 \
+  agent.params.config.grad_norm=0.5 \
+  agent.params.config.minibatch_size=800 \
+  'agent.params.network.image_shape=[84,84,3]'
 ```
 
-## Place: CAPS
+**CATS**
 
 ```bash
-python scripts/rl_games/train.py --task ER-Place-Franka-Pregrasped-Table55-GoalFixedScale-RGB84-Front25Transport10-v0 --agent rl_games_goal_fixed_scale_cfg_entry_point --mode caps --seed "$SEED" --num_envs 512 --max_iterations 1500 --headless --enable_cameras --caps-lambda-t 0.5 --caps-lambda-s 0.1 --caps-sigma 0.2 agent.params.config.horizon_length=50 agent.params.config.save_frequency=100 agent.params.config.entropy_coef=0.0 agent.params.config.lr_schedule=null agent.params.config.learning_rate=0.0003 agent.params.config.mini_epochs=4 agent.params.network.separate=false agent.params.config.gamma=0.8 agent.params.config.tau=0.9 agent.params.config.e_clip=0.2 agent.params.config.critic_coef=0.5 agent.params.config.grad_norm=0.5 agent.params.config.minibatch_size=800 'agent.params.network.image_shape=[84,84,3]'
+python scripts/rl_games/train.py \
+  --task ER-Place-Franka-Pregrasped-Table55-GoalFixedScale-RGB84-Front25Transport10-v0 \
+  --agent rl_games_goal_fixed_scale_cfg_entry_point \
+  --mode cats \
+  --seed "$SEED" --num_envs 512 --max_iterations 1500 \
+  --headless --enable_cameras \
+  --alpha-max 1.0 \
+  agent.params.config.horizon_length=50 \
+  agent.params.config.save_frequency=100 \
+  agent.params.config.entropy_coef=0.0 \
+  agent.params.config.lr_schedule=null \
+  agent.params.config.learning_rate=0.0003 \
+  agent.params.config.mini_epochs=4 \
+  agent.params.network.separate=false \
+  agent.params.config.gamma=0.8 \
+  agent.params.config.tau=0.9 \
+  agent.params.config.e_clip=0.2 \
+  agent.params.config.critic_coef=0.5 \
+  agent.params.config.grad_norm=0.5 \
+  agent.params.config.minibatch_size=800 \
+  'agent.params.network.image_shape=[84,84,3]'
 ```
 
-## Place: CATS
+**Evaluation**
 
 ```bash
-python scripts/rl_games/train.py --task ER-Place-Franka-Pregrasped-Table55-GoalFixedScale-RGB84-Front25Transport10-v0 --agent rl_games_goal_fixed_scale_cfg_entry_point --mode cats --seed "$SEED" --num_envs 512 --max_iterations 1500 --headless --enable_cameras --alpha-max 1.0 agent.params.config.horizon_length=50 agent.params.config.save_frequency=100 agent.params.config.entropy_coef=0.0 agent.params.config.lr_schedule=null agent.params.config.learning_rate=0.0003 agent.params.config.mini_epochs=4 agent.params.network.separate=false agent.params.config.gamma=0.8 agent.params.config.tau=0.9 agent.params.config.e_clip=0.2 agent.params.config.critic_coef=0.5 agent.params.config.grad_norm=0.5 agent.params.config.minibatch_size=800 'agent.params.network.image_shape=[84,84,3]'
-```
-
-## Place: evaluation
-
-```bash
-python scripts/evaluation/eval_transport10_parallel.py --checkpoint "$CHECKPOINT" --agent-cfg "$AGENT_CFG" --task ER-Place-Franka-Pregrasped-Table55-GoalFixedScale-RGB84-Front25Transport10-Eval-v0 --headless --enable_cameras --trials 50 --eval-seeds 652165 709797 242820 579787 70701 --goal-schedule goals.json --out summary.json
+python scripts/evaluation/eval_transport10_parallel.py \
+  --checkpoint "$CHECKPOINT" \
+  --agent-cfg "$AGENT_CFG" \
+  --task ER-Place-Franka-Pregrasped-Table55-GoalFixedScale-RGB84-Front25Transport10-Eval-v0 \
+  --headless --enable_cameras \
+  --trials 50 \
+  --eval-seeds 652165 709797 242820 579787 70701 \
+  --goal-schedule goals.json \
+  --out summary.json
 ```
 
 ## Evaluation Metrics
 
-Evaluation uses deterministic policy means. For Reach, use `success_rate`
+### Reach Success
+
+For Reach, use `success_rate`
 (equivalently, `hold_success_1s`), which requires staying within the distance
 threshold continuously for one second. The reported thresholds are 5 and
 10 cm; `minimum_distance_success_rate` is a different metric and does not
 require holding the target.
+
+### Place Cube Success
+
+After Place evaluation, compute the reported success metric:
+
+```bash
+python score_place.py summary.json \
+  --output reported_metrics.json
+```
+
+Success requires XY error at most 5 cm, cube height within 0.0505 m +/- 0.005 m,
+table contact, gripper width at least 0.06 m and no finger contact, with no
+hold-time requirement. This differs from the training success metric.
+
+### Smoothness
 
 Smoothness is the frequency-weighted action score computed separately for
 each of the seven arm outputs at 30 Hz, then averaged across coordinates and
@@ -179,22 +329,14 @@ target windows or trials. It uses policy outputs before joint-position
 scaling, not measured joint motion, and excludes the gripper. Lower is smoother.
 See [the metric implementation][metrics].
 
-### Place Cube Success
+### Aggregation
 
-After Place evaluation, compute the reported success metric:
-
-```bash
-python score_place.py summary.json --output reported_metrics.json
-```
-
-Success requires XY error at most 5 cm, cube height within 0.0505 m +/- 0.005 m,
-table contact, gripper width at least 0.06 m and no finger contact, with no
-hold-time requirement. This differs from the training success metric.
 Report training-seed means with untruncated 95% t-confidence intervals.
 Evaluation seeds and trials are averaged within each trained policy first;
 training seeds, not individual trials, are the independent units for these
 intervals. Keep the per-training-seed evaluation outputs for this aggregation.
 
+[azimi]: https://arxiv.org/abs/2606.18594
 [observations]: source/er_isaac/er_isaac/tasks/manager_based/er_isaac/mdp/observation.py
 [network]: scripts/rl_games/models/visual_proprio_network.py
 [controller]: source/er_isaac/er_isaac/tasks/manager_based/er_isaac/config/franka/joint_pos_camera_env_cfg.py
