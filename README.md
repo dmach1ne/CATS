@@ -84,15 +84,19 @@ comparing overhead.
 
 ### 2. Temporal vs. Spatial Regularization
 
-Compare return at matched smoothness levels on Hopper and Walker:
+Train and evaluate temporal-only CAPS, spatial-only CAPS and LipsNet++ at the
+four smoothness targets on Hopper and Walker:
 
-| Comparison | Script |
-| --- | --- |
-| Temporal-only CAPS | `tools/train_four_target_temporal.py` |
-| Spatial-only CAPS and LipsNet++ | `tools/train_smoothness_matched.py` |
+```bash
+for TASK in hopper walker; do
+  python tools/train_smoothness_matched.py --algorithm "$ALG" --env "$TASK"
+done
+```
 
-Use `--seeds 10` for the reported comparisons. See `--help` for coefficient and
-evaluation options.
+The coefficients for each method and target are in
+[selected_settings.json](benchmark/selected_settings.json). Training uses ten
+seeds. Use `--method caps_fixed`, `--method caps_spatial` or `--method lipsnetpp`
+to run one method, and `--target-smoothness 0.2` to run one target.
 
 ### 3. Transition-Induced Spatial Effect
 
@@ -125,8 +129,9 @@ LipsNet++ uses `tools/evaluate_lipsnetpp_policy_sensitivity.py` with the same
 noise magnitudes and its selected configuration.
 
 Figure 4 compares Base, CATS and CATS with next-state noise on LunarLander and
-Pendulum. The extension keeps the selected CATS coefficient and adds Gaussian
-next-state noise with standard deviation 0.05:
+Pendulum. Train the extension with Gaussian noise of standard deviation 0.05
+on the next states used by the temporal penalty, then evaluate it alongside
+the Base and CATS policies trained in Section 1:
 
 ```bash
 for TASK in lunar pendulum; do

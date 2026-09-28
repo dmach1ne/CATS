@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Train one smoothness-matching coefficient with multiple local workers."""
+"""Train and evaluate temporal-only CAPS, spatial-only CAPS and LipsNet++."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 ENVIRONMENTS = ("hopper", "walker")
-METHODS = ("caps_spatial", "lipsnetpp")
+METHODS = ("caps_fixed", "caps_spatial", "lipsnetpp")
 
 
 def scalar_label(value: float) -> str:
@@ -48,27 +48,42 @@ def remove_intermediate_checkpoints(run_dirs: list[Path]) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--algorithm", choices=("ppo", "sac"), required=True)
-    parser.add_argument("--method", choices=METHODS, required=True)
+    parser.add_argument("--method", choices=(*METHODS, "all"), default="all")
     parser.add_argument("--env", choices=ENVIRONMENTS, required=True)
-    parser.add_argument("--coefficient", type=float, required=True)
-    parser.add_argument("--seeds", type=int, default=3)
+    parser.add_argument("--target-smoothness", type=float, nargs="+",
+                        choices=(0.2, 0.4, 0.6, 0.8), default=[0.2, 0.4, 0.6, 0.8])
+    parser.add_argument("--seeds", type=int, default=10)
     parser.add_argument("--seed-offset", type=int, default=0)
     parser.add_argument("--workers", type=int, default=3)
     parser.add_argument("--evaluation-episodes", type=int, default=10)
     parser.add_argument("--device", default="cuda")
     args = parser.parse_args()
 
-    if args.coefficient <= 0:
-        parser.error("--coefficient must be positive")
     if args.seeds <= 0 or args.workers <= 0 or args.seed_offset < 0:
         parser.error("seed and worker counts must be positive; offset nonnegative")
+
+    if str(ROOT) not in sys.path:
+        sys.path.insert(0, str(ROOT))
+    from afqr_common.experiment_settings import matched_coefficient
+
+    methods = METHODS if args.method == "all" else (args.method,)
+    for method in methods:
+        for target in args.target_smoothness:
+            config = argparse.Namespace(**vars(args))
+            config.method = method
+            config.target_smoothness = target
+            config.coefficient = matched_coefficient(args.algorithm, args.env, method, target)
+            train_configuration(config)
+
+
+def train_configuration(args) -> None:
 
     algorithm_root = ROOT / args.algorithm
     for import_root in (ROOT, algorithm_root):
         if str(import_root) not in sys.path:
             sys.path.insert(0, str(import_root))
 
-    from tests.modules.controller import train_caps, train_lipsnetpp
+    from tests.modules.controller import train_caps, train_caps_fixed, train_lipsnetpp
     from tests.modules.envs import make_hopper_env, make_walker_env
     from tests.modules.params import alg_args, env_args, env_timestep
     from afqr_common.experiment_settings import selected_settings
@@ -95,12 +110,17 @@ def main() -> None:
     log_dir.mkdir(parents=True, exist_ok=True)
 
     coefficient_label = scalar_label(args.coefficient)
-    if args.method == "caps_spatial":
+    if args.method in {"caps_fixed", "caps_spatial"}:
         method_args = alg_args["caps"][args.env].copy()
-        method_args["caps_lamT"] = 0.0
-        method_args["caps_lamS"] = args.coefficient
-        prefix = f"caps_{args.algorithm}_lamT0.0_lamS{args.coefficient}"
-        train_function = train_caps
+        temporal = args.method == "caps_fixed"
+        method_args["caps_lamT"] = args.coefficient if temporal else 0.0
+        method_args["caps_lamS"] = 0.0 if temporal else args.coefficient
+        if temporal:
+            prefix = f"caps_fixed_{args.algorithm}_lamT{args.coefficient}_lamS0.0"
+            train_function = train_caps_fixed
+        else:
+            prefix = f"caps_{args.algorithm}_lamT0.0_lamS{args.coefficient}"
+            train_function = train_caps
         train_args = method_args
         run_dirs = [save_dir / f"{prefix}_{seed}" for seed in seeds]
     else:
@@ -219,18 +239,20 @@ def main() -> None:
         "algorithm": args.algorithm,
         "method": args.method,
         "environment": args.env,
+        "target_smoothness": args.target_smoothness,
         "coefficient": args.coefficient,
-        "lambda_t": 0.0 if args.method == "caps_spatial" else None,
+        "lambda_t": train_args.get("caps_lamT"),
+        "lambda_s": train_args.get("caps_lamS"),
         "sigma": train_args.get("caps_sigma") if args.method == "caps_spatial" else None,
-        "lambda_h": args.lambda_h,
-        "history_len": args.history_len,
+        "lambda_h": train_args.get("lipsnetpp_lambda_h"),
+        "history_len": train_args.get("history_len"),
         "training_seeds": seeds,
         "evaluation_seeds": evaluation_seeds,
         "workers": args.workers,
         "deterministic_evaluation": True,
         "evaluation_protocol": (
             EVALUATION_PROTOCOL
-            if args.method == "caps_spatial"
+            if args.method != "lipsnetpp"
             else "explicit_validation_seed_raw_env_with_history_v1"
         ),
     }
