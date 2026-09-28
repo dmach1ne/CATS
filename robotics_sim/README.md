@@ -160,7 +160,7 @@ use the saved `agent.yaml` from each run when evaluating its checkpoint.
 
 ```bash
 python scripts/rl_games/train.py \
-  --task ER-Reach-Franka-CNN-RealAsIs-Overlay2D-Proprio-LegacyController-NoHeightPenalty-GoalFixedScale-LiftTable55-v0 \
+  --task Franka-Reach-v0 \
   --agent rl_games_goal_fixed_scale_cfg_entry_point \
   --mode base \
   --seed "$SEED" --num_envs 128 --max_iterations 3000 \
@@ -171,7 +171,7 @@ python scripts/rl_games/train.py \
 
 ```bash
 python scripts/rl_games/train.py \
-  --task ER-Reach-Franka-CNN-RealAsIs-Overlay2D-Proprio-LegacyController-NoHeightPenalty-GoalFixedScale-LiftTable55-v0 \
+  --task Franka-Reach-v0 \
   --agent rl_games_goal_fixed_scale_cfg_entry_point \
   --mode caps \
   --seed "$SEED" --num_envs 128 --max_iterations 3000 \
@@ -186,7 +186,7 @@ python scripts/rl_games/train.py \
 
 ```bash
 python scripts/rl_games/train.py \
-  --task ER-Reach-Franka-CNN-RealAsIs-Overlay2D-Proprio-LegacyController-NoHeightPenalty-GoalFixedScale-LiftTable55-v0 \
+  --task Franka-Reach-v0 \
   --agent rl_games_goal_fixed_scale_cfg_entry_point \
   --mode cats \
   --seed "$SEED" --num_envs 128 --max_iterations 3000 \
@@ -200,7 +200,7 @@ python scripts/rl_games/train.py \
 python scripts/eval_success.py \
   --checkpoint "$CHECKPOINT" \
   --agent-cfg "$AGENT_CFG" \
-  --task ER-Reach-Franka-CNN-RealAsIs-Overlay2D-Proprio-Eval-LegacyController-NoHeightPenalty-GoalFixedScale-LiftTable55-v0 \
+  --task Franka-Reach-Eval-v0 \
   --headless --enable_cameras \
   --targets 30 \
   --eval-seeds 652165 709797 242820 579787 70701 \
@@ -214,7 +214,7 @@ python scripts/eval_success.py \
 
 ```bash
 python scripts/rl_games/train.py \
-  --task ER-Place-Franka-Pregrasped-Table55-GoalFixedScale-RGB84-Front25Transport10-v0 \
+  --task Franka-PlaceCube-v0 \
   --agent rl_games_goal_fixed_scale_cfg_entry_point \
   --mode base \
   --seed "$SEED" --num_envs 512 --max_iterations 1500 \
@@ -239,7 +239,7 @@ python scripts/rl_games/train.py \
 
 ```bash
 python scripts/rl_games/train.py \
-  --task ER-Place-Franka-Pregrasped-Table55-GoalFixedScale-RGB84-Front25Transport10-v0 \
+  --task Franka-PlaceCube-v0 \
   --agent rl_games_goal_fixed_scale_cfg_entry_point \
   --mode caps \
   --seed "$SEED" --num_envs 512 --max_iterations 1500 \
@@ -267,7 +267,7 @@ python scripts/rl_games/train.py \
 
 ```bash
 python scripts/rl_games/train.py \
-  --task ER-Place-Franka-Pregrasped-Table55-GoalFixedScale-RGB84-Front25Transport10-v0 \
+  --task Franka-PlaceCube-v0 \
   --agent rl_games_goal_fixed_scale_cfg_entry_point \
   --mode cats \
   --seed "$SEED" --num_envs 512 --max_iterations 1500 \
@@ -295,7 +295,7 @@ python scripts/rl_games/train.py \
 python scripts/evaluation/eval_transport10_parallel.py \
   --checkpoint "$CHECKPOINT" \
   --agent-cfg "$AGENT_CFG" \
-  --task ER-Place-Franka-Pregrasped-Table55-GoalFixedScale-RGB84-Front25Transport10-Eval-v0 \
+  --task Franka-PlaceCube-Eval-v0 \
   --headless --enable_cameras \
   --trials 50 \
   --eval-seeds 652165 709797 242820 579787 70701 \

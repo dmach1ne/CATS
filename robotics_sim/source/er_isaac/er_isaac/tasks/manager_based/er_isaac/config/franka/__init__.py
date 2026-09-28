@@ -9,8 +9,8 @@ import gymnasium as gym
 from . import agents
 
 for _placement_id, _placement_cfg in (
-    ("ER-Place-Franka-Pregrasped-Table55-GoalFixedScale-RGB84-Front25Transport10-v0", "PregraspedPlacementEnvCfg"),
-    ("ER-Place-Franka-Pregrasped-Table55-GoalFixedScale-RGB84-Front25Transport10-Eval-v0", "PregraspedPlacementEvalEnvCfg"),
+    ("Franka-PlaceCube-v0", "PregraspedPlacementEnvCfg"),
+    ("Franka-PlaceCube-Eval-v0", "PregraspedPlacementEvalEnvCfg"),
 ):
     gym.register(
         id=_placement_id,
@@ -24,7 +24,7 @@ for _placement_id, _placement_cfg in (
     )
 
 gym.register(
-    id="ER-Reach-Franka-CNN-RealAsIs-Overlay2D-Proprio-LegacyController-NoHeightPenalty-GoalFixedScale-LiftTable55-v0",
+    id="Franka-Reach-v0",
     entry_point="isaaclab.envs:ManagerBasedRLEnv",
     disable_env_checker=True,
     kwargs={
@@ -35,7 +35,7 @@ gym.register(
 )
 
 gym.register(
-    id="ER-Reach-Franka-CNN-RealAsIs-Overlay2D-Proprio-Eval-LegacyController-NoHeightPenalty-GoalFixedScale-LiftTable55-v0",
+    id="Franka-Reach-Eval-v0",
     entry_point="isaaclab.envs:ManagerBasedRLEnv",
     disable_env_checker=True,
     kwargs={

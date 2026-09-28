@@ -31,7 +31,7 @@ from isaaclab.app import AppLauncher  # noqa: E402
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--checkpoint", type=str, required=True)
-parser.add_argument("--task", type=str, default="ER-Reach-Franka-CNN-RealAsIs-Overlay2D-Proprio-Eval-LegacyController-NoHeightPenalty-GoalFixedScale-LiftTable55-v0")
+parser.add_argument("--task", type=str, default="Franka-Reach-Eval-v0")
 parser.add_argument("--targets", type=int, default=8, help="평가할 목표 초기화 횟수")
 parser.add_argument("--out", type=str, default="eval.mp4")
 parser.add_argument("--fps", type=int, default=30)
