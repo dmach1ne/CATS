@@ -242,7 +242,7 @@ python scripts/rl_games/train.py \
 **Evaluation**
 
 ```bash
-python scripts/evaluation/eval_transport10_parallel.py \
+python scripts/evaluation/eval_place.py \
   --checkpoint "$CHECKPOINT" \
   --agent-cfg "$AGENT_CFG" \
   --task Franka-PlaceCube-Eval-v0 \
@@ -293,8 +293,8 @@ training-seed mean and untruncated 95% t-confidence interval.
 [placement-math]: source/er_isaac/er_isaac/tasks/manager_based/er_isaac/mdp/placement_math.py
 [cats-agent]: scripts/rl_games/models/a2c_continuous_cats.py
 [caps-loss]: scripts/rl_games/models/caps.py
-[reach-agent]: source/er_isaac/er_isaac/tasks/manager_based/er_isaac/config/franka/agents/rl_games_visual_reach_compact_proprio_goal_fixed_scale_ppo_cfg.yaml
-[place-agent]: source/er_isaac/er_isaac/tasks/manager_based/er_isaac/config/franka/agents/rl_games_visual_lift_compact_proprio_goal_fixed_scale_ppo_cfg.yaml
-[metrics]: scripts/evaluation/lift_metrics.py
+[reach-agent]: source/er_isaac/er_isaac/tasks/manager_based/er_isaac/config/franka/agents/reach_ppo.yaml
+[place-agent]: source/er_isaac/er_isaac/tasks/manager_based/er_isaac/config/franka/agents/place_ppo.yaml
+[metrics]: scripts/evaluation/action_metrics.py
 
-[reach-scene]: source/er_isaac/er_isaac/tasks/manager_based/er_isaac/config/franka/reach_lift_table55_env_cfg.py
+[reach-scene]: source/er_isaac/er_isaac/tasks/manager_based/er_isaac/config/franka/reach_table_env_cfg.py

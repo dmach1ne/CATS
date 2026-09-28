@@ -3,18 +3,18 @@
 from copy import deepcopy
 
 from isaaclab.utils import configclass
-from .real_cam_env_cfg import FrankaReachCNNRealAsIsOverlay2DProprioLegacyControllerNoHeightPenaltyEnvCfg
-from .eval_env_cfg import FrankaReachCNNRealAsIsOverlay2DProprioLegacyControllerNoHeightPenaltyEvalEnvCfg
-from .real_cam_env_cfg import FrankaReachCNNRealAsIsOverlay2DProprioRewardPenaltyLegacyControllerNoHeightPenaltyEnvCfg
-from .eval_env_cfg import FrankaReachCNNRealAsIsOverlay2DProprioRewardPenaltyLegacyControllerNoHeightPenaltyEvalEnvCfg
-from .visual_lift_env_cfg import FrankaVisualLiftOverlay2DProprioLegacyControllerEnvCfg
-from .visual_lift_env_cfg import FrankaVisualLiftOverlay2DProprioLegacyControllerEvalEnvCfg
-from .visual_lift_env_cfg import FrankaVisualLiftOverlay2DProprioRewardPenaltyLegacyControllerEnvCfg
-from .visual_lift_env_cfg import FrankaVisualLiftOverlay2DProprioRewardPenaltyLegacyControllerEvalEnvCfg
+from .real_cam_env_cfg import FrankaReachCNNRealAsIsOverlay2DProprioJointPositionControllerNoHeightPenaltyEnvCfg
+from .eval_env_cfg import FrankaReachCNNRealAsIsOverlay2DProprioJointPositionControllerNoHeightPenaltyEvalEnvCfg
+from .real_cam_env_cfg import FrankaReachCNNRealAsIsOverlay2DProprioRewardPenaltyJointPositionControllerNoHeightPenaltyEnvCfg
+from .eval_env_cfg import FrankaReachCNNRealAsIsOverlay2DProprioRewardPenaltyJointPositionControllerNoHeightPenaltyEvalEnvCfg
+from .cube_manipulation_env_cfg import FrankaCubeManipulationOverlay2DProprioJointPositionControllerEnvCfg
+from .cube_manipulation_env_cfg import FrankaCubeManipulationOverlay2DProprioJointPositionControllerEvalEnvCfg
+from .cube_manipulation_env_cfg import FrankaCubeManipulationOverlay2DProprioRewardPenaltyJointPositionControllerEnvCfg
+from .cube_manipulation_env_cfg import FrankaCubeManipulationOverlay2DProprioRewardPenaltyJointPositionControllerEvalEnvCfg
 
 
 @configclass
-class FrankaReachCNNRealAsIsOverlay2DProprioLegacyControllerNoHeightPenaltyGoalFixedScaleEnvCfg(FrankaReachCNNRealAsIsOverlay2DProprioLegacyControllerNoHeightPenaltyEnvCfg):
+class FrankaReachCNNRealAsIsOverlay2DProprioJointPositionControllerNoHeightPenaltyGoalFixedScaleEnvCfg(FrankaReachCNNRealAsIsOverlay2DProprioJointPositionControllerNoHeightPenaltyEnvCfg):
     def __post_init__(self):
         super().__post_init__()
         self.observations = deepcopy(self.observations)
@@ -22,7 +22,7 @@ class FrankaReachCNNRealAsIsOverlay2DProprioLegacyControllerNoHeightPenaltyGoalF
 
 
 @configclass
-class FrankaReachCNNRealAsIsOverlay2DProprioLegacyControllerNoHeightPenaltyEvalGoalFixedScaleEnvCfg(FrankaReachCNNRealAsIsOverlay2DProprioLegacyControllerNoHeightPenaltyEvalEnvCfg):
+class FrankaReachCNNRealAsIsOverlay2DProprioJointPositionControllerNoHeightPenaltyEvalGoalFixedScaleEnvCfg(FrankaReachCNNRealAsIsOverlay2DProprioJointPositionControllerNoHeightPenaltyEvalEnvCfg):
     def __post_init__(self):
         super().__post_init__()
         self.observations = deepcopy(self.observations)
@@ -30,7 +30,7 @@ class FrankaReachCNNRealAsIsOverlay2DProprioLegacyControllerNoHeightPenaltyEvalG
 
 
 @configclass
-class FrankaReachCNNRealAsIsOverlay2DProprioRewardPenaltyLegacyControllerNoHeightPenaltyGoalFixedScaleEnvCfg(FrankaReachCNNRealAsIsOverlay2DProprioRewardPenaltyLegacyControllerNoHeightPenaltyEnvCfg):
+class FrankaReachCNNRealAsIsOverlay2DProprioRewardPenaltyJointPositionControllerNoHeightPenaltyGoalFixedScaleEnvCfg(FrankaReachCNNRealAsIsOverlay2DProprioRewardPenaltyJointPositionControllerNoHeightPenaltyEnvCfg):
     def __post_init__(self):
         super().__post_init__()
         self.observations = deepcopy(self.observations)
@@ -38,7 +38,7 @@ class FrankaReachCNNRealAsIsOverlay2DProprioRewardPenaltyLegacyControllerNoHeigh
 
 
 @configclass
-class FrankaReachCNNRealAsIsOverlay2DProprioRewardPenaltyLegacyControllerNoHeightPenaltyEvalGoalFixedScaleEnvCfg(FrankaReachCNNRealAsIsOverlay2DProprioRewardPenaltyLegacyControllerNoHeightPenaltyEvalEnvCfg):
+class FrankaReachCNNRealAsIsOverlay2DProprioRewardPenaltyJointPositionControllerNoHeightPenaltyEvalGoalFixedScaleEnvCfg(FrankaReachCNNRealAsIsOverlay2DProprioRewardPenaltyJointPositionControllerNoHeightPenaltyEvalEnvCfg):
     def __post_init__(self):
         super().__post_init__()
         self.observations = deepcopy(self.observations)
@@ -46,7 +46,7 @@ class FrankaReachCNNRealAsIsOverlay2DProprioRewardPenaltyLegacyControllerNoHeigh
 
 
 @configclass
-class FrankaVisualLiftOverlay2DProprioLegacyControllerGoalFixedScaleEnvCfg(FrankaVisualLiftOverlay2DProprioLegacyControllerEnvCfg):
+class FrankaCubeManipulationOverlay2DProprioJointPositionControllerGoalFixedScaleEnvCfg(FrankaCubeManipulationOverlay2DProprioJointPositionControllerEnvCfg):
     def __post_init__(self):
         super().__post_init__()
         self.observations = deepcopy(self.observations)
@@ -54,7 +54,7 @@ class FrankaVisualLiftOverlay2DProprioLegacyControllerGoalFixedScaleEnvCfg(Frank
 
 
 @configclass
-class FrankaVisualLiftOverlay2DProprioLegacyControllerEvalGoalFixedScaleEnvCfg(FrankaVisualLiftOverlay2DProprioLegacyControllerEvalEnvCfg):
+class FrankaCubeManipulationOverlay2DProprioJointPositionControllerEvalGoalFixedScaleEnvCfg(FrankaCubeManipulationOverlay2DProprioJointPositionControllerEvalEnvCfg):
     def __post_init__(self):
         super().__post_init__()
         self.observations = deepcopy(self.observations)
@@ -62,7 +62,7 @@ class FrankaVisualLiftOverlay2DProprioLegacyControllerEvalGoalFixedScaleEnvCfg(F
 
 
 @configclass
-class FrankaVisualLiftOverlay2DProprioRewardPenaltyLegacyControllerGoalFixedScaleEnvCfg(FrankaVisualLiftOverlay2DProprioRewardPenaltyLegacyControllerEnvCfg):
+class FrankaCubeManipulationOverlay2DProprioRewardPenaltyJointPositionControllerGoalFixedScaleEnvCfg(FrankaCubeManipulationOverlay2DProprioRewardPenaltyJointPositionControllerEnvCfg):
     def __post_init__(self):
         super().__post_init__()
         self.observations = deepcopy(self.observations)
@@ -70,7 +70,7 @@ class FrankaVisualLiftOverlay2DProprioRewardPenaltyLegacyControllerGoalFixedScal
 
 
 @configclass
-class FrankaVisualLiftOverlay2DProprioRewardPenaltyLegacyControllerEvalGoalFixedScaleEnvCfg(FrankaVisualLiftOverlay2DProprioRewardPenaltyLegacyControllerEvalEnvCfg):
+class FrankaCubeManipulationOverlay2DProprioRewardPenaltyJointPositionControllerEvalGoalFixedScaleEnvCfg(FrankaCubeManipulationOverlay2DProprioRewardPenaltyJointPositionControllerEvalEnvCfg):
     def __post_init__(self):
         super().__post_init__()
         self.observations = deepcopy(self.observations)

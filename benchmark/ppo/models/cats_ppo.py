@@ -291,7 +291,7 @@ class CATSPPO(PPO):
         )
         self.cats_alpha = cats_alpha
 
-    def _caps_lambda(self) -> float:
+    def _cats_lambda(self) -> float:
         completed_fraction = min(
             1.0, max(0.0, 1.0 - self._current_progress_remaining)
         )
@@ -310,9 +310,9 @@ class CATSPPO(PPO):
         entropy_losses = []
         pg_losses, value_losses = [], []
         clip_fractions = []
-        caps_lambda = self._caps_lambda()
+        cats_lambda = self._cats_lambda()
         if record_auxiliary:
-            caps_losses = []
+            cats_losses = []
             loss_t_values = []
             action_diff_stats = {
                 key: []
@@ -434,11 +434,11 @@ class CATSPPO(PPO):
                             clipped_mask,
                         )
 
-                caps_loss = caps_lambda * loss_t
+                cats_loss = cats_lambda * loss_t
                 if record_auxiliary:
-                    caps_losses.append(caps_loss.item())
+                    cats_losses.append(cats_loss.item())
 
-                loss = policy_loss + self.ent_coef * entropy_loss + self.vf_coef * value_loss + caps_loss
+                loss = policy_loss + self.ent_coef * entropy_loss + self.vf_coef * value_loss + cats_loss
 
                 with th.no_grad():
                     log_ratio = log_prob - rollout_data.old_log_prob
@@ -472,7 +472,7 @@ class CATSPPO(PPO):
         if record_auxiliary:
             if loss_t_values:
                 self.logger.record("train/loss_t", np.mean(loss_t_values))
-            self.logger.record("train/cats_lambda", caps_lambda)
+            self.logger.record("train/cats_lambda", cats_lambda)
             _record_action_diff_poc_stats(self.logger, "action_diff", action_diff_stats)
             _record_pair_poc_stats(
                 self.logger,
@@ -489,8 +489,8 @@ class CATSPPO(PPO):
                 "clipped_action_diff_high_frac",
             )
             _record_loss_tail_stats(self.logger, loss_tail_stats)
-            if caps_losses:
-                self.logger.record("train/caps_loss", np.mean(caps_losses))
+            if cats_losses:
+                self.logger.record("train/cats_loss", np.mean(cats_losses))
         if hasattr(self.policy, "log_std"):
             self.logger.record("train/std", th.exp(self.policy.log_std).mean().item())
         self.logger.record("train/n_updates", self._n_updates, exclude="tensorboard")

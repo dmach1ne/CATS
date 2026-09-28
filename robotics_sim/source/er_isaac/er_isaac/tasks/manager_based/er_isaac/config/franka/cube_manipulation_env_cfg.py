@@ -36,7 +36,7 @@ from .real_cam_env_cfg import (
     _make_floor,
     _make_wall,
 )
-from .joint_pos_camera_env_cfg import apply_legacy_panda_joint_position_controller
+from .joint_pos_camera_env_cfg import apply_joint_position_controller
 
 
 RESTING_OBJECT_ROOT_Z_M = 0.025
@@ -64,8 +64,8 @@ def _make_target_marker() -> RigidObjectCfg:
 
 
 @configclass
-class VisualLiftSceneCfg(ObjectTableSceneCfg):
-    """Standard Lift scene with the Visual Reach camera and visual-only target."""
+class CubeManipulationSceneCfg(ObjectTableSceneCfg):
+    """Shared cube scene with the Visual Reach camera and visual-only target."""
 
     tiled_camera: TiledCameraCfg = _make_camera(REAL_CAM_ROT_ASIS)
     target_viz: RigidObjectCfg = _make_target_marker()
@@ -74,7 +74,7 @@ class VisualLiftSceneCfg(ObjectTableSceneCfg):
 
 
 @configclass
-class VisualLiftEvalSceneCfg(VisualLiftSceneCfg):
+class CubeManipulationEvalSceneCfg(CubeManipulationSceneCfg):
     """Training scene plus a recording-only camera with the full real-camera field of view."""
 
     full_camera: TiledCameraCfg = TiledCameraCfg(
@@ -95,21 +95,21 @@ class VisualLiftEvalSceneCfg(VisualLiftSceneCfg):
 
 
 @configclass
-class VisualLiftOverlay2DSceneCfg(VisualLiftSceneCfg):
+class CubeManipulationOverlay2DSceneCfg(CubeManipulationSceneCfg):
     """Training scene without the rendered 3-D target marker."""
 
     target_viz: RigidObjectCfg | None = None
 
 
 @configclass
-class VisualLiftOverlay2DEvalSceneCfg(VisualLiftEvalSceneCfg):
+class CubeManipulationOverlay2DEvalSceneCfg(CubeManipulationEvalSceneCfg):
     """Evaluation scene without the rendered 3-D target marker."""
 
     target_viz: RigidObjectCfg | None = None
 
 
 @configclass
-class VisualLiftObservationsCfg:
+class CubeManipulationObservationsCfg:
     @configclass
     class PolicyCfg(ObsGroup):
         image = ObsTerm(
@@ -129,11 +129,11 @@ class VisualLiftObservationsCfg:
 
 
 @configclass
-class VisualLiftProprioObservationsCfg:
+class CubeManipulationProprioObservationsCfg:
     @configclass
     class PolicyCfg(ObsGroup):
         image_proprio = ObsTerm(
-            func=mdp.visual_lift_image_proprio,
+            func=mdp.cube_image_proprio,
             params={
                 "sensor_cfg": SceneEntityCfg("tiled_camera"),
                 "robot_cfg": SceneEntityCfg("robot", joint_names=["panda_joint.*"]),
@@ -159,7 +159,7 @@ class VisualLiftProprioObservationsCfg:
 
 
 @configclass
-class VisualLiftEventCfg(LiftEventCfg):
+class CubeManipulationEventCfg(LiftEventCfg):
     sync_target_viz_to_object_pose = EventTerm(
         func=mdp.set_marker_pose_from_command,
         mode="interval",
@@ -169,12 +169,12 @@ class VisualLiftEventCfg(LiftEventCfg):
 
 
 @configclass
-class FrankaVisualLiftEnvCfg(FrankaCubeLiftEnvCfg):
-    """Standard-reward Visual Lift configuration used by the reference variant."""
+class FrankaCubeManipulationEnvCfg(FrankaCubeLiftEnvCfg):
+    """Standard-reward Cube manipulation configuration used by the reference variant."""
 
-    scene: VisualLiftSceneCfg = VisualLiftSceneCfg(num_envs=128, env_spacing=10.0)
-    observations: VisualLiftObservationsCfg = VisualLiftObservationsCfg()
-    events: VisualLiftEventCfg = VisualLiftEventCfg()
+    scene: CubeManipulationSceneCfg = CubeManipulationSceneCfg(num_envs=128, env_spacing=10.0)
+    observations: CubeManipulationObservationsCfg = CubeManipulationObservationsCfg()
+    events: CubeManipulationEventCfg = CubeManipulationEventCfg()
 
     def __post_init__(self):
         super().__post_init__()
@@ -187,9 +187,9 @@ class FrankaVisualLiftEnvCfg(FrankaCubeLiftEnvCfg):
             collision_props=sim_utils.CollisionPropertiesCfg(collision_enabled=True),
             visual_material=sim_utils.PreviewSurfaceCfg(diffuse_color=LIFT_OBJECT_COLOR),
         )
-        # Use the legacy Panda joint-position controller for the default Lift
+        # Use the joint-position controller for the default cube manipulation
         # task, matching the controller used by the current training protocol.
-        apply_legacy_panda_joint_position_controller(self)
+        apply_joint_position_controller(self)
         self.commands.object_pose.debug_vis = False
         # Match the Visual Reach policy and camera target rate: 60 Hz physics / 2 = 30 Hz.
         self.decimation = 2
@@ -224,13 +224,13 @@ class FrankaVisualLiftEnvCfg(FrankaCubeLiftEnvCfg):
 
 
 @configclass
-class FrankaVisualLiftRewardPenaltyEnvCfg(FrankaVisualLiftEnvCfg):
-    """Reference Visual Lift retaining Isaac Lab's action/velocity penalties."""
+class FrankaCubeManipulationRewardPenaltyEnvCfg(FrankaCubeManipulationEnvCfg):
+    """Reference Cube manipulation retaining Isaac Lab's action/velocity penalties."""
 
 
 @configclass
-class FrankaVisualLiftBaseEnvCfg(FrankaVisualLiftEnvCfg):
-    """Primary Base Visual Lift configuration without reward regularizers."""
+class FrankaCubeManipulationBaseEnvCfg(FrankaCubeManipulationEnvCfg):
+    """Primary Base Cube manipulation configuration without reward regularizers."""
 
     def __post_init__(self):
         super().__post_init__()
@@ -241,10 +241,10 @@ class FrankaVisualLiftBaseEnvCfg(FrankaVisualLiftEnvCfg):
 
 
 @configclass
-class FrankaVisualLiftOverlay2DEnvCfg(FrankaVisualLiftEnvCfg):
-    """Visual Lift with the target composited into each policy frame."""
+class FrankaCubeManipulationOverlay2DEnvCfg(FrankaCubeManipulationEnvCfg):
+    """Cube manipulation with the target composited into each policy frame."""
 
-    scene: VisualLiftOverlay2DSceneCfg = VisualLiftOverlay2DSceneCfg(
+    scene: CubeManipulationOverlay2DSceneCfg = CubeManipulationOverlay2DSceneCfg(
         num_envs=128, env_spacing=10.0
     )
 
@@ -271,13 +271,13 @@ class FrankaVisualLiftOverlay2DEnvCfg(FrankaVisualLiftEnvCfg):
 
 
 @configclass
-class FrankaVisualLiftOverlay2DRewardPenaltyEnvCfg(FrankaVisualLiftOverlay2DEnvCfg):
-    """Overlay2D Lift retaining Isaac Lab's action and velocity penalties."""
+class FrankaCubeManipulationOverlay2DRewardPenaltyEnvCfg(FrankaCubeManipulationOverlay2DEnvCfg):
+    """Overlay2D cube manipulation retaining Isaac Lab's action and velocity penalties."""
 
 
 @configclass
-class FrankaVisualLiftOverlay2DBaseEnvCfg(FrankaVisualLiftOverlay2DEnvCfg):
-    """Primary Overlay2D Lift without reward regularizers."""
+class FrankaCubeManipulationOverlay2DBaseEnvCfg(FrankaCubeManipulationOverlay2DEnvCfg):
+    """Primary Overlay2D cube manipulation without reward regularizers."""
 
     def __post_init__(self):
         super().__post_init__()
@@ -288,46 +288,46 @@ class FrankaVisualLiftOverlay2DBaseEnvCfg(FrankaVisualLiftOverlay2DEnvCfg):
 
 
 @configclass
-class FrankaVisualLiftOverlay2DProprioEnvCfg(FrankaVisualLiftOverlay2DBaseEnvCfg):
+class FrankaCubeManipulationOverlay2DProprioEnvCfg(FrankaCubeManipulationOverlay2DBaseEnvCfg):
     """Overlay2D Base with a single RGB frame and 23-D proprioception."""
 
-    observations: VisualLiftProprioObservationsCfg = VisualLiftProprioObservationsCfg()
+    observations: CubeManipulationProprioObservationsCfg = CubeManipulationProprioObservationsCfg()
 
 
 @configclass
-class FrankaVisualLiftOverlay2DProprioRewardPenaltyEnvCfg(
-    FrankaVisualLiftOverlay2DRewardPenaltyEnvCfg
+class FrankaCubeManipulationOverlay2DProprioRewardPenaltyEnvCfg(
+    FrankaCubeManipulationOverlay2DRewardPenaltyEnvCfg
 ):
     """Overlay2D reward-penalty reference with raw proprioception."""
 
-    observations: VisualLiftProprioObservationsCfg = VisualLiftProprioObservationsCfg()
+    observations: CubeManipulationProprioObservationsCfg = CubeManipulationProprioObservationsCfg()
 
 
 @configclass
-class FrankaVisualLiftOverlay2DProprioLegacyControllerEnvCfg(
-    FrankaVisualLiftOverlay2DProprioEnvCfg
+class FrankaCubeManipulationOverlay2DProprioJointPositionControllerEnvCfg(
+    FrankaCubeManipulationOverlay2DProprioEnvCfg
 ):
-    """Current visual Lift task with the pre-parity Panda arm controller."""
+    """Current cube manipulation task with the joint-position controller."""
 
     def __post_init__(self):
         super().__post_init__()
-        apply_legacy_panda_joint_position_controller(self)
+        apply_joint_position_controller(self)
 
 
 @configclass
-class FrankaVisualLiftOverlay2DProprioRewardPenaltyLegacyControllerEnvCfg(
-    FrankaVisualLiftOverlay2DProprioRewardPenaltyEnvCfg
+class FrankaCubeManipulationOverlay2DProprioRewardPenaltyJointPositionControllerEnvCfg(
+    FrankaCubeManipulationOverlay2DProprioRewardPenaltyEnvCfg
 ):
-    """Reward-penalty visual Lift task with the pre-parity arm controller."""
+    """Reward-penalty cube manipulation task with the joint-position controller."""
 
     def __post_init__(self):
         super().__post_init__()
-        apply_legacy_panda_joint_position_controller(self)
+        apply_joint_position_controller(self)
 
 
 @configclass
-class FrankaVisualLiftEvalEnvCfg(FrankaVisualLiftRewardPenaltyEnvCfg):
-    scene: VisualLiftEvalSceneCfg = VisualLiftEvalSceneCfg(num_envs=50, env_spacing=2.5)
+class FrankaCubeManipulationEvalEnvCfg(FrankaCubeManipulationRewardPenaltyEnvCfg):
+    scene: CubeManipulationEvalSceneCfg = CubeManipulationEvalSceneCfg(num_envs=50, env_spacing=2.5)
 
     def __post_init__(self):
         super().__post_init__()
@@ -337,15 +337,15 @@ class FrankaVisualLiftEvalEnvCfg(FrankaVisualLiftRewardPenaltyEnvCfg):
 
 
 @configclass
-class FrankaVisualLiftRewardPenaltyEvalEnvCfg(FrankaVisualLiftEvalEnvCfg):
+class FrankaCubeManipulationRewardPenaltyEvalEnvCfg(FrankaCubeManipulationEvalEnvCfg):
     """Evaluation configuration for the reward-penalty reference."""
 
 
 @configclass
-class FrankaVisualLiftBaseEvalEnvCfg(FrankaVisualLiftBaseEnvCfg):
+class FrankaCubeManipulationBaseEvalEnvCfg(FrankaCubeManipulationBaseEnvCfg):
     """Evaluation configuration for the primary no-penalty Base."""
 
-    scene: VisualLiftEvalSceneCfg = VisualLiftEvalSceneCfg(num_envs=50, env_spacing=2.5)
+    scene: CubeManipulationEvalSceneCfg = CubeManipulationEvalSceneCfg(num_envs=50, env_spacing=2.5)
 
     def __post_init__(self):
         super().__post_init__()
@@ -355,10 +355,10 @@ class FrankaVisualLiftBaseEvalEnvCfg(FrankaVisualLiftBaseEnvCfg):
 
 
 @configclass
-class FrankaVisualLiftOverlay2DRewardPenaltyEvalEnvCfg(
-    FrankaVisualLiftOverlay2DRewardPenaltyEnvCfg
+class FrankaCubeManipulationOverlay2DRewardPenaltyEvalEnvCfg(
+    FrankaCubeManipulationOverlay2DRewardPenaltyEnvCfg
 ):
-    scene: VisualLiftOverlay2DEvalSceneCfg = VisualLiftOverlay2DEvalSceneCfg(
+    scene: CubeManipulationOverlay2DEvalSceneCfg = CubeManipulationOverlay2DEvalSceneCfg(
         num_envs=50, env_spacing=2.5
     )
 
@@ -370,8 +370,8 @@ class FrankaVisualLiftOverlay2DRewardPenaltyEvalEnvCfg(
 
 
 @configclass
-class FrankaVisualLiftOverlay2DBaseEvalEnvCfg(FrankaVisualLiftOverlay2DBaseEnvCfg):
-    scene: VisualLiftOverlay2DEvalSceneCfg = VisualLiftOverlay2DEvalSceneCfg(
+class FrankaCubeManipulationOverlay2DBaseEvalEnvCfg(FrankaCubeManipulationOverlay2DBaseEnvCfg):
+    scene: CubeManipulationOverlay2DEvalSceneCfg = CubeManipulationOverlay2DEvalSceneCfg(
         num_envs=50, env_spacing=2.5
     )
 
@@ -383,12 +383,12 @@ class FrankaVisualLiftOverlay2DBaseEvalEnvCfg(FrankaVisualLiftOverlay2DBaseEnvCf
 
 
 @configclass
-class FrankaVisualLiftOverlay2DProprioEvalEnvCfg(
-    FrankaVisualLiftOverlay2DProprioEnvCfg
+class FrankaCubeManipulationOverlay2DProprioEvalEnvCfg(
+    FrankaCubeManipulationOverlay2DProprioEnvCfg
 ):
     """Evaluation configuration for the Overlay2D proprio policy."""
 
-    scene: VisualLiftOverlay2DEvalSceneCfg = VisualLiftOverlay2DEvalSceneCfg(
+    scene: CubeManipulationOverlay2DEvalSceneCfg = CubeManipulationOverlay2DEvalSceneCfg(
         num_envs=50, env_spacing=2.5
     )
 
@@ -400,12 +400,12 @@ class FrankaVisualLiftOverlay2DProprioEvalEnvCfg(
 
 
 @configclass
-class FrankaVisualLiftOverlay2DProprioRewardPenaltyEvalEnvCfg(
-    FrankaVisualLiftOverlay2DProprioRewardPenaltyEnvCfg
+class FrankaCubeManipulationOverlay2DProprioRewardPenaltyEvalEnvCfg(
+    FrankaCubeManipulationOverlay2DProprioRewardPenaltyEnvCfg
 ):
     """Evaluation configuration for the proprio reward-penalty reference."""
 
-    scene: VisualLiftOverlay2DEvalSceneCfg = VisualLiftOverlay2DEvalSceneCfg(
+    scene: CubeManipulationOverlay2DEvalSceneCfg = CubeManipulationOverlay2DEvalSceneCfg(
         num_envs=50, env_spacing=2.5
     )
 
@@ -417,12 +417,12 @@ class FrankaVisualLiftOverlay2DProprioRewardPenaltyEvalEnvCfg(
 
 
 @configclass
-class FrankaVisualLiftOverlay2DProprioLegacyControllerEvalEnvCfg(
-    FrankaVisualLiftOverlay2DProprioLegacyControllerEnvCfg
+class FrankaCubeManipulationOverlay2DProprioJointPositionControllerEvalEnvCfg(
+    FrankaCubeManipulationOverlay2DProprioJointPositionControllerEnvCfg
 ):
-    """Evaluation configuration for the legacy-controller proprio policy."""
+    """Evaluation configuration for the joint-position-controller proprio policy."""
 
-    scene: VisualLiftOverlay2DEvalSceneCfg = VisualLiftOverlay2DEvalSceneCfg(
+    scene: CubeManipulationOverlay2DEvalSceneCfg = CubeManipulationOverlay2DEvalSceneCfg(
         num_envs=50, env_spacing=2.5
     )
 
@@ -434,12 +434,12 @@ class FrankaVisualLiftOverlay2DProprioLegacyControllerEvalEnvCfg(
 
 
 @configclass
-class FrankaVisualLiftOverlay2DProprioRewardPenaltyLegacyControllerEvalEnvCfg(
-    FrankaVisualLiftOverlay2DProprioRewardPenaltyLegacyControllerEnvCfg
+class FrankaCubeManipulationOverlay2DProprioRewardPenaltyJointPositionControllerEvalEnvCfg(
+    FrankaCubeManipulationOverlay2DProprioRewardPenaltyJointPositionControllerEnvCfg
 ):
-    """Evaluation configuration for the legacy reward-penalty proprio policy."""
+    """Evaluation configuration for the reward-penalty proprio policy."""
 
-    scene: VisualLiftOverlay2DEvalSceneCfg = VisualLiftOverlay2DEvalSceneCfg(
+    scene: CubeManipulationOverlay2DEvalSceneCfg = CubeManipulationOverlay2DEvalSceneCfg(
         num_envs=50, env_spacing=2.5
     )
 

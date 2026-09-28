@@ -7,7 +7,7 @@ from isaaclab.utils import configclass
 
 from ...mdp.placement import (PlacementGoalCommandCfg, PlacementGripperActionCfg,
                              placement_dropped, placement_reward)
-from .vertical15_table55_env_cfg import Vertical15Table55EnvCfg, Vertical15Table55EvalEnvCfg
+from .cube_table_env_cfg import CubeTableEnvCfg, CubeTableEvalEnvCfg
 
 
 @configclass
@@ -95,14 +95,14 @@ class _PlacementMixin:
 
 
 @configclass
-class PregraspedPlacementEnvCfg(_PlacementMixin, Vertical15Table55EnvCfg):
+class PregraspedPlacementEnvCfg(_PlacementMixin, CubeTableEnvCfg):
     def __post_init__(self):
         super().__post_init__()
         self._configure_placement()
 
 
 @configclass
-class PregraspedPlacementEvalEnvCfg(_PlacementMixin, Vertical15Table55EvalEnvCfg):
+class PregraspedPlacementEvalEnvCfg(_PlacementMixin, CubeTableEvalEnvCfg):
     def __post_init__(self):
         super().__post_init__()
         self._configure_placement()

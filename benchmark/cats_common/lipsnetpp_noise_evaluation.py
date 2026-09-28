@@ -91,7 +91,7 @@ def compute_base_observation_scale(
     warmup_episodes: int,
     device: str = "cpu",
 ) -> tuple[np.ndarray, list[dict]]:
-    """Average per-policy observation stds, matching the legacy CATS protocol."""
+    """Average per-policy observation stds for the CATS evaluation protocol."""
     _validate_checkpoints(checkpoints)
     if warmup_episodes <= 0 or warmup_episodes > len(evaluation_seeds):
         raise ValueError("warmup_episodes must fit within evaluation_seeds")

@@ -1,4 +1,4 @@
-"""Pure distance-based hold metrics shared by Reach and Lift evaluators."""
+"""Pure distance-based hold metrics shared by Reach and Place Cube evaluators."""
 
 from __future__ import annotations
 

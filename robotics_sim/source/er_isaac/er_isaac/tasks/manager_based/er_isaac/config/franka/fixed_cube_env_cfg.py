@@ -5,20 +5,20 @@ from copy import deepcopy
 from isaaclab.utils import configclass
 
 from .goal_fixed_scale_env_cfg import (
-    FrankaVisualLiftOverlay2DProprioLegacyControllerGoalFixedScaleEnvCfg,
-    FrankaVisualLiftOverlay2DProprioLegacyControllerEvalGoalFixedScaleEnvCfg,
-    FrankaVisualLiftOverlay2DProprioRewardPenaltyLegacyControllerGoalFixedScaleEnvCfg,
-    FrankaVisualLiftOverlay2DProprioRewardPenaltyLegacyControllerEvalGoalFixedScaleEnvCfg,
+    FrankaCubeManipulationOverlay2DProprioJointPositionControllerGoalFixedScaleEnvCfg,
+    FrankaCubeManipulationOverlay2DProprioJointPositionControllerEvalGoalFixedScaleEnvCfg,
+    FrankaCubeManipulationOverlay2DProprioRewardPenaltyJointPositionControllerGoalFixedScaleEnvCfg,
+    FrankaCubeManipulationOverlay2DProprioRewardPenaltyJointPositionControllerEvalGoalFixedScaleEnvCfg,
 )
 
 
-class _Vertical15FixedCubeMixin:
-    def _configure_vertical15_fixed_cube(self):
+class _FixedCubeMixin:
+    def _configure_fixed_cube(self):
         for name in ("scene", "commands", "events", "rewards"):
             setattr(self, name, deepcopy(getattr(self, name)))
         # Pose commands are robot-base-relative, while object spawn is env-local.
         if tuple(self.scene.robot.init_state.rot) != (1.0, 0.0, 0.0, 0.0):
-            raise ValueError("Vertical15FixedCube requires an unrotated robot base")
+            raise ValueError("FixedCube requires an unrotated robot base")
         table_z = self.scene.table.init_state.pos[2]
         cube_pos = (0.45, 0.0, table_z + 0.049 / 2)
         self.scene.object.spawn.size = (0.049,) * 3
@@ -42,28 +42,28 @@ class _Vertical15FixedCubeMixin:
 
 
 @configclass
-class Vertical15FixedCubeEnvCfg(_Vertical15FixedCubeMixin, FrankaVisualLiftOverlay2DProprioLegacyControllerGoalFixedScaleEnvCfg):
+class FixedCubeEnvCfg(_FixedCubeMixin, FrankaCubeManipulationOverlay2DProprioJointPositionControllerGoalFixedScaleEnvCfg):
     def __post_init__(self):
         super().__post_init__()
-        self._configure_vertical15_fixed_cube()
+        self._configure_fixed_cube()
 
 
 @configclass
-class Vertical15FixedCubeEvalEnvCfg(_Vertical15FixedCubeMixin, FrankaVisualLiftOverlay2DProprioLegacyControllerEvalGoalFixedScaleEnvCfg):
+class FixedCubeEvalEnvCfg(_FixedCubeMixin, FrankaCubeManipulationOverlay2DProprioJointPositionControllerEvalGoalFixedScaleEnvCfg):
     def __post_init__(self):
         super().__post_init__()
-        self._configure_vertical15_fixed_cube()
+        self._configure_fixed_cube()
 
 
 @configclass
-class Vertical15FixedCubeRewardPenaltyEnvCfg(_Vertical15FixedCubeMixin, FrankaVisualLiftOverlay2DProprioRewardPenaltyLegacyControllerGoalFixedScaleEnvCfg):
+class FixedCubeRewardPenaltyEnvCfg(_FixedCubeMixin, FrankaCubeManipulationOverlay2DProprioRewardPenaltyJointPositionControllerGoalFixedScaleEnvCfg):
     def __post_init__(self):
         super().__post_init__()
-        self._configure_vertical15_fixed_cube()
+        self._configure_fixed_cube()
 
 
 @configclass
-class Vertical15FixedCubeRewardPenaltyEvalEnvCfg(_Vertical15FixedCubeMixin, FrankaVisualLiftOverlay2DProprioRewardPenaltyLegacyControllerEvalGoalFixedScaleEnvCfg):
+class FixedCubeRewardPenaltyEvalEnvCfg(_FixedCubeMixin, FrankaCubeManipulationOverlay2DProprioRewardPenaltyJointPositionControllerEvalGoalFixedScaleEnvCfg):
     def __post_init__(self):
         super().__post_init__()
-        self._configure_vertical15_fixed_cube()
+        self._configure_fixed_cube()

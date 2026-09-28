@@ -103,7 +103,7 @@ def collect(args, raw, wrapped, player, schedule):
                         frame = captured['frames'][i]
                         if not np.allclose(frame['goal_position_b'], batch[i]['goal_position_b'], atol=1e-7, rtol=0):
                             raise RuntimeError('Goal changed within an active trial')
-                        holds[i] = old.update_old_success(frame, holds[i], raw.step_dt)
+                        holds[i] = old.update_release_hold_success(frame, holds[i], raw.step_dt)
                         frames[i].append(frame)
                         actions[i].append(values[i])
                         if seed == args.eval_seeds[0] and start == 0:

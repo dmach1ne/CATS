@@ -2,7 +2,7 @@
 from isaaclab.assets import AssetBaseCfg
 import isaaclab.sim as sim_utils
 from isaaclab.utils import configclass
-from .vertical15_fixedcube_env_cfg import Vertical15FixedCubeEnvCfg, Vertical15FixedCubeEvalEnvCfg
+from .fixed_cube_env_cfg import FixedCubeEnvCfg, FixedCubeEvalEnvCfg
 
 # The base edge and cutout dimensions are simulation geometry estimates.
 BASE_FRONT_X = 0.07156231
@@ -74,14 +74,14 @@ class _Table55Mixin:
 
 
 @configclass
-class Vertical15Table55EnvCfg(_Table55Mixin, Vertical15FixedCubeEnvCfg):
+class CubeTableEnvCfg(_Table55Mixin, FixedCubeEnvCfg):
     def __post_init__(self):
         super().__post_init__()
         self._configure_table55()
 
 
 @configclass
-class Vertical15Table55EvalEnvCfg(_Table55Mixin, Vertical15FixedCubeEvalEnvCfg):
+class CubeTableEvalEnvCfg(_Table55Mixin, FixedCubeEvalEnvCfg):
     def __post_init__(self):
         super().__post_init__()
         self._configure_table55()

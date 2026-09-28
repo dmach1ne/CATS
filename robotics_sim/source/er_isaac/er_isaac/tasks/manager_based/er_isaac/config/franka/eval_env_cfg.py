@@ -24,11 +24,11 @@ from .real_cam_env_cfg import (
     FrankaReachCNNRealAsIsOverlay2DLowZNoHeightPenaltyEnvCfg,
     FrankaReachCNNRealAsIsOverlay2DLowZRewardPenaltyNoHeightPenaltyEnvCfg,
     FrankaReachCNNRealAsIsOverlay2DProprioEnvCfg,
-    FrankaReachCNNRealAsIsOverlay2DProprioLegacyControllerEnvCfg,
-    FrankaReachCNNRealAsIsOverlay2DProprioLegacyControllerNoHeightPenaltyEnvCfg,
+    FrankaReachCNNRealAsIsOverlay2DProprioJointPositionControllerEnvCfg,
+    FrankaReachCNNRealAsIsOverlay2DProprioJointPositionControllerNoHeightPenaltyEnvCfg,
     FrankaReachCNNRealAsIsOverlay2DProprioRewardPenaltyEnvCfg,
-    FrankaReachCNNRealAsIsOverlay2DProprioRewardPenaltyLegacyControllerEnvCfg,
-    FrankaReachCNNRealAsIsOverlay2DProprioRewardPenaltyLegacyControllerNoHeightPenaltyEnvCfg,
+    FrankaReachCNNRealAsIsOverlay2DProprioRewardPenaltyJointPositionControllerEnvCfg,
+    FrankaReachCNNRealAsIsOverlay2DProprioRewardPenaltyJointPositionControllerNoHeightPenaltyEnvCfg,
     FrankaReachCNNRealAsIsOverlay2DRewardPenaltyEnvCfg,
     RealCamSceneCfg,
 )
@@ -134,8 +134,8 @@ class FrankaReachCNNRealAsIsOverlay2DProprioRewardPenaltyEvalEnvCfg(
 
 
 @configclass
-class FrankaReachCNNRealAsIsOverlay2DProprioLegacyControllerEvalEnvCfg(
-    FrankaReachCNNRealAsIsOverlay2DProprioLegacyControllerEnvCfg
+class FrankaReachCNNRealAsIsOverlay2DProprioJointPositionControllerEvalEnvCfg(
+    FrankaReachCNNRealAsIsOverlay2DProprioJointPositionControllerEnvCfg
 ):
     scene: Overlay2DEvalSceneCfg = Overlay2DEvalSceneCfg(num_envs=1, env_spacing=10)
 
@@ -145,8 +145,8 @@ class FrankaReachCNNRealAsIsOverlay2DProprioLegacyControllerEvalEnvCfg(
 
 
 @configclass
-class FrankaReachCNNRealAsIsOverlay2DProprioRewardPenaltyLegacyControllerEvalEnvCfg(
-    FrankaReachCNNRealAsIsOverlay2DProprioRewardPenaltyLegacyControllerEnvCfg
+class FrankaReachCNNRealAsIsOverlay2DProprioRewardPenaltyJointPositionControllerEvalEnvCfg(
+    FrankaReachCNNRealAsIsOverlay2DProprioRewardPenaltyJointPositionControllerEnvCfg
 ):
     scene: Overlay2DEvalSceneCfg = Overlay2DEvalSceneCfg(num_envs=1, env_spacing=10)
 
@@ -156,8 +156,8 @@ class FrankaReachCNNRealAsIsOverlay2DProprioRewardPenaltyLegacyControllerEvalEnv
 
 
 @configclass
-class FrankaReachCNNRealAsIsOverlay2DProprioLegacyControllerNoHeightPenaltyEvalEnvCfg(
-    FrankaReachCNNRealAsIsOverlay2DProprioLegacyControllerNoHeightPenaltyEnvCfg
+class FrankaReachCNNRealAsIsOverlay2DProprioJointPositionControllerNoHeightPenaltyEvalEnvCfg(
+    FrankaReachCNNRealAsIsOverlay2DProprioJointPositionControllerNoHeightPenaltyEnvCfg
 ):
     scene: Overlay2DEvalSceneCfg = Overlay2DEvalSceneCfg(num_envs=1, env_spacing=10)
 
@@ -167,8 +167,8 @@ class FrankaReachCNNRealAsIsOverlay2DProprioLegacyControllerNoHeightPenaltyEvalE
 
 
 @configclass
-class FrankaReachCNNRealAsIsOverlay2DProprioRewardPenaltyLegacyControllerNoHeightPenaltyEvalEnvCfg(
-    FrankaReachCNNRealAsIsOverlay2DProprioRewardPenaltyLegacyControllerNoHeightPenaltyEnvCfg
+class FrankaReachCNNRealAsIsOverlay2DProprioRewardPenaltyJointPositionControllerNoHeightPenaltyEvalEnvCfg(
+    FrankaReachCNNRealAsIsOverlay2DProprioRewardPenaltyJointPositionControllerNoHeightPenaltyEnvCfg
 ):
     scene: Overlay2DEvalSceneCfg = Overlay2DEvalSceneCfg(num_envs=1, env_spacing=10)
 

@@ -14,7 +14,7 @@ from ...er_isaac_env_cfg import ReachRGBEnvCfg, ReachRGBFeatureEnvCfg, ReachCNNE
 from .joint_pos_env_cfg import FR3_EXPLICIT_IMPEDANCE_CFG
 
 
-def apply_legacy_panda_joint_position_controller(env_cfg):
+def apply_joint_position_controller(env_cfg):
     """Restore the pre-FR3-parity arm-controller configuration only."""
     env_cfg.scene.robot = FRANKA_PANDA_CFG.replace(
         prim_path="{ENV_REGEX_NS}/Robot"

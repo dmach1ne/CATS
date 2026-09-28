@@ -11,7 +11,7 @@ from rl_games.algos_torch import model_builder
 from rl_games.algos_torch.network_builder import A2CBuilder, NetworkBuilder
 
 
-LIFT_NETWORK_NAME = "visual_lift_proprio_actor_critic"
+PLACE_NETWORK_NAME = "place_proprio_actor_critic"
 REACH_NETWORK_NAME = "visual_reach_proprio_actor_critic"
 IMAGE_SHAPE = (84, 84, 3)
 IMAGE_SIZE = 84 * 84 * 3
@@ -48,7 +48,7 @@ def _conv_output_size(size: int, kernel: int, stride: int, padding: int) -> int:
 
 
 class VisualProprioBuilder(NetworkBuilder):
-    """Shared or separate image-plus-proprio actor-critic for Visual Reach and Lift."""
+    """Shared or separate image-plus-proprio actor-critic for Reach and Place Cube."""
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -85,23 +85,15 @@ class VisualProprioBuilder(NetworkBuilder):
                 )
             self.separate = bool(params.get("separate", False))
             fusion = params.get("fusion", "raw_concat")
-            self.purelift_gripper_width = fusion == "compact_purelift_gripper_width"
-            self.compact = fusion in {"compact_proprio", "compact_proprio_goal_fixed_scale", "compact_purelift_gripper_width"}
-            if fusion not in {"raw_concat", "compact_proprio", "compact_proprio_goal_fixed_scale", "compact_purelift_gripper_width"}:
+            self.compact = fusion in {"compact_proprio", "compact_proprio_goal_fixed_scale"}
+            if fusion not in {"raw_concat", "compact_proprio", "compact_proprio_goal_fixed_scale"}:
                 raise ValueError("Unknown proprio fusion")
             self.goal_fixed_scale = bool(params.get("proprio_fixed_scale", False))
-            if (fusion in {"compact_proprio_goal_fixed_scale", "compact_purelift_gripper_width"}) != self.goal_fixed_scale:
+            if (fusion == "compact_proprio_goal_fixed_scale") != self.goal_fixed_scale:
                 raise ValueError("GoalFixedScale fusion requires explicit proprio_fixed_scale")
-            if self.purelift_gripper_width:
-                if actions_num != 8 or self.proprio_size != 24:
-                    raise ValueError("PureLiftGripperWidth requires 24-D proprio and 8 actions")
-                self.register_buffer("proprio_scale", torch.tensor(
-                    [1.0 / math.pi] * 7 + [0.5] * 7 + [1.0] * 8 + [2.0, 12.5],
-                    dtype=torch.float32,
-                ))
-            elif self.goal_fixed_scale:
+            if self.goal_fixed_scale:
                 if actions_num not in (7, 8) or self.proprio_size != 18 + actions_num:
-                    raise ValueError("GoalFixedScale requires 25-D Reach or 26-D Lift proprio")
+                    raise ValueError("GoalFixedScale requires 25-D Reach or 26-D Place Cube proprio")
                 self.register_buffer("proprio_scale", torch.tensor(
                     [1.0 / math.pi] * 7 + [0.5] * 7 + [1.0] * actions_num + [2.0] * 4,
                     dtype=torch.float32,
@@ -358,5 +350,5 @@ class VisualProprioBuilder(NetworkBuilder):
 
 def register_visual_proprio_networks() -> None:
     """Register both public names against the shared implementation."""
-    model_builder.register_network(LIFT_NETWORK_NAME, VisualProprioBuilder)
+    model_builder.register_network(PLACE_NETWORK_NAME, VisualProprioBuilder)
     model_builder.register_network(REACH_NETWORK_NAME, VisualProprioBuilder)

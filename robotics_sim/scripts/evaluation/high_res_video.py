@@ -14,13 +14,13 @@ POLICY_CROP_X = (FULL_WIDTH - POLICY_VIEW_SIDE) // 2
 DUAL_WIDTH = POLICY_VIEW_SIDE + GUTTER + FULL_WIDTH
 POLICY_INPUT_WIDTH = 84
 POLICY_IMAGE_SIZE = POLICY_INPUT_WIDTH * POLICY_INPUT_WIDTH * 3
-VISUAL_LIFT_PROPRIO_SIZE = 23
-VISUAL_LIFT_FLAT_OBSERVATION_SIZE = POLICY_IMAGE_SIZE + VISUAL_LIFT_PROPRIO_SIZE
+CUBE_PROPRIO_SIZE = 23
+CUBE_FLAT_OBSERVATION_SIZE = POLICY_IMAGE_SIZE + CUBE_PROPRIO_SIZE
 VISUAL_REACH_PROPRIO_SIZE = 22
 VISUAL_REACH_FLAT_OBSERVATION_SIZE = POLICY_IMAGE_SIZE + VISUAL_REACH_PROPRIO_SIZE
 VISUAL_PROPRIO_FLAT_OBSERVATION_SIZES = {
     VISUAL_REACH_FLAT_OBSERVATION_SIZE,
-    VISUAL_LIFT_FLAT_OBSERVATION_SIZE,
+    CUBE_FLAT_OBSERVATION_SIZE,
     POLICY_IMAGE_SIZE + 25,
     POLICY_IMAGE_SIZE + 26,
 }
@@ -71,9 +71,9 @@ def compose_high_res_dual(frame: np.ndarray) -> np.ndarray:
 def latest_policy_rgb(observation: np.ndarray) -> np.ndarray:
     """Return the most recent RGB image from a policy observation tensor.
 
-    Camera observations are channel-last in this project. Legacy Visual Lift
+    Camera observations are channel-last in this project. Visual manipulation
     stacks three RGB frames along that final channel axis, while Reach supplies
-    one RGB frame. Reach and Lift proprio policies flatten one RGB frame before
+    one RGB frame. Reach and Place Cube proprio policies flatten one RGB frame before
     appending their task-specific state vector. A channel-first tensor is also
     accepted.
     """

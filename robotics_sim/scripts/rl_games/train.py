@@ -124,21 +124,6 @@ register_visual_proprio_networks()
 @hydra_task_config(args_cli.task, args_cli.agent)
 def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agent_cfg: dict):
     """Train with RL-Games agent."""
-    purelift_task = "-PureLiftGripperWidth" in (args_cli.task or "")
-    purelift_network = agent_cfg["params"]["network"].get("fusion") == "compact_purelift_gripper_width"
-    if purelift_task != purelift_network:
-        raise ValueError("PureLiftGripperWidth task and agent fusion must be selected together")
-    if purelift_network and agent_cfg["params"]["config"].get("normalize_input", False):
-        raise ValueError("PureLiftGripperWidth requires model-owned fixed scaling")
-    if purelift_network and args_cli.mode == "caps":
-        raise ValueError("PureLiftGripperWidth supports only Base, Reward Penalty, and CATS")
-    if purelift_network:
-        eval_task = args_cli.task if args_cli.task.endswith('-Eval-v0') else args_cli.task.removesuffix('-v0') + '-Eval-v0'
-        for task_id in (args_cli.task, eval_task):
-            spec = gym.spec(task_id)
-            entry = spec.kwargs.get(args_cli.agent, '')
-            if not str(entry).endswith('rl_games_visual_lift_purelift_gripper_width_ppo_cfg.yaml'):
-                raise ValueError(f'PureLiftGripperWidth agent registration mismatch: {task_id}')
     # override configurations with non-hydra CLI arguments
     env_cfg.scene.num_envs = args_cli.num_envs if args_cli.num_envs is not None else env_cfg.scene.num_envs
     env_cfg.sim.device = args_cli.device if args_cli.device is not None else env_cfg.sim.device

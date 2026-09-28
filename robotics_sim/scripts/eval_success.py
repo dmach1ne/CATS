@@ -37,12 +37,12 @@ parser.add_argument("--out", type=str, default="eval.mp4")
 parser.add_argument("--fps", type=int, default=30)
 parser.add_argument(
     "--video-layout",
-    choices=("legacy", "high_res_dual", "policy_input_high_res"),
+    choices=("camera", "high_res_dual", "policy_input_high_res"),
     default="policy_input_high_res",
 )
 parser.add_argument("--control-trace", action="store_true",
-                    help="Append an action trace to a legacy layout. The default layout already includes one.")
-parser.add_argument("--seed", type=int, default=None, help="Legacy single evaluation seed")
+                    help="Append an action trace to the camera layout. The default layout already includes one.")
+parser.add_argument("--seed", type=int, default=None, help="Single evaluation seed")
 parser.add_argument(
     "--eval-seeds", type=int, nargs="+", default=None,
     help="Evaluation seeds to run sequentially; defaults to 12345 22345 32345",
@@ -243,7 +243,7 @@ from evaluation.high_res_video import (  # noqa: E402
     full_to_policy_pixel,
     latest_policy_rgb,
 )
-from evaluation.lift_metrics import mechanical_energy, arm_smoothness  # noqa: E402
+from evaluation.action_metrics import mechanical_energy, arm_smoothness  # noqa: E402
 from evaluation.hold_metrics import hold_success  # noqa: E402
 
 

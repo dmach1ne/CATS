@@ -245,7 +245,7 @@ class CATSSAC(CustomSAC):
             _init_setup_model=_init_setup_model,
         )
 
-    def _caps_lambda(self) -> float:
+    def _cats_lambda(self) -> float:
         completed_fraction = min(
             1.0, max(0.0, self.num_timesteps / max(1, self._total_timesteps))
         )
@@ -323,25 +323,25 @@ class CATSSAC(CustomSAC):
             critic_loss.backward()
             self.critic.optimizer.step()
 
-            # CAPS Loss
-            caps_now_actions = self.policy._predict(replay_data.observations, deterministic=True).type(th.float32)
-            caps_next_actions = self.policy._predict(replay_data.next_observations, deterministic=True).type(th.float32)
-            action_diff = caps_now_actions - caps_next_actions
+            # CATS temporal loss
+            cats_now_actions = self.policy._predict(replay_data.observations, deterministic=True).type(th.float32)
+            cats_next_actions = self.policy._predict(replay_data.next_observations, deterministic=True).type(th.float32)
+            action_diff = cats_now_actions - cats_next_actions
             
-            loss_t = 0.5 * F.mse_loss(caps_now_actions, caps_next_actions)
+            loss_t = 0.5 * F.mse_loss(cats_now_actions, cats_next_actions)
             loss_t_values.append(loss_t.item())
             _append_action_diff_poc_stats(action_diff_stats, action_diff)
 
             # Linear Scheduling Calculation
-            caps_lambda = self._caps_lambda()
-            lambda_values.append(caps_lambda)
+            cats_lambda = self._cats_lambda()
+            lambda_values.append(cats_lambda)
             
-            reg_loss_t = caps_lambda * loss_t
-            caps_loss = reg_loss_t
+            reg_loss_t = cats_lambda * loss_t
+            cats_loss = reg_loss_t
 
             q_values_pi = th.cat(self.critic(replay_data.observations, actions_pi), dim=1)
             min_qf_pi, _ = th.min(q_values_pi, dim=1, keepdim=True)
-            actor_loss = (ent_coef * log_prob - min_qf_pi).mean() + caps_loss
+            actor_loss = (ent_coef * log_prob - min_qf_pi).mean() + cats_loss
             actor_losses.append(actor_loss.item())
 
             # === Observation-only logging (before optimizer step) ===

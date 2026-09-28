@@ -14,13 +14,13 @@ EVAL_DIR = Path(__file__).resolve().parent
 if str(EVAL_DIR) not in sys.path:
     sys.path.insert(0, str(EVAL_DIR))
 from agent_config import load_agent_config
-from lift_metrics import arm_smoothness, mechanical_energy
-from placement_legacy_eval_metrics import update_old_success, cube_bottom_above_table
+from action_metrics import arm_smoothness, mechanical_energy
+from placement_metrics import update_release_hold_success, cube_bottom_above_table
 
 DEFAULT_EVAL_SEEDS = (652165, 709797, 242820, 579787, 70701)
 PROTOCOL = dict(name='pregrasped_placement_front25cm_release_hold1s_v1',
                 xy_thresholds_m=[.02, .05, .10], hold_s=1.0, rest_height_m=.0505,
-                reward_protocol='placesphere_front25_transport10_lower_near5_v1',
+                reward_protocol='place_cube_v1',
                 rest_height_tolerance_m=.005, open_width_m=.06,
                 table_contact_required=True, finger_contacts_absent=True,
                 success_requires_lift=False, success_rule="old_rest_release_hold_no_lift_gate", success_aggregation='episode_ever',
@@ -230,7 +230,7 @@ def collect_trials(args, raw, wrapped, player, get_snapshot, trials, archive):
                 if 'frame' not in captured:
                     raise RuntimeError('Placement step produced no pre-reset reward snapshot')
                 observation = observation['obs'] if isinstance(observation, dict) else observation
-                old_hold = update_old_success(captured['frame'], old_hold, dt)
+                old_hold = update_release_hold_success(captured['frame'], old_hold, dt)
                 frames.append(captured['frame'])
                 actions.append(action_np)
                 torques.append(frames[-1]['arm_applied_torque'])

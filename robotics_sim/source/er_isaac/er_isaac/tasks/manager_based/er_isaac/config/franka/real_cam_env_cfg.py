@@ -37,7 +37,7 @@ from ...er_isaac_env_cfg import ReachRGBCameraSceneCfg
 from ...reach_cfg import RewardPenaltyCurriculumCfg, RewardPenaltyRewardsCfg
 from .joint_pos_camera_env_cfg import (
     FrankaReachCNNEnvCfg,
-    apply_legacy_panda_joint_position_controller,
+    apply_joint_position_controller,
 )
 
 # ── 실물 렌즈(고정) ──────────────────────────────────────────────────────────
@@ -269,7 +269,7 @@ class FrankaReachCNNRealAsIsOverlay2DLowZNoHeightPenaltyEnvCfg(
 
     def __post_init__(self):
         super().__post_init__()
-        apply_legacy_panda_joint_position_controller(self)
+        apply_joint_position_controller(self)
         self.commands.ee_pose.ranges.pos_z = REACH_LOW_TARGET_Z_RANGE
         self.rewards.low_end_effector_height = None
 
@@ -311,32 +311,32 @@ class FrankaReachCNNRealAsIsOverlay2DProprioRewardPenaltyEnvCfg(
 
 
 @configclass
-class FrankaReachCNNRealAsIsOverlay2DProprioLegacyControllerEnvCfg(
+class FrankaReachCNNRealAsIsOverlay2DProprioJointPositionControllerEnvCfg(
     FrankaReachCNNRealAsIsOverlay2DProprioEnvCfg
 ):
-    """Current visual Reach task with the pre-parity Panda arm controller."""
+    """Current visual Reach task with the joint-position controller."""
 
     def __post_init__(self):
         super().__post_init__()
-        apply_legacy_panda_joint_position_controller(self)
+        apply_joint_position_controller(self)
 
 
 @configclass
-class FrankaReachCNNRealAsIsOverlay2DProprioRewardPenaltyLegacyControllerEnvCfg(
+class FrankaReachCNNRealAsIsOverlay2DProprioRewardPenaltyJointPositionControllerEnvCfg(
     FrankaReachCNNRealAsIsOverlay2DProprioRewardPenaltyEnvCfg
 ):
-    """Reward-penalty visual Reach task with the pre-parity arm controller."""
+    """Reward-penalty visual Reach task with the joint-position controller."""
 
     def __post_init__(self):
         super().__post_init__()
-        apply_legacy_panda_joint_position_controller(self)
+        apply_joint_position_controller(self)
 
 
 @configclass
-class FrankaReachCNNRealAsIsOverlay2DProprioLegacyControllerNoHeightPenaltyEnvCfg(
-    FrankaReachCNNRealAsIsOverlay2DProprioLegacyControllerEnvCfg
+class FrankaReachCNNRealAsIsOverlay2DProprioJointPositionControllerNoHeightPenaltyEnvCfg(
+    FrankaReachCNNRealAsIsOverlay2DProprioJointPositionControllerEnvCfg
 ):
-    """Legacy-controller visual Reach without the low end-effector height term."""
+    """Joint-position-controller visual Reach without the low end-effector height term."""
 
     def __post_init__(self):
         super().__post_init__()
@@ -344,10 +344,10 @@ class FrankaReachCNNRealAsIsOverlay2DProprioLegacyControllerNoHeightPenaltyEnvCf
 
 
 @configclass
-class FrankaReachCNNRealAsIsOverlay2DProprioRewardPenaltyLegacyControllerNoHeightPenaltyEnvCfg(
-    FrankaReachCNNRealAsIsOverlay2DProprioRewardPenaltyLegacyControllerEnvCfg
+class FrankaReachCNNRealAsIsOverlay2DProprioRewardPenaltyJointPositionControllerNoHeightPenaltyEnvCfg(
+    FrankaReachCNNRealAsIsOverlay2DProprioRewardPenaltyJointPositionControllerEnvCfg
 ):
-    """Legacy-controller Reward Penalty Reach without the height term."""
+    """Joint-position-controller Reward Penalty Reach without the height term."""
 
     def __post_init__(self):
         super().__post_init__()

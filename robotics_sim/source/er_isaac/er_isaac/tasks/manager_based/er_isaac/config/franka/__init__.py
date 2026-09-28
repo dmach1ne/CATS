@@ -18,8 +18,8 @@ for _placement_id, _placement_cfg in (
         disable_env_checker=True,
         kwargs={
             "env_cfg_entry_point": f"{__name__}.pregrasped_placement_env_cfg:{_placement_cfg}",
-            "rl_games_cfg_entry_point": f"{agents.__name__}:rl_games_visual_lift_compact_proprio_goal_fixed_scale_ppo_cfg.yaml",
-            "rl_games_goal_fixed_scale_cfg_entry_point": f"{agents.__name__}:rl_games_visual_lift_compact_proprio_goal_fixed_scale_ppo_cfg.yaml",
+            "rl_games_cfg_entry_point": f"{agents.__name__}:place_ppo.yaml",
+            "rl_games_goal_fixed_scale_cfg_entry_point": f"{agents.__name__}:place_ppo.yaml",
         },
     )
 
@@ -28,9 +28,9 @@ gym.register(
     entry_point="isaaclab.envs:ManagerBasedRLEnv",
     disable_env_checker=True,
     kwargs={
-        "env_cfg_entry_point": f"{__name__}.reach_lift_table55_env_cfg:FrankaReachGoalFixedScaleLiftTable55EnvCfg",
-        "rl_games_cfg_entry_point": f"{agents.__name__}:rl_games_visual_reach_compact_proprio_goal_fixed_scale_ppo_cfg.yaml",
-        "rl_games_goal_fixed_scale_cfg_entry_point": f"{agents.__name__}:rl_games_visual_reach_compact_proprio_goal_fixed_scale_ppo_cfg.yaml",
+        "env_cfg_entry_point": f"{__name__}.reach_table_env_cfg:FrankaReachGoalFixedScaleTableEnvCfg",
+        "rl_games_cfg_entry_point": f"{agents.__name__}:reach_ppo.yaml",
+        "rl_games_goal_fixed_scale_cfg_entry_point": f"{agents.__name__}:reach_ppo.yaml",
     },
 )
 
@@ -39,8 +39,8 @@ gym.register(
     entry_point="isaaclab.envs:ManagerBasedRLEnv",
     disable_env_checker=True,
     kwargs={
-        "env_cfg_entry_point": f"{__name__}.reach_lift_table55_env_cfg:FrankaReachGoalFixedScaleLiftTable55EvalEnvCfg",
-        "rl_games_cfg_entry_point": f"{agents.__name__}:rl_games_visual_reach_compact_proprio_goal_fixed_scale_ppo_cfg.yaml",
-        "rl_games_goal_fixed_scale_cfg_entry_point": f"{agents.__name__}:rl_games_visual_reach_compact_proprio_goal_fixed_scale_ppo_cfg.yaml",
+        "env_cfg_entry_point": f"{__name__}.reach_table_env_cfg:FrankaReachGoalFixedScaleTableEvalEnvCfg",
+        "rl_games_cfg_entry_point": f"{agents.__name__}:reach_ppo.yaml",
+        "rl_games_goal_fixed_scale_cfg_entry_point": f"{agents.__name__}:reach_ppo.yaml",
     },
 )

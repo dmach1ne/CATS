@@ -1,8 +1,8 @@
-"""Old release/hold success and orientation-aware cube height metrics."""
+"""Release/hold success and orientation-aware cube height metrics."""
 import numpy as np
 
 
-def update_old_success(frame, hold, dt):
+def update_release_hold_success(frame, hold, dt):
     released = (abs(frame['height_m'] - .0505) <= .005 + 1e-9
                 and frame['table_contact'] and frame['width_m'] >= .06 - 1e-9
                 and not frame['left_finger_contact'] and not frame['right_finger_contact'])

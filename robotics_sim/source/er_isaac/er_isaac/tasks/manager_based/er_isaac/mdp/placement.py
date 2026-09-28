@@ -500,7 +500,7 @@ class PregraspedPlacementEnv(ManagerBasedRLEnv):
             pose_unstable = consecutive.clone()
             # Bias the existing PD target by G/Kp only during preparation. Unlike
             # accumulating IK error into the target, this has no integral windup.
-            # Policy steps still use the unmodified legacy action/controller.
+            # Policy steps still use the shared action/controller.
             for _ in range(self.cfg.placement_prep_steps):
                 pending = ~certified
                 closing_target[pending] = torch.maximum(close_q[pending], closing_target[pending] - 0.02 * self.physics_dt)

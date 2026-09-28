@@ -28,9 +28,9 @@ from isaaclab.envs.utils.io_descriptors import (
 )
 
 
-VISUAL_LIFT_IMAGE_SIZE = 84 * 84 * 3
-VISUAL_LIFT_PROPRIO_SIZE = 23
-VISUAL_LIFT_OBSERVATION_SIZE = VISUAL_LIFT_IMAGE_SIZE + VISUAL_LIFT_PROPRIO_SIZE
+CUBE_IMAGE_SIZE = 84 * 84 * 3
+CUBE_PROPRIO_SIZE = 23
+CUBE_OBSERVATION_SIZE = CUBE_IMAGE_SIZE + CUBE_PROPRIO_SIZE
 VISUAL_REACH_IMAGE_SIZE = 84 * 84 * 3
 VISUAL_REACH_PROPRIO_SIZE = 22
 VISUAL_REACH_OBSERVATION_SIZE = VISUAL_REACH_IMAGE_SIZE + VISUAL_REACH_PROPRIO_SIZE
@@ -105,7 +105,7 @@ def visual_reach_image_proprio(
     return observation
 
 
-def visual_lift_image_proprio(
+def cube_image_proprio(
     env: ManagerBasedEnv,
     sensor_cfg: SceneEntityCfg = SceneEntityCfg("tiled_camera"),
     robot_cfg: SceneEntityCfg = SceneEntityCfg("robot"),
@@ -139,10 +139,10 @@ def visual_lift_image_proprio(
         target_marker_radius_m=target_marker_radius_m,
     )
     if tuple(image_shape) not in ((84, 84, 3), (128, 128, 3)):
-        raise ValueError(f"Unsupported Visual Lift image_shape: {image_shape}")
+        raise ValueError(f"Unsupported Cube manipulation image_shape: {image_shape}")
     if overlaid.shape[1:] != tuple(image_shape):
         raise ValueError(
-            "Visual Lift proprio policy requires NHWC RGB frames with shape "
+            "Cube manipulation proprio policy requires NHWC RGB frames with shape "
             f"(N, {image_shape[0]}, {image_shape[1]}, 3), got {tuple(overlaid.shape)}"
         )
 
@@ -156,14 +156,14 @@ def visual_lift_image_proprio(
     ).unsqueeze(-1)
 
     proprio = torch.cat((joint_pos, joint_vel, last_action, ee_height), dim=-1)
-    if proprio.shape[-1] != VISUAL_LIFT_PROPRIO_SIZE:
+    if proprio.shape[-1] != CUBE_PROPRIO_SIZE:
         raise ValueError(
-            f"Expected {VISUAL_LIFT_PROPRIO_SIZE} proprio values, got {proprio.shape[-1]}"
+            f"Expected {CUBE_PROPRIO_SIZE} proprio values, got {proprio.shape[-1]}"
         )
 
     image_flat = overlaid.to(dtype=torch.float32).reshape(overlaid.shape[0], -1)
     observation = torch.cat((image_flat, proprio.to(dtype=torch.float32)), dim=-1)
-    expected_size = image_shape[0] * image_shape[1] * image_shape[2] + VISUAL_LIFT_PROPRIO_SIZE
+    expected_size = image_shape[0] * image_shape[1] * image_shape[2] + CUBE_PROPRIO_SIZE
     if observation.shape[-1] != expected_size:
         raise ValueError(
             f"Expected observation width {expected_size}, "

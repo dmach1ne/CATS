@@ -88,7 +88,7 @@ class CATSNextNoisePPO(PPO):
         entropy_losses = []
         pg_losses, value_losses = [], []
         clip_fractions = []
-        caps_losses = []
+        cats_losses = []
         lambda_values = []
         loss_t_values = []
 
@@ -147,13 +147,13 @@ class CATSNextNoisePPO(PPO):
 
                 progress = 1.0 - self._current_progress_remaining
                 progress = min(1.0, max(0.0, progress))
-                caps_lambda = self.cats_alpha * progress
-                lambda_values.append(caps_lambda)
+                cats_lambda = self.cats_alpha * progress
+                lambda_values.append(cats_lambda)
 
-                caps_loss = caps_lambda * loss_t
-                caps_losses.append(caps_loss.item())
+                cats_loss = cats_lambda * loss_t
+                cats_losses.append(cats_loss.item())
 
-                loss = policy_loss + self.ent_coef * entropy_loss + self.vf_coef * value_loss + caps_loss
+                loss = policy_loss + self.ent_coef * entropy_loss + self.vf_coef * value_loss + cats_loss
 
                 with th.no_grad():
                     log_ratio = log_prob - rollout_data.old_log_prob
@@ -188,8 +188,8 @@ class CATSNextNoisePPO(PPO):
             self.logger.record("train/loss_t", np.mean(loss_t_values))
         if len(lambda_values) > 0:
             self.logger.record("train/cats_lambda", np.mean(lambda_values))
-        if len(caps_losses) > 0:
-            self.logger.record("train/caps_loss", np.mean(caps_losses))
+        if len(cats_losses) > 0:
+            self.logger.record("train/cats_loss", np.mean(cats_losses))
         if hasattr(self.policy, "log_std"):
             self.logger.record("train/std", th.exp(self.policy.log_std).mean().item())
         self.logger.record("train/next_noise_sigma", self.next_noise_sigma)

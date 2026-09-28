@@ -137,27 +137,27 @@ class CATSNextNoiseSAC(CustomSAC):
             critic_loss.backward()
             self.critic.optimizer.step()
 
-            caps_now_actions = self.policy._predict(replay_data.observations, deterministic=True).type(th.float32)
+            cats_now_actions = self.policy._predict(replay_data.observations, deterministic=True).type(th.float32)
             noisy_next_observations = replay_data.next_observations + th.normal(
                 mean=0.0,
                 std=self.next_noise_sigma,
                 size=replay_data.next_observations.size(),
                 device=replay_data.next_observations.device,
             )
-            caps_next_actions = self.policy._predict(noisy_next_observations, deterministic=True).type(th.float32)
+            cats_next_actions = self.policy._predict(noisy_next_observations, deterministic=True).type(th.float32)
 
-            loss_t = 0.5 * F.mse_loss(caps_now_actions, caps_next_actions)
+            loss_t = 0.5 * F.mse_loss(cats_now_actions, cats_next_actions)
             loss_t_values.append(loss_t.item())
 
             progress = min(1.0, max(0.0, self.num_timesteps / max(1, self._total_timesteps)))
-            caps_lambda = self.cats_alpha * progress
-            lambda_values.append(caps_lambda)
+            cats_lambda = self.cats_alpha * progress
+            lambda_values.append(cats_lambda)
 
-            caps_loss = caps_lambda * loss_t
+            cats_loss = cats_lambda * loss_t
 
             q_values_pi = th.cat(self.critic(replay_data.observations, actions_pi), dim=1)
             min_qf_pi, _ = th.min(q_values_pi, dim=1, keepdim=True)
-            actor_loss = (ent_coef * log_prob - min_qf_pi).mean() + caps_loss
+            actor_loss = (ent_coef * log_prob - min_qf_pi).mean() + cats_loss
             actor_losses.append(actor_loss.item())
 
             with th.no_grad():
