@@ -441,7 +441,7 @@ def run_evaluation(
     if args.warmup_episodes > args.eval_episodes:
         raise ValueError("warmup_episodes cannot exceed eval_episodes")
     if args.noise_draws != 10:
-        raise ValueError("This frozen protocol requires exactly 10 noise draws")
+        raise ValueError("Policy sensitivity evaluation requires exactly 10 noise draws")
     if args.batch_size <= 0:
         raise ValueError("Batch size must be positive")
 

@@ -322,7 +322,7 @@ def evaluate_lipsnetpp_policy_sensitivity(
     if set(base_by_seed) != set(lipsnetpp_by_seed):
         raise ValueError("Base and LipsNet++ training seeds must match")
     if noise_draws != 10:
-        raise ValueError("the frozen protocol requires 10 noise draws")
+        raise ValueError("Policy sensitivity evaluation requires exactly 10 noise draws")
 
     records = []
     for training_seed in sorted(base_by_seed):

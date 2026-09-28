@@ -30,8 +30,8 @@ Use the following training seeds for each method:
 | Place Cube | 178132, 410580, 922852 | 512 | 1500 |
 
 Run each seed with the corresponding command below. Jobs may be scheduled
-independently on available GPUs. Place commands include training overrides
-that are not fully captured by the YAML configuration alone.
+independently on available GPUs. The Place Cube commands below override the
+YAML defaults with the experiment settings.
 
 For evaluation, set `CHECKPOINT` to the trained checkpoint and `AGENT_CFG`
 to its saved `agent.yaml`. Each command evaluates five seeds; Reach uses
@@ -98,6 +98,3 @@ Success requires XY error at most 5 cm, cube height within 0.0505 m +/- 0.005 m,
 table contact, gripper width at least 0.06 m and no finger contact, with no
 hold-time requirement. This differs from the training success metric.
 Report training-seed means with untruncated 95% t-confidence intervals.
-
-Only simulation code is included. The impedance action module controls the
-simulated robot; it is not a physical-robot driver.

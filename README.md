@@ -63,8 +63,8 @@ python ppo/tests/train_lipsnetpp.py --env hopper --workers 5
 python ppo/tests/evaluate_lipsnetpp.py --env hopper
 ```
 
-For SAC, switch the import paths and script paths to `sac`. Each command trains
-the selected configuration across ten seeds, not a hyperparameter search.
+Training uses ten seeds. For SAC, switch the import paths and script paths to
+`sac`.
 
 **Observation noise (Table II).** Evaluate the trained policies on Hopper and
 Walker under PPO and SAC, with noise magnitudes from 0 to 0.5 in steps of 0.1:
@@ -91,8 +91,8 @@ Compare return at matched smoothness levels on Hopper and Walker:
 | Temporal-only CAPS | `tools/train_four_target_temporal.py` |
 | Spatial-only CAPS and LipsNet++ | `tools/train_smoothness_matched.py` |
 
-Use `--seeds 10` for the reported comparisons. Each script trains and evaluates
-one coefficient across seeds; see `--help` for coefficient and evaluation options.
+Use `--seeds 10` for the reported comparisons. See `--help` for coefficient and
+evaluation options.
 
 ### 3. Transition-Induced Spatial Effect
 
@@ -162,8 +162,7 @@ done
 ### 6. Robot Simulation
 
 See [robotics_sim/README.md](robotics_sim/README.md) for Reach and Place Cube
-training, evaluation and task settings. This release includes simulation code
-only, not checkpoints or physical-robot deployment software.
+training, evaluation and task settings.
 
 ## Reading the Results
 
