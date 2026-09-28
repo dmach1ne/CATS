@@ -1,6 +1,7 @@
 """Shared LipsNet++ experiment profiles and artifact naming."""
 
 from dataclasses import asdict, dataclass
+from afqr_common.experiment_settings import selected_settings
 
 
 @dataclass(frozen=True)
@@ -14,16 +15,12 @@ class LipsNetPlusPlusProfile:
         return asdict(self)
 
 
-LIPSNETPP_PROFILES = {
-    "A": LipsNetPlusPlusProfile("A", lambda_k=1e-2, lambda_h=1e-2, history_len=5),
-    "B": LipsNetPlusPlusProfile("B", lambda_k=1e-2, lambda_h=1e-3, history_len=5),
-    "C": LipsNetPlusPlusProfile("C", lambda_k=1e-3, lambda_h=1e-3, history_len=5),
-    "D": LipsNetPlusPlusProfile("D", lambda_k=1e-2, lambda_h=1e-3, history_len=10),
-    "E": LipsNetPlusPlusProfile("E", lambda_k=1e-3, lambda_h=1e-2, history_len=5),
-    "F": LipsNetPlusPlusProfile("F", lambda_k=1e-2, lambda_h=1e-2, history_len=10),
-    "G": LipsNetPlusPlusProfile("G", lambda_k=1e-3, lambda_h=1e-2, history_len=10),
-    "H": LipsNetPlusPlusProfile("H", lambda_k=1e-3, lambda_h=1e-3, history_len=10),
-}
+def selected_profile(algorithm: str, environment: str) -> LipsNetPlusPlusProfile:
+    settings = selected_settings(algorithm, environment)["lipsnetpp"]
+    return LipsNetPlusPlusProfile(
+        settings["profile_name"], settings["lipsnetpp_lambda_k"],
+        settings["lipsnetpp_lambda_h"], settings["history_len"],
+    )
 
 
 def scalar_label(value: float) -> str:

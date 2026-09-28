@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from afqr_common.lipsnetpp_experiment import LIPSNETPP_PROFILES
+from afqr_common.lipsnetpp_experiment import selected_profile
 from afqr_common.lipsnetpp_noise_evaluation import (
     PolicyCheckpoint,
     compute_base_observation_scale,
@@ -28,11 +28,10 @@ def main() -> None:
         choices=("ant", "hopper", "lunar", "pendulum", "walker"),
         required=True,
     )
-    parser.add_argument("--profile", choices=LIPSNETPP_PROFILES, required=True)
     parser.add_argument("--checkpoint-manifest", type=Path, required=True)
     parser.add_argument(
         "--sigmas",
-        default="0.0,0.05,0.1,0.15,0.2,0.25,0.3",
+        default="0.0,0.05,0.1,0.15,0.2,0.25,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0",
     )
     parser.add_argument("--warmup-episodes", type=int, default=10)
     parser.add_argument("--evaluation-episodes", type=int, default=10)
@@ -42,6 +41,7 @@ def main() -> None:
     parser.add_argument("--device", default="cpu")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
+    profile = selected_profile(args.algorithm, args.environment)
 
     manifest = json.loads(
         args.checkpoint_manifest.read_text(encoding="utf-8")
@@ -49,7 +49,7 @@ def main() -> None:
     for field, expected in (
         ("algorithm", args.algorithm),
         ("environment", args.environment),
-        ("profile", args.profile),
+        ("profile", profile.name),
     ):
         if str(manifest[field]).lower() != str(expected).lower():
             raise ValueError(
@@ -108,7 +108,7 @@ def main() -> None:
         base_checkpoints,
         lipsnetpp_checkpoints,
         args.environment,
-        LIPSNETPP_PROFILES[args.profile],
+        profile,
         observation_scale,
         validation_seeds[: args.evaluation_episodes],
         [float(value) for value in args.sigmas.split(",")],

@@ -1,4 +1,4 @@
-"""Train the approved LipsNet++ PPO tuning profiles."""
+"""Train the selected LipsNet++ SAC configuration across seeds."""
 
 import argparse
 import os
@@ -7,10 +7,10 @@ from concurrent.futures import ProcessPoolExecutor, as_completed
 from functools import partial
 
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
-PPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-sys.path.extend([REPO_ROOT, PPO_ROOT])
+SAC_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.extend([REPO_ROOT, SAC_ROOT])
 
-from afqr_common.lipsnetpp_experiment import LIPSNETPP_PROFILES, run_name
+from afqr_common.lipsnetpp_experiment import selected_profile, run_name
 from tests.modules.controller import train_lipsnetpp
 from tests.modules.envs import (
     make_ant_env,
@@ -29,9 +29,9 @@ TRAIN_ENVS = {
     "pendulum": make_pendulum_env,
     "walker": make_walker_env,
 }
-SAVE_ROOT = "./ppo/results/pths"
-LOG_ROOT = "./ppo/results/tensorboard_logs"
-SEED_FILE = "./ppo/tests/seeds.txt"
+SAVE_ROOT = "./sac/results/pths"
+LOG_ROOT = "./sac/results/tensorboard_logs"
+SEED_FILE = "./sac/tests/seeds.txt"
 
 
 def _load_seeds(limit: int, offset: int = 0) -> list[int]:
@@ -52,31 +52,15 @@ def _run(job_name: str, function) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--env", choices=TRAIN_ENVS, default=None)
-    parser.add_argument(
-        "--profiles",
-        default="A,B,C,D",
-        help="Comma-separated profile names from A,B,C,D",
-    )
-    parser.add_argument("--seeds", type=int, default=3)
+    parser.add_argument("--env", choices=TRAIN_ENVS, required=True)
+    parser.add_argument("--seeds", type=int, default=10)
     parser.add_argument("--seed-offset", type=int, default=0)
-    parser.add_argument("--workers", type=int, default=1)
+    parser.add_argument("--workers", type=int, default=5)
     parser.add_argument("--device", default="auto")
-    parser.add_argument(
-        "--keep-checkpoints",
-        action="store_true",
-        help="Keep the initial and five intermediate checkpoints (pilot only).",
-    )
     args = parser.parse_args()
 
-    profile_names = [
-        profile_name.strip().upper()
-        for profile_name in args.profiles.split(",")
-        if profile_name.strip()
-    ]
-    unknown = set(profile_names) - set(LIPSNETPP_PROFILES)
-    if unknown:
-        raise ValueError(f"unknown LipsNet++ profiles: {sorted(unknown)}")
+    profile = selected_profile("sac", args.env)
+    profile_names = [profile.name]
     if args.seeds <= 0 or args.seed_offset < 0:
         raise ValueError("--seeds must be positive and --seed-offset nonnegative")
     seeds = _load_seeds(args.seeds, args.seed_offset)
@@ -92,7 +76,6 @@ def main() -> None:
         os.makedirs(save_dir, exist_ok=True)
         os.makedirs(log_dir, exist_ok=True)
         for profile_name in profile_names:
-            profile = LIPSNETPP_PROFILES[profile_name]
             profile_args = {
                 "profile_name": profile.name,
                 "lipsnetpp_lambda_k": profile.lambda_k,
@@ -100,7 +83,7 @@ def main() -> None:
                 "history_len": profile.history_len,
             }
             for seed in seeds:
-                name = run_name("ppo", profile, seed)
+                name = run_name("sac", profile, seed)
                 final_path = os.path.join(save_dir, name, "final.zip")
                 if os.path.isfile(final_path):
                     print(f"[SKIP] {env_name}/{name}", flush=True)
@@ -120,7 +103,7 @@ def main() -> None:
                             env_args[env_name],
                             profile_args,
                             args.device,
-                            args.keep_checkpoints,
+                            False,
                         ),
                     )
                 )

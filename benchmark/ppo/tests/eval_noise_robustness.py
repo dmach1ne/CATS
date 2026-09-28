@@ -4,7 +4,7 @@ Evaluate policy robustness under noisy observations.
 - Add uniform noise scaled by per-feature std to obs before policy prediction
 - Measure reward degradation and smoothness across noise levels
 
-usage: python -m ppo.tests.eval_noise_robustness --algs vanilla_ppo cats_sample_dist_inverse_ppo_lambda50.0 --env walker --sigmas 0.0,0.01,0.05,0.1,0.2,0.5
+usage: python -m ppo.tests.eval_noise_robustness --env walker
 """
 import sys
 import os
@@ -20,6 +20,8 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from ppo.tests.modules.envs import make_ant_env, make_hopper_env, make_lunar_env, make_pendulum_env, make_walker_env
 from ppo.tests.modules.action_extractor import calculate_smoothness_np
 from ppo.models.custom_ppo import CustomPPO
+from ppo.tests.modules.params import alg_args
+from afqr_common.experiment_settings import selected_settings
 from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 
 seed_file_path = "./ppo/tests/validation_seeds.txt"
@@ -155,11 +157,8 @@ def eval_with_noise(model, env, use_vec_env, sigma, obs_std, n_episodes, seeds,
 def main():
     parser = argparse.ArgumentParser(description="Evaluate policy robustness under noisy observations")
     parser.add_argument("--root_dir", type=str, default="./ppo/results/pths/")
-    parser.add_argument("--algs", type=str, nargs="+", required=True)
-    parser.add_argument("--obs_scale_alg", type=str, default=None,
-                        help="Optional reference algorithm used only to compute shared observation std")
-    parser.add_argument("--env", type=str, required=True, choices=list(train_envs_dict.keys()))
-    parser.add_argument("--sigmas", type=str, default="0.0,0.01,0.05,0.1,0.2,0.5,1.0",
+    parser.add_argument("--env", required=True, choices=("hopper", "walker"))
+    parser.add_argument("--sigmas", type=str, default="0.0,0.1,0.2,0.3,0.4,0.5",
                         help="Comma-separated noise levels")
     parser.add_argument("--output_dir", type=str, default="./ppo/results/analysis/noise_robustness/")
     parser.add_argument("--warmup_episodes", type=int, default=10)
@@ -168,6 +167,15 @@ def main():
     parser.add_argument("--noise_seed", type=int, default=20260717,
                         help="Base seed for common observation-noise streams")
     args = parser.parse_args()
+    alpha = float(selected_settings("ppo", args.env)["cats"]["cats_alpha"])
+    caps = alg_args["caps"][args.env]
+    args.obs_scale_alg = "vanilla_ppo"
+    args.algs = [
+        args.obs_scale_alg,
+        f"caps_ppo_lamT{caps['caps_lamT']}_lamS{caps['caps_lamS']}",
+        "l2c2_ppo", "grad_ppo", "asap_ppo",
+        f"caps_linear_ppo_alpha{alpha}",
+    ]
 
     sigmas = [float(s.strip()) for s in args.sigmas.split(",")]
     seeds = load_seeds(seed_file_path)
@@ -180,8 +188,7 @@ def main():
         if not files and not al_name.endswith('_ppo'):
             files = find_matching_files(save_dir, al_name + '_ppo')
         if not files:
-            print(f"  No models found for '{al_name}' in '{save_dir}'")
-            continue
+            raise FileNotFoundError(f"No models found for '{al_name}' in '{save_dir}'")
         if args.max_seeds:
             files = files[:args.max_seeds]
         all_alg_files[al_name] = files

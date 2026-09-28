@@ -50,21 +50,13 @@ ENVIRONMENTS = {
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--method", choices=METHODS, required=True)
-    parser.add_argument("--environment", choices=ENVIRONMENTS, default="ant")
+    parser.add_argument("--environment", choices=("walker",), default="walker")
     parser.add_argument("--seed", type=int, required=True)
     parser.add_argument("--output-root", type=Path, required=True)
     parser.add_argument("--device", default="cuda")
-    parser.add_argument("--cats-alpha", type=float, default=100.0)
-    parser.add_argument(
-        "--include-auxiliary-metrics",
-        action="store_true",
-        help="Include analysis-only smoothness and PoC diagnostics.",
-    )
     args = parser.parse_args()
 
-    os.environ["AFQR_DISABLE_AUXILIARY_METRICS"] = (
-        "0" if args.include_auxiliary_metrics else "1"
-    )
+    os.environ["AFQR_DISABLE_AUXILIARY_METRICS"] = "1"
 
     if args.device.startswith("cuda") and not torch.cuda.is_available():
         raise RuntimeError("CUDA is required for this timing benchmark")
@@ -81,7 +73,7 @@ def main() -> None:
 
     method_args = alg_args[config_name][args.environment].copy()
     if args.method == "cats":
-        method_args["cats_alpha"] = args.cats_alpha
+        method_args["cats_alpha"] = 1.0
 
     target_steps = env_timestep[args.environment]
     n_envs = env_args[args.environment].get("n_envs", 1)
@@ -98,9 +90,9 @@ def main() -> None:
         "cuda_visible_devices": os.environ.get("CUDA_VISIBLE_DEVICES"),
         "target_timesteps": target_steps,
         "expected_completed_timesteps": expected_steps,
-        "cats_alpha": args.cats_alpha if args.method == "cats" else None,
+        "cats_alpha": method_args.get("cats_alpha"),
         "lpp_profile": "B" if args.method == "lpp" else None,
-        "auxiliary_metrics_enabled": args.include_auxiliary_metrics,
+        "auxiliary_metrics_enabled": False,
         "timing_protocol_version": 3,
         "implementation_optimization": "shared_policy_context_v2",
         "cats_optimization": (

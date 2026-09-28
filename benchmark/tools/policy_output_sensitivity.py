@@ -344,12 +344,11 @@ def build_parser(algorithm: str) -> argparse.ArgumentParser:
         description=f"Evaluate {algorithm.upper()} policy-output sensitivity"
     )
     parser.add_argument("--root_dir", default=f"./{algorithm}/results/pths/")
-    parser.add_argument("--algs", nargs="+", required=True)
-    parser.add_argument("--obs_scale_alg", required=True)
+    parser.add_argument("--experiment", choices=("comparison", "next-state-noise", "ramp-up"), default="comparison")
     parser.add_argument("--observation_scale_file", default=None)
     parser.add_argument("--env", choices=sorted(ENV_NAMES), required=True)
     parser.add_argument(
-        "--sigmas", default="0.0,0.05,0.1,0.15,0.2,0.25,0.3"
+        "--sigmas", default=None
     )
     parser.add_argument(
         "--output_dir", default=f"./{algorithm}/results/analysis/policy_output_sensitivity/"
@@ -365,7 +364,6 @@ def build_parser(algorithm: str) -> argparse.ArgumentParser:
     parser.add_argument("--max_episode_steps", type=int, default=None)
     parser.add_argument("--device", default="auto")
     parser.add_argument("--overwrite", action="store_true")
-    parser.add_argument("--own_only", action="store_true", default=True)
     return parser
 
 
@@ -415,7 +413,31 @@ def run_evaluation(
     argv: Sequence[str] | None = None,
     method_model_classes: dict[str, Any] | None = None,
 ) -> None:
-    args = build_parser(algorithm).parse_args(argv)
+    parser = build_parser(algorithm)
+    args = parser.parse_args(argv)
+    from importlib import import_module
+    from afqr_common.experiment_settings import selected_settings
+
+    alpha = float(selected_settings(algorithm, args.env)["cats"]["cats_alpha"])
+    cats = f"caps_linear_{algorithm}_alpha{alpha}"
+    args.obs_scale_alg = "vanilla_ppo" if algorithm == "ppo" else "vanilla"
+    if args.experiment == "comparison":
+        params = import_module(f"{algorithm}.tests.modules.params").alg_args["caps"][args.env]
+        caps = f"caps_{algorithm}_lamT{params['caps_lamT']}_lamS{params['caps_lamS']}"
+        args.algs = [args.obs_scale_alg, caps, f"l2c2_{algorithm}", f"asap_{algorithm}", cats]
+    elif args.experiment == "next-state-noise":
+        if args.env not in {"lunar", "pendulum"}:
+            parser.error("next-state-noise compares LunarLander and Pendulum")
+        args.algs = [args.obs_scale_alg, cats, f"caps_linear_nn_{algorithm}_alpha{alpha}_sigma0.05"]
+    else:
+        if algorithm != "ppo" or args.env not in {"ant", "hopper", "walker"}:
+            parser.error("ramp-up sensitivity compares PPO Ant, Hopper and Walker")
+        args.algs = [f"caps_fixed_ppo_lamT{alpha / 2}_lamS0.0", cats]
+    if args.sigmas is None:
+        args.sigmas = "0.0,0.05,0.1,0.15,0.2,0.25,0.3"
+        if args.experiment != "ramp-up":
+            args.sigmas += ",0.4,0.5,0.6,0.7,0.8,0.9,1.0"
+    args.output_dir = str(Path(args.output_dir) / args.experiment)
     if args.warmup_episodes > args.eval_episodes:
         raise ValueError("warmup_episodes cannot exceed eval_episodes")
     if args.noise_draws != 10:
@@ -590,7 +612,7 @@ def run_evaluation(
         "models_per_method": args.expected_models,
         "primary_state_distribution": "each policy's own clean deterministic visitation",
         "primary_state_weighting": "uniform over all visited timesteps within each policy",
-        "own_only": args.own_only,
+        "own_only": True,
         "metric": "0.5 * mean squared deterministic action-output difference",
         "policy_output": "policy._predict(..., deterministic=True)",
         "environment_output": "model.predict(..., deterministic=True)",

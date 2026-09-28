@@ -51,8 +51,6 @@ def main() -> None:
     parser.add_argument("--method", choices=METHODS, required=True)
     parser.add_argument("--env", choices=ENVIRONMENTS, required=True)
     parser.add_argument("--coefficient", type=float, required=True)
-    parser.add_argument("--lambda-h", type=float)
-    parser.add_argument("--history-len", type=int)
     parser.add_argument("--seeds", type=int, default=3)
     parser.add_argument("--seed-offset", type=int, default=0)
     parser.add_argument("--workers", type=int, default=3)
@@ -64,11 +62,6 @@ def main() -> None:
         parser.error("--coefficient must be positive")
     if args.seeds <= 0 or args.workers <= 0 or args.seed_offset < 0:
         parser.error("seed and worker counts must be positive; offset nonnegative")
-    if args.method == "lipsnetpp":
-        if args.lambda_h is None or args.lambda_h <= 0:
-            parser.error("LipsNet++ requires a positive --lambda-h")
-        if args.history_len not in {5, 10}:
-            parser.error("LipsNet++ requires --history-len 5 or 10")
 
     algorithm_root = ROOT / args.algorithm
     for import_root in (ROOT, algorithm_root):
@@ -78,6 +71,11 @@ def main() -> None:
     from tests.modules.controller import train_caps, train_lipsnetpp
     from tests.modules.envs import make_hopper_env, make_walker_env
     from tests.modules.params import alg_args, env_args, env_timestep
+    from afqr_common.experiment_settings import selected_settings
+
+    lips_settings = selected_settings(args.algorithm, args.env)["lipsnetpp"]
+    args.lambda_h = lips_settings["lipsnetpp_lambda_h"]
+    args.history_len = lips_settings["history_len"]
 
     factories = {"hopper": make_hopper_env, "walker": make_walker_env}
     seeds = load_seeds(

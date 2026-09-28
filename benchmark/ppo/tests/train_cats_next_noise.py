@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import sys
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
@@ -6,14 +7,13 @@ from datetime import datetime
 from functools import partial
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+sys.path.append(str(Path(__file__).resolve().parents[2]))
+
+from afqr_common.experiment_settings import selected_settings
 
 from tests.modules.envs import make_ant_env, make_hopper_env, make_lunar_env, make_pendulum_env, make_walker_env
 
-try:
-    from tests.modules.action_extractor import test_some_path
-except ImportError:
-    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../td3")))
-    from tests.modules.action_extractor import test_some_path
+from tests.modules.action_extractor import test_some_path
 
 from tests.modules.controller import train_caps_linear_nn
 from tests.modules.params import alg_args, env_args, env_timestep
@@ -49,23 +49,19 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--env", type=str, default=None, choices=list(train_envs_dict.keys()))
+    parser.add_argument("--env", required=True, choices=("lunar", "pendulum"))
     parser.add_argument("--device", type=str, default="auto")
     parser.add_argument("--seeds", type=int, default=10)
     parser.add_argument("--workers", type=int, default=5)
-    parser.add_argument("--alphas", type=str, default=None,
-                        help="Comma-separated alpha values (default: 5.0,17.5,30.0,50.0)")
-    parser.add_argument("--next_noise_sigma", type=float, default=0.1)
     args = parser.parse_args()
 
     seeds = load_seeds(seed_file_path)[:args.seeds]
-    alpha_values = [5.0, 17.5, 30.0, 50.0]
-    if args.alphas:
-        alpha_values = [float(v.strip()) for v in args.alphas.split(",")]
+    alpha_values = [float(selected_settings("ppo", args.env)["cats"]["cats_alpha"])]
+    args.next_noise_sigma = 0.05
 
     target_envs = [args.env] if args.env else ['ant', 'hopper', 'lunar', 'pendulum', 'walker']
 
-    print("=== CAPS LINEAR NN PPO Alpha Sweep ===")
+    print("=== CATS PPO with next-state noise ===")
     print(f"Target Environments: {target_envs}")
     print(f"Alpha values: {alpha_values}")
     print(f"Next noise sigma: {args.next_noise_sigma}")
@@ -121,7 +117,7 @@ if __name__ == "__main__":
     timestamp = datetime.now().strftime("%m%d_%H%M")
     alpha_str = "_".join([str(a) for a in alpha_values])
     env_folder = args.env if args.env else "all"
-    sub_dir = f"caps_linear_nn_sweep/{env_folder}/{timestamp}_alpha{alpha_str}_sigma{args.next_noise_sigma}"
+    sub_dir = f"cats_next_noise/{env_folder}/{timestamp}_alpha{alpha_str}_sigma{args.next_noise_sigma}"
 
     test_some_path(save_dir_root, True, pth_names, sub_dir, target_envs=target_envs)
     print("Results saved to:", os.path.join(save_dir_root, sub_dir))

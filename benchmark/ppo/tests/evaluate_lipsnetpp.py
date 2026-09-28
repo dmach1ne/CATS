@@ -1,4 +1,4 @@
-"""Evaluate completed LipsNet++ PPO tuning runs."""
+"""Evaluate the selected LipsNet++ PPO configuration."""
 
 import argparse
 import sys
@@ -11,7 +11,7 @@ for import_root in (REPO_ROOT, PPO_ROOT):
         sys.path.append(str(import_root))
 
 from afqr_common.lipsnetpp_evaluation import evaluate_profiles
-from afqr_common.lipsnetpp_experiment import LIPSNETPP_PROFILES
+from afqr_common.lipsnetpp_experiment import selected_profile
 from ppo.models.lipsnetpp_ppo import LipsNetPlusPlusPPO
 
 
@@ -29,15 +29,14 @@ def load_seeds(path: Path, limit: int, offset: int = 0) -> list[int]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--envs", default=",".join(DEFAULT_ENVS))
-    parser.add_argument("--profiles", default="A,B,C,D")
-    parser.add_argument("--training-seeds", type=int, default=3)
+    parser.add_argument("--env", choices=DEFAULT_ENVS, required=True)
+    parser.add_argument("--training-seeds", type=int, default=10)
     parser.add_argument("--training-seed-offset", type=int, default=0)
     parser.add_argument("--evaluation-episodes", type=int, default=10)
     parser.add_argument(
         "--output",
         type=Path,
-        default=Path("ppo/results/pths/lipsnetpp_tuning"),
+        default=Path("ppo/results/pths/lipsnetpp_evaluation"),
     )
     args = parser.parse_args()
 
@@ -54,15 +53,11 @@ def main() -> None:
         "ppo",
         LipsNetPlusPlusPPO,
         Path("ppo/results/pths"),
-        [item.strip() for item in args.envs.split(",") if item.strip()],
-        [
-            LIPSNETPP_PROFILES[item.strip().upper()]
-            for item in args.profiles.split(",")
-            if item.strip()
-        ],
+        [args.env],
+        [selected_profile("ppo", args.env)],
         training_seeds,
         evaluation_seeds,
-        args.output,
+        args.output / args.env,
     )
 
 

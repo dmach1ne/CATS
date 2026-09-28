@@ -29,7 +29,7 @@ export PYTHONPATH="$PWD:$PWD/$ALG:$PWD/$ALG/tests:$PWD/$ALG/models"
 ```
 
 Training scripts read `$ALG/tests/seeds.txt`; evaluation uses
-`$ALG/tests/validation_seeds.txt`. In sweep commands, `--seeds` specifies the
+`$ALG/tests/validation_seeds.txt`. In training commands, `--seeds` specifies the
 number of runs. `--workers` controls concurrent training jobs.
 
 ## Experiments
@@ -42,8 +42,7 @@ with Base, CATS, CAPS, L2C2, Grad-CAPS (GRAD), ASAP and LipsNet++.
 Train CATS on PPO Hopper:
 
 ```bash
-python ppo/tests/caps_linear_sweep.py \
-  --env hopper --alphas 5 --seeds 10 --workers 5 --device auto
+python ppo/tests/train_cats.py --env hopper --workers 5 --device auto
 ```
 
 Train the comparison methods:
@@ -55,39 +54,29 @@ python ppo/tests/test_all.py \
 
 These scripts run full-budget training and then evaluate the saved policies.
 Task budgets and method parameters are in `$ALG/tests/modules/params.py`.
-The selected CATS coefficients and LipsNet++ profiles are:
-
-| Task | PPO CATS | SAC CATS | PPO LipsNet++ | SAC LipsNet++ |
-| --- | ---: | ---: | :---: | :---: |
-| Ant | 100 | 100 | F | E |
-| Hopper | 5 | 80 | E | F |
-| LunarLander | 0.25 | 30 | H | F |
-| Pendulum | 10 | 40 | C | D |
-| Walker | 1 | 40 | H | G |
-
-These settings are also available in [selected_settings.json](benchmark/selected_settings.json).
-LipsNet++ profiles are defined in `afqr_common/lipsnetpp_experiment.py`.
-For PPO Hopper:
+CATS and LipsNet++ load their selected hyperparameters directly from
+[selected_settings.json](benchmark/selected_settings.json).
+To train and evaluate LipsNet++ on PPO Hopper:
 
 ```bash
-python ppo/tests/lipsnetpp_sweep.py --env hopper --profiles E --seeds 10 --workers 5
-python ppo/tests/evaluate_lipsnetpp.py \
-  --envs hopper --profiles E --training-seeds 10 --evaluation-episodes 10
+python ppo/tests/train_lipsnetpp.py --env hopper --workers 5
+python ppo/tests/evaluate_lipsnetpp.py --env hopper
 ```
 
-For SAC, switch the import paths and script paths to `sac` and use the SAC
-settings above. Pass the selected settings explicitly; sweep defaults may differ.
+For SAC, switch the import paths and script paths to `sac`. Each command trains
+the selected configuration across ten seeds, not a hyperparameter search.
 
-**Observation noise.** Evaluate the trained policies on Hopper or Walker:
+**Observation noise (Table II).** Evaluate the trained policies on Hopper and
+Walker under PPO and SAC, with noise magnitudes from 0 to 0.5 in steps of 0.1:
 
 ```bash
-python ppo/tests/eval_noise_robustness.py \
-  --env hopper --algs vanilla caps_linear_ppo_alpha5.0 \
-  --obs_scale_alg vanilla --sigmas 0,0.1,0.2,0.3,0.4,0.5
+for TASK in hopper walker; do
+  python "$ALG/tests/eval_noise_robustness.py" --env "$TASK"
+done
 ```
 
-Add other trained method prefixes to `--algs` for the full comparison.
-LipsNet++ uses `tools/evaluate_lipsnetpp_noise.py`.
+This evaluates Base, CAPS, L2C2, GRAD, ASAP and CATS. LipsNet++ uses
+`tools/evaluate_lipsnetpp_noise.py` with the same noise magnitudes.
 
 **Training cost.** Use `ppo/tests/benchmark_training_cost.py` to measure
 wall-clock training time. Match the hardware and training configuration when
@@ -101,9 +90,9 @@ Compare return at matched smoothness levels on Hopper and Walker:
 | --- | --- |
 | Temporal-only CAPS | `tools/train_four_target_temporal.py` |
 | Spatial-only CAPS and LipsNet++ | `tools/train_smoothness_matched.py` |
-| Spatial-only CAPS training | `tools/train_caps_spatial_only.py` |
 
-Use each script's `--help` for coefficient, seed and evaluation options.
+Use `--seeds 10` for the reported comparisons. Each script trains and evaluates
+one coefficient across seeds; see `--help` for coefficient and evaluation options.
 
 ### 3. Transition-Induced Spatial Effect
 
@@ -119,35 +108,56 @@ normalizer for both policies so their neighborhood distances use the same scale.
 
 ### 4. Policy Sensitivity
 
-Measure changes in policy outputs under observation noise:
+Figure 3 compares Base, CAPS, L2C2, ASAP, LipsNet++ and CATS on all five tasks
+under PPO and SAC. Evaluate Base, CAPS, L2C2, ASAP and CATS with:
 
 ```bash
-python ppo/tests/eval_policy_output_sensitivity.py \
-  --env hopper --algs vanilla caps_linear_ppo_alpha5.0 \
-  --obs_scale_alg vanilla --own_only --sigmas 0,0.05,0.1,0.15,0.2,0.25,0.3
+for TASK in ant hopper lunar pendulum walker; do
+  python "$ALG/tests/eval_policy_output_sensitivity.py" --env "$TASK"
+done
 ```
 
-Each policy is evaluated on its own clean visited observations. The metric is
-half the mean squared output difference over ten noise draws per observation.
-LipsNet++ uses `tools/evaluate_lipsnetpp_policy_sensitivity.py`.
+Each policy is evaluated on its own clean visited observations, using ten noise
+draws per observation. The reported metric is half the mean squared difference
+between clean and perturbed policy outputs. The noise magnitudes are
+0, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90 and 1.00.
+LipsNet++ uses `tools/evaluate_lipsnetpp_policy_sensitivity.py` with the same
+noise magnitudes and its selected configuration.
 
-For the next-state-noise extension on LunarLander and Pendulum, train with
-`$ALG/tests/caps_linear_nn_sweep.py`, the selected coefficient and
-`--next_noise_sigma 0.05`, then run the same sensitivity evaluation.
+Figure 4 compares Base, CATS and CATS with next-state noise on LunarLander and
+Pendulum. The extension keeps the selected CATS coefficient and adds Gaussian
+next-state noise with standard deviation 0.05:
+
+```bash
+for TASK in lunar pendulum; do
+  python "$ALG/tests/train_cats_next_noise.py" --env "$TASK" --workers 5
+  python "$ALG/tests/eval_policy_output_sensitivity.py" \
+    --env "$TASK" --experiment next-state-noise
+done
+```
 
 ### 5. Linear Ramp-Up
 
 Compare CATS with Fixed-middle and Fixed-final on Ant, Hopper and Walker.
-For PPO Hopper, whose final CATS coefficient is 5:
+For PPO Hopper:
 
 ```bash
-python ppo/tests/caps_fixed_sweep.py \
-  --env hopper --lamT 2.5,5 --lamS 0 --seeds 10 --workers 5
+python ppo/tests/train_fixed_controls.py --env hopper --workers 5
 ```
 
 Fixed-middle uses half the final CATS coefficient; Fixed-final uses the full
-coefficient throughout training. For SAC, keep `--ps 0.0`. Evaluate the PPO
-policies with the sensitivity script above for the ramp-up sensitivity comparison.
+coefficient throughout training. Both coefficients are derived from the selected
+CATS setting. Use `--control middle` or `--control final` to run only one control.
+
+Table VI compares **Fixed-middle and CATS**, on **PPO Ant, Hopper and Walker**,
+at noise magnitudes 0.05 through 0.30 in increments of 0.05:
+
+```bash
+for TASK in ant hopper walker; do
+  python ppo/tests/eval_policy_output_sensitivity.py \
+    --env "$TASK" --experiment ramp-up
+done
+```
 
 ### 6. Robot Simulation
 
