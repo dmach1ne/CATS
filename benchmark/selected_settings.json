@@ -1,0 +1,117 @@
+{
+  "source": "table_tex/no_reacher/caps_linear_main_source.csv",
+  "source_sha256": "b17c5a983315199d854786e1dac0320211840fb8dd89bd16af6d4bb00e63ff4e",
+  "status": "Table-source settings, not independently retrained; PPO Lunar CATS source is user_provided_caps_linear_ppo_table",
+  "settings": {
+    "ppo/ant": {
+      "lipsnetpp": {
+        "profile_name": "F",
+        "lipsnetpp_lambda_k": 0.01,
+        "lipsnetpp_lambda_h": 0.01,
+        "history_len": 10
+      },
+      "cats": {
+        "cats_alpha": 100.0
+      }
+    },
+    "ppo/hopper": {
+      "lipsnetpp": {
+        "profile_name": "E",
+        "lipsnetpp_lambda_k": 0.001,
+        "lipsnetpp_lambda_h": 0.01,
+        "history_len": 5
+      },
+      "cats": {
+        "cats_alpha": 5.0
+      }
+    },
+    "ppo/lunar": {
+      "lipsnetpp": {
+        "profile_name": "H",
+        "lipsnetpp_lambda_k": 0.001,
+        "lipsnetpp_lambda_h": 0.001,
+        "history_len": 10
+      },
+      "cats": {
+        "cats_alpha": 0.25
+      }
+    },
+    "ppo/pendulum": {
+      "lipsnetpp": {
+        "profile_name": "C",
+        "lipsnetpp_lambda_k": 0.001,
+        "lipsnetpp_lambda_h": 0.001,
+        "history_len": 5
+      },
+      "cats": {
+        "cats_alpha": 10.0
+      }
+    },
+    "ppo/walker": {
+      "lipsnetpp": {
+        "profile_name": "H",
+        "lipsnetpp_lambda_k": 0.001,
+        "lipsnetpp_lambda_h": 0.001,
+        "history_len": 10
+      },
+      "cats": {
+        "cats_alpha": 1.0
+      }
+    },
+    "sac/ant": {
+      "lipsnetpp": {
+        "profile_name": "E",
+        "lipsnetpp_lambda_k": 0.001,
+        "lipsnetpp_lambda_h": 0.01,
+        "history_len": 5
+      },
+      "cats": {
+        "cats_alpha": 100.0
+      }
+    },
+    "sac/hopper": {
+      "lipsnetpp": {
+        "profile_name": "F",
+        "lipsnetpp_lambda_k": 0.01,
+        "lipsnetpp_lambda_h": 0.01,
+        "history_len": 10
+      },
+      "cats": {
+        "cats_alpha": 80.0
+      }
+    },
+    "sac/lunar": {
+      "lipsnetpp": {
+        "profile_name": "F",
+        "lipsnetpp_lambda_k": 0.01,
+        "lipsnetpp_lambda_h": 0.01,
+        "history_len": 10
+      },
+      "cats": {
+        "cats_alpha": 30.0
+      }
+    },
+    "sac/pendulum": {
+      "lipsnetpp": {
+        "profile_name": "D",
+        "lipsnetpp_lambda_k": 0.01,
+        "lipsnetpp_lambda_h": 0.001,
+        "history_len": 10
+      },
+      "cats": {
+        "cats_alpha": 40.0
+      }
+    },
+    "sac/walker": {
+      "lipsnetpp": {
+        "profile_name": "G",
+        "lipsnetpp_lambda_k": 0.001,
+        "lipsnetpp_lambda_h": 0.01,
+        "history_len": 10
+      },
+      "cats": {
+        "cats_alpha": 40.0
+      }
+    }
+  }
+}

@@ -1,0 +1,112 @@
+# Visual Lift Overlay2D + proprioception PPO configuration.
+# PPO/training values intentionally match rl_games_visual_lift_ppo_cfg.yaml.
+
+params:
+  seed: 42
+
+  env:
+    clip_observations: 256.0
+    clip_actions: 100.0
+
+  algo:
+    name: a2c_continuous
+
+  model:
+    name: continuous_a2c_logstd
+
+  network:
+    name: visual_lift_proprio_actor_critic
+    separate: False
+    fusion: compact_proprio_goal_fixed_scale
+    image_shape: [84, 84, 3]
+    proprio_size: 26
+    proprio_fixed_scale: true
+    normalise_channels: False
+    cnn:
+      pooling: flatten
+      activation: relu
+      initializer:
+        name: default
+      convs:
+        - filters: 16
+          kernel_size: 6
+          strides: 2
+          padding: 0
+        - filters: 32
+          kernel_size: 4
+          strides: 2
+          padding: 0
+        - filters: 64
+          kernel_size: 3
+          strides: 1
+          padding: 0
+        - filters: 64
+          kernel_size: 3
+          strides: 1
+          padding: 0
+    mlp:
+      units: [256, 128]
+      activation: relu
+      initializer:
+        name: default
+    space:
+      continuous:
+        mu_activation: None
+        sigma_activation: None
+        mu_init:
+          name: default
+        sigma_init:
+          name: const_initializer
+          val: 0
+        fixed_sigma: True
+
+  load_checkpoint: False
+  load_path: ''
+
+  config:
+    name: visual_lift_franka_camera_compact_proprio_goal_fixed_scale
+    env_name: rlgpu
+    device: 'cuda:0'
+    device_name: 'cuda:0'
+    multi_gpu: False
+    ppo: True
+    mixed_precision: False
+    finite_gradient_guard: true
+    normalize_input: False
+    normalize_value: True
+    value_bootstrap: False
+    num_actors: -1
+    reward_shaper:
+      scale_value: 0.01
+    normalize_advantage: True
+    gamma: 0.99
+    tau: 0.95
+    learning_rate: 1e-4
+    lr_schedule: adaptive
+    schedule_type: legacy
+    kl_threshold: 0.008
+    min_lr: 1e-6
+    max_lr: 1e-3
+    lr_multiplier: 1.5
+    score_to_win: 100000000
+    max_epochs: 1500
+    save_best_after: 100
+    save_frequency: 50
+    print_stats: True
+    grad_norm: 1.0
+    entropy_coef: 0.001
+    truncate_grads: True
+    e_clip: 0.2
+    horizon_length: 24
+    minibatch_size: 2304
+    mini_epochs: 4
+    critic_coef: 4
+    clip_value: True
+    clip_actions: False
+    seq_len: 4
+    bounds_loss_coef: 0.0001
+    cats:
+      enabled: false
+      alpha_max: 1.0
+      arm_dims: 7
+      gripper_action_index: 7

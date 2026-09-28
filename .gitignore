@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+.venv/
+runs/
+logs/
+*.zip
+*.pth
+*.pt
+*.onnx
+*.pkl
+*.npz
+*.mp4
+*.gif
+*.h5
