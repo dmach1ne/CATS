@@ -13,8 +13,8 @@ import h5py
 import numpy as np
 
 
-COLLECTION_FORMAT = "afqr_lsp_compact_collection_v1"
-CHUNK_FORMAT = "afqr_lsp_compact_chunk_v1"
+COLLECTION_FORMAT = "cats_lsp_compact_collection_v1"
+CHUNK_FORMAT = "cats_lsp_compact_chunk_v1"
 
 
 def sha256_file(path: Path) -> str:
@@ -197,7 +197,7 @@ def build_normalizer(
     small = scale < 1e-8
     scale[small] = 1.0
     return {
-        "format": "afqr_lsp_compact_normalizer_v1",
+        "format": "cats_lsp_compact_normalizer_v1",
         "status": "completed",
         "algorithm": algorithm,
         "environment": environment,

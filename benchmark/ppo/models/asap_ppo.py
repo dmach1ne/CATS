@@ -539,7 +539,7 @@ class ASAPPPO(PPO):
             clip_range_vf = self.clip_range_vf(self._current_progress_remaining)  # type: ignore[operator]
 
         record_auxiliary = os.environ.get(
-            "AFQR_DISABLE_AUXILIARY_METRICS", "0"
+            "CATS_DISABLE_AUXILIARY_METRICS", "0"
         ) != "1"
         entropy_losses = []
         pg_losses, value_losses = [], []

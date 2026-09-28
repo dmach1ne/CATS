@@ -13,7 +13,7 @@ import numpy as np
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(str(Path(__file__).resolve().parents[2]))
 
-from afqr_common.experiment_settings import selected_settings
+from cats_common.experiment_settings import selected_settings
 
 from tests.modules.envs import make_ant_env, make_hopper_env, make_walker_env, make_pendulum_env, make_lunar_env
 

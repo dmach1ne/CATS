@@ -14,7 +14,7 @@ import torch.nn as nn
 from gymnasium import spaces
 from torch.nn import functional as F
 
-from afqr_common.l2c2 import (
+from cats_common.l2c2 import (
     distance_dependent_gains,
     half_squared_l2_distance,
     monte_carlo_squared_hellinger,
@@ -143,7 +143,7 @@ class L2C2PPO(PPO):
             clip_range_vf = self.clip_range_vf(self._current_progress_remaining)  # type: ignore[operator]
 
         record_auxiliary = os.environ.get(
-            "AFQR_DISABLE_AUXILIARY_METRICS", "0"
+            "CATS_DISABLE_AUXILIARY_METRICS", "0"
         ) != "1"
         entropy_losses = []
         pg_losses, value_losses = [], []
@@ -346,7 +346,7 @@ class CustomPPO(PPO):
             clip_range_vf = self.clip_range_vf(self._current_progress_remaining)  # type: ignore[operator]
 
         record_auxiliary = os.environ.get(
-            "AFQR_DISABLE_AUXILIARY_METRICS", "0"
+            "CATS_DISABLE_AUXILIARY_METRICS", "0"
         ) != "1"
         entropy_losses = []
         pg_losses, value_losses = [], []
@@ -547,7 +547,7 @@ class CAPSPPO(PPO):
             clip_range_vf = self.clip_range_vf(self._current_progress_remaining)  # type: ignore[operator]
 
         record_auxiliary = os.environ.get(
-            "AFQR_DISABLE_AUXILIARY_METRICS", "0"
+            "CATS_DISABLE_AUXILIARY_METRICS", "0"
         ) != "1"
         entropy_losses = []
         pg_losses, value_losses = [], []

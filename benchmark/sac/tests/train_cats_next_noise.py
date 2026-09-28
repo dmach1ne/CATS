@@ -9,13 +9,13 @@ from functools import partial
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(str(Path(__file__).resolve().parents[2]))
 
-from afqr_common.experiment_settings import selected_settings
+from cats_common.experiment_settings import selected_settings
 
 from tests.modules.envs import make_ant_env, make_hopper_env, make_lunar_env, make_pendulum_env, make_walker_env
 
 from tests.modules.action_extractor import test_some_path
 
-from tests.modules.controller import train_caps_linear_nn
+from tests.modules.controller import train_cats_next_noise
 from tests.modules.params import alg_args, env_args, env_timestep
 
 
@@ -82,24 +82,24 @@ if __name__ == "__main__":
         time.sleep(0.1)
 
         for alpha_val in alpha_values:
-            base_args = alg_args.get("caps_linear", {}).get(env_name, {}).copy()
+            base_args = alg_args.get("cats", {}).get(env_name, {}).copy()
             current_alg_args = base_args.copy()
             current_alg_args["cats_alpha"] = alpha_val
             current_alg_args["next_noise_sigma"] = args.next_noise_sigma
 
             for seed in seeds:
-                folder_name = f"caps_linear_nn_sac_alpha{alpha_val}_sigma{args.next_noise_sigma}_{seed}"
+                folder_name = f"cats_next_noise_sac_alpha{alpha_val}_sigma{args.next_noise_sigma}_{seed}"
                 final_zip_path = os.path.join(save_dir, folder_name, "final.zip")
                 if os.path.isfile(final_zip_path):
                     print(f"[SKIP] {env_name}/{folder_name} - final.zip already exists")
                     skipped_count += 1
                     continue
 
-                job_name = f"{env_name}/caps_linear_nn_sac_alpha{alpha_val}_sigma{args.next_noise_sigma}_{seed}"
+                job_name = f"{env_name}/cats_next_noise_sac_alpha{alpha_val}_sigma{args.next_noise_sigma}_{seed}"
                 jobs.append((
                     job_name,
                     partial(
-                        run_job_with_logging, job_name, train_caps_linear_nn,
+                        run_job_with_logging, job_name, train_cats_next_noise,
                         seed, env_timestep[env_name], save_dir, log_dir,
                         train_envs_dict[env_name], env_args.get(env_name, {}),
                         current_alg_args, args.device, detail_info=True,
@@ -118,7 +118,7 @@ if __name__ == "__main__":
                     print(f"[ERROR] {job_name} generated an exception: {exc}")
 
     print("\n=== Evaluation ===")
-    pth_names = [f"caps_linear_nn_sac_alpha{alpha}_sigma{args.next_noise_sigma}" for alpha in alpha_values]
+    pth_names = [f"cats_next_noise_sac_alpha{alpha}_sigma{args.next_noise_sigma}" for alpha in alpha_values]
     timestamp = datetime.now().strftime("%m%d_%H%M")
     alpha_str = "_".join([str(a) for a in alpha_values])
     env_folder = args.env if args.env else "all"

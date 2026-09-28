@@ -10,7 +10,7 @@ REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
 PPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.extend([REPO_ROOT, PPO_ROOT])
 
-from afqr_common.lipsnetpp_experiment import selected_profile, run_name
+from cats_common.lipsnetpp_experiment import selected_profile, run_name
 from tests.modules.controller import train_lipsnetpp
 from tests.modules.envs import (
     make_ant_env,

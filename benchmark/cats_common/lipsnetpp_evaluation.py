@@ -10,7 +10,7 @@ import gymnasium as gym
 import numpy as np
 from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 
-from afqr_common.lipsnetpp_experiment import LipsNetPlusPlusProfile, run_name
+from cats_common.lipsnetpp_experiment import LipsNetPlusPlusProfile, run_name
 
 
 ENVIRONMENT_IDS = {

@@ -22,9 +22,9 @@ except ImportError:
     torch = None
 
 
-COLLECTION_FORMAT = "afqr_lsp_compact_collection_v1"
-CHUNK_FORMAT = "afqr_lsp_compact_chunk_v1"
-ANALYSIS_FORMAT = "afqr_lsp_compact_cell_analysis_v1"
+COLLECTION_FORMAT = "cats_lsp_compact_collection_v1"
+CHUNK_FORMAT = "cats_lsp_compact_chunk_v1"
+ANALYSIS_FORMAT = "cats_lsp_compact_cell_analysis_v1"
 K_GRID = (4, 32, 128)
 PAIR_K = 4
 QUERY_SEED_OFFSET = 20_260_721
@@ -528,7 +528,7 @@ def main() -> None:
     )
     normalizer = json.loads(args.normalizer.read_text())
     if (
-        normalizer.get("format") != "afqr_lsp_compact_normalizer_v1"
+        normalizer.get("format") != "cats_lsp_compact_normalizer_v1"
         or normalizer.get("status") != "completed"
         or normalizer.get("algorithm") != collection["algorithm"]
         or normalizer.get("environment") != collection["environment"]

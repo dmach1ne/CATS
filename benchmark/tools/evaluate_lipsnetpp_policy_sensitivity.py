@@ -10,12 +10,12 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from afqr_common.lipsnetpp_experiment import selected_profile
-from afqr_common.lipsnetpp_noise_evaluation import (
+from cats_common.lipsnetpp_experiment import selected_profile
+from cats_common.lipsnetpp_noise_evaluation import (
     PolicyCheckpoint,
     compute_base_observation_scale,
 )
-from afqr_common.lipsnetpp_sensitivity_evaluation import (
+from cats_common.lipsnetpp_sensitivity_evaluation import (
     evaluate_lipsnetpp_policy_sensitivity,
 )
 

@@ -10,8 +10,8 @@ for import_root in (REPO_ROOT, SAC_ROOT):
     if str(import_root) not in sys.path:
         sys.path.append(str(import_root))
 
-from afqr_common.lipsnetpp_evaluation import evaluate_profiles
-from afqr_common.lipsnetpp_experiment import selected_profile
+from cats_common.lipsnetpp_evaluation import evaluate_profiles
+from cats_common.lipsnetpp_experiment import selected_profile
 from sac.models.lipsnetpp_sac import LipsNetPlusPlusSAC
 
 

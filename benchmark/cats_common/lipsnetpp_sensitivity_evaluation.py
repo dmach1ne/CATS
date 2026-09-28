@@ -9,13 +9,13 @@ from typing import Sequence
 
 import numpy as np
 
-from afqr_common.lipsnetpp_evaluation import (
+from cats_common.lipsnetpp_evaluation import (
     _actor_observation,
     _load_normalizer,
     make_environment,
 )
-from afqr_common.lipsnetpp_experiment import LipsNetPlusPlusProfile
-from afqr_common.lipsnetpp_noise_evaluation import PolicyCheckpoint
+from cats_common.lipsnetpp_experiment import LipsNetPlusPlusProfile
+from cats_common.lipsnetpp_noise_evaluation import PolicyCheckpoint
 
 
 def stable_seed(*parts: object) -> int:
@@ -379,7 +379,7 @@ def evaluate_lipsnetpp_policy_sensitivity(
             if lipsnetpp_normalizer_env is not None:
                 lipsnetpp_normalizer_env.close()
 
-    output = {'format': 'afqr_lipsnetpp_policy_output_sensitivity_v1', 'status': 'completed', 'algorithm': algorithm, 'environment': environment, 'method_pair': ['Base', 'LipsNet++'], 'profile': profile.as_dict(), 'training_seeds': sorted(base_by_seed), 'evaluation_seeds': list(evaluation_seeds), 'sigmas': [float(value) for value in sigmas], 'noise_distribution': 'Uniform(-1, 1)', 'noise_formula': 'current_actor_observation + sigma * shared_base_observation_std * epsilon', 'history_noise_semantics': 'only history[0], the current observation, is perturbed; earlier history rows remain clean', 'primary_scope': 'own', 'primary_state_distribution': "each policy's own clean deterministic visitation", 'primary_state_weighting': 'uniform over all visited timesteps within each policy', 'own_noise_key': 'noise_seed/algorithm/environment/training_seed/evaluation_seed/own', 'noise_reuse_across_sigmas': True, 'metric': '0.5 * mean squared deterministic action-output difference', 'noise_draws_per_state': noise_draws, 'noise_seed': noise_seed, 'batch_size': batch_size, 'device': device, 'observation_scale': np.asarray(observation_scale).tolist(), 'base_scale_provenance': list(scale_provenance), 'records': records}
+    output = {'format': 'cats_lipsnetpp_policy_output_sensitivity_v1', 'status': 'completed', 'algorithm': algorithm, 'environment': environment, 'method_pair': ['Base', 'LipsNet++'], 'profile': profile.as_dict(), 'training_seeds': sorted(base_by_seed), 'evaluation_seeds': list(evaluation_seeds), 'sigmas': [float(value) for value in sigmas], 'noise_distribution': 'Uniform(-1, 1)', 'noise_formula': 'current_actor_observation + sigma * shared_base_observation_std * epsilon', 'history_noise_semantics': 'only history[0], the current observation, is perturbed; earlier history rows remain clean', 'primary_scope': 'own', 'primary_state_distribution': "each policy's own clean deterministic visitation", 'primary_state_weighting': 'uniform over all visited timesteps within each policy', 'own_noise_key': 'noise_seed/algorithm/environment/training_seed/evaluation_seed/own', 'noise_reuse_across_sigmas': True, 'metric': '0.5 * mean squared deterministic action-output difference', 'noise_draws_per_state': noise_draws, 'noise_seed': noise_seed, 'batch_size': batch_size, 'device': device, 'observation_scale': np.asarray(observation_scale).tolist(), 'base_scale_provenance': list(scale_provenance), 'records': records}
     output_dir.mkdir(parents=True, exist_ok=True)
     (output_dir / "policy_output_sensitivity.json").write_text(
         json.dumps(output, indent=2),

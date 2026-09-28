@@ -22,7 +22,7 @@ from sac.tests.modules.envs import make_ant_env, make_hopper_env, make_lunar_env
 from sac.tests.modules.action_extractor import calculate_smoothness_np
 from sac.models.custom_sac import CustomSAC
 from sac.tests.modules.params import alg_args
-from afqr_common.experiment_settings import selected_settings
+from cats_common.experiment_settings import selected_settings
 from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 
 seed_file_path = "./sac/tests/validation_seeds.txt"
@@ -175,7 +175,7 @@ def main():
         args.obs_scale_alg,
         f"caps_sac_lamT{caps['caps_lamT']}_lamS{caps['caps_lamS']}",
         "l2c2_sac", "grad_sac", "asap_sac",
-        f"caps_linear_sac_alpha{alpha}",
+        f"cats_sac_alpha{alpha}",
     ]
 
     sigmas = [float(s.strip()) for s in args.sigmas.split(",")]

@@ -19,7 +19,7 @@ from stable_baselines3.common.noise import ActionNoise
 from stable_baselines3.common.type_aliases import GymEnv, MaybeCallback, Schedule, PyTorchObs
 from stable_baselines3.common.utils import get_parameters_by_name, polyak_update
 from stable_baselines3.sac.policies import SACPolicy
-from afqr_common.cats_schedules import linear_ramp_up_coefficient
+from cats_common.cats_schedules import linear_ramp_up_coefficient
 
 
 def _append_action_diff_poc_stats(stats: dict[str, list], action_diff: th.Tensor) -> None:
@@ -182,7 +182,7 @@ def _record_loss_tail_stats(logger, stats: dict[str, list]) -> None:
         )
 
 
-class CapsLinearSAC(CustomSAC):
+class CATSSAC(CustomSAC):
     def __init__(
         self,
         policy: Union[str, type[SACPolicy]],

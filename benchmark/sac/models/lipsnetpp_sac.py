@@ -8,7 +8,7 @@ from gymnasium import spaces
 from torch import nn
 from torch.nn import functional as F
 
-from afqr_common.lipsnetpp import LipsNetPlusPlus, LipsNetPlusPlusLoss
+from cats_common.lipsnetpp import LipsNetPlusPlus, LipsNetPlusPlusLoss
 from stable_baselines3 import SAC
 from stable_baselines3.common.policies import BaseFeaturesExtractor
 from stable_baselines3.common.preprocessing import get_action_dim

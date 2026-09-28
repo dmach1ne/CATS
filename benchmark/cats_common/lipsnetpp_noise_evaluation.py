@@ -8,13 +8,13 @@ from typing import Sequence
 
 import numpy as np
 
-from afqr_common.lipsnetpp_evaluation import (
+from cats_common.lipsnetpp_evaluation import (
     _actor_observation,
     _load_normalizer,
     calculate_smoothness,
     make_environment,
 )
-from afqr_common.lipsnetpp_experiment import LipsNetPlusPlusProfile
+from cats_common.lipsnetpp_experiment import LipsNetPlusPlusProfile
 
 
 @dataclass(frozen=True)
@@ -29,7 +29,7 @@ def make_noise_rng(
     training_seed: int,
     evaluation_seed: int,
 ) -> np.random.Generator:
-    """Match the existing AFQR paired-noise common-random-number stream."""
+    """Match the existing CATS paired-noise common-random-number stream."""
     payload = (
         f"{base_seed}|{environment}|{training_seed}|{evaluation_seed}"
     ).encode("utf-8")
@@ -91,7 +91,7 @@ def compute_base_observation_scale(
     warmup_episodes: int,
     device: str = "cpu",
 ) -> tuple[np.ndarray, list[dict]]:
-    """Average per-policy observation stds, matching the legacy AFQR protocol."""
+    """Average per-policy observation stds, matching the legacy CATS protocol."""
     _validate_checkpoints(checkpoints)
     if warmup_episodes <= 0 or warmup_episodes > len(evaluation_seeds):
         raise ValueError("warmup_episodes must fit within evaluation_seeds")

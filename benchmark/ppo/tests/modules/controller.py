@@ -12,9 +12,9 @@ from stable_baselines3.common.vec_env import DummyVecEnv, VecMonitor, VecNormali
 
 from stable_baselines3.common.callbacks import CheckpointCallback
 
-from afqr_common.lipsnetpp_experiment import LipsNetPlusPlusProfile, run_name
+from cats_common.lipsnetpp_experiment import LipsNetPlusPlusProfile, run_name
 
-from afqr_common.observation_history import ObservationHistoryVecEnv
+from cats_common.observation_history import ObservationHistoryVecEnv
 
 from models.custom_ppo import CustomPPO, L2C2PPO, CAPSPPO
 
@@ -24,9 +24,9 @@ from models.asap_only_s_ppo import ASAPPolicy_share
 
 from models.asap_ppo import ASAPPPO
 
-from models.caps_linear_ppo import CapsLinearPPO
+from models.cats_ppo import CATSPPO
 
-from models.caps_linear_nn_ppo import CapsLinearNNPPO
+from models.cats_next_noise_ppo import CATSNextNoisePPO
 
 from models.lipsnetpp_ppo import LipsNetPlusPlusPPO, LipsNetPlusPlusPolicy
 
@@ -262,23 +262,23 @@ def train_caps_fixed(seed: int, total_time_steps: int, save_dir: str, log_dir: s
     vec_env.close()
     del model
 
-def train_caps_linear(seed: int, total_time_steps: int, save_dir: str, log_dir: str, mkenv_func: Callable, env_args: dict, alg_args: dict, device: str = 'auto', detail_info: bool = False):
+def train_cats(seed: int, total_time_steps: int, save_dir: str, log_dir: str, mkenv_func: Callable, env_args: dict, alg_args: dict, device: str = 'auto', detail_info: bool = False):
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
     if 'cats_alpha' in alg_args:
         alpha_val = alg_args['cats_alpha']
-        pth_name = f'caps_linear_ppo_alpha{alpha_val}_{seed}'
-        log_name = f'CAPS_LINEAR_PPO_alpha{alpha_val}_{seed}'
+        pth_name = f'cats_ppo_alpha{alpha_val}_{seed}'
+        log_name = f'CATS_PPO_alpha{alpha_val}_{seed}'
     else:
-        pth_name = f'caps_linear_ppo_{seed}'
-        log_name = f'CAPS_LINEAR_PPO_{seed}'
+        pth_name = f'cats_ppo_{seed}'
+        log_name = f'CATS_PPO_{seed}'
     local_save_dir = os.path.join(save_dir, pth_name)
     if not os.path.exists(local_save_dir):
         os.makedirs(local_save_dir)
     checkpoint_callback = CheckpointCallback(save_freq=total_time_steps // 5, save_path=local_save_dir, name_prefix='mid')
     vec_env = _make_vec_env(mkenv_func, env_args, local_save_dir)
     ppo_args = _filter_ppo_args(env_args, alg_args)
-    model = CapsLinearPPO("MlpPolicy", vec_env, verbose=0, tensorboard_log=log_dir, seed=seed, device=device, **ppo_args)
+    model = CATSPPO("MlpPolicy", vec_env, verbose=0, tensorboard_log=log_dir, seed=seed, device=device, **ppo_args)
     model.save(os.path.join(local_save_dir, 'mid_00000_steps'))
     model.learn(total_timesteps=total_time_steps, tb_log_name=log_name, callback=checkpoint_callback)
     save_name = os.path.join(local_save_dir, 'final')
@@ -287,24 +287,24 @@ def train_caps_linear(seed: int, total_time_steps: int, save_dir: str, log_dir: 
     vec_env.close()
     del model
 
-def train_caps_linear_nn(seed: int, total_time_steps: int, save_dir: str, log_dir: str, mkenv_func: Callable, env_args: dict, alg_args: dict, device: str = 'auto', detail_info: bool = False):
+def train_cats_next_noise(seed: int, total_time_steps: int, save_dir: str, log_dir: str, mkenv_func: Callable, env_args: dict, alg_args: dict, device: str = 'auto', detail_info: bool = False):
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
     if 'cats_alpha' in alg_args:
         alpha_val = alg_args['cats_alpha']
         sigma_val = alg_args.get('next_noise_sigma', 0.1)
-        pth_name = f'caps_linear_nn_ppo_alpha{alpha_val}_sigma{sigma_val}_{seed}'
-        log_name = f'CAPS_LINEAR_NN_PPO_alpha{alpha_val}_sigma{sigma_val}_{seed}'
+        pth_name = f'cats_next_noise_ppo_alpha{alpha_val}_sigma{sigma_val}_{seed}'
+        log_name = f'CATS_NEXT_NOISE_PPO_alpha{alpha_val}_sigma{sigma_val}_{seed}'
     else:
-        pth_name = f'caps_linear_nn_ppo_{seed}'
-        log_name = f'CAPS_LINEAR_NN_PPO_{seed}'
+        pth_name = f'cats_next_noise_ppo_{seed}'
+        log_name = f'CATS_NEXT_NOISE_PPO_{seed}'
     local_save_dir = os.path.join(save_dir, pth_name)
     if not os.path.exists(local_save_dir):
         os.makedirs(local_save_dir)
     checkpoint_callback = CheckpointCallback(save_freq=total_time_steps // 5, save_path=local_save_dir, name_prefix='mid')
     vec_env = _make_vec_env(mkenv_func, env_args, local_save_dir)
     ppo_args = _filter_ppo_args(env_args, alg_args)
-    model = CapsLinearNNPPO("MlpPolicy", vec_env, verbose=0, tensorboard_log=log_dir, seed=seed, device=device, **ppo_args)
+    model = CATSNextNoisePPO("MlpPolicy", vec_env, verbose=0, tensorboard_log=log_dir, seed=seed, device=device, **ppo_args)
     model.save(os.path.join(local_save_dir, 'mid_00000_steps'))
     model.learn(total_timesteps=total_time_steps, tb_log_name=log_name, callback=checkpoint_callback)
     save_name = os.path.join(local_save_dir, 'final')

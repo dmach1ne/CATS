@@ -1,7 +1,7 @@
 """Shared LipsNet++ experiment profiles and artifact naming."""
 
 from dataclasses import asdict, dataclass
-from afqr_common.experiment_settings import selected_settings
+from cats_common.experiment_settings import selected_settings
 
 
 @dataclass(frozen=True)

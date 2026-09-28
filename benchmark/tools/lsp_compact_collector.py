@@ -29,15 +29,15 @@ from tools.lsp_transition_collector import (
 )
 
 
-FORMAT = "afqr_lsp_compact_chunk_v1"
-COLLECTION_FORMAT = "afqr_lsp_compact_collection_v1"
+FORMAT = "cats_lsp_compact_chunk_v1"
+COLLECTION_FORMAT = "cats_lsp_compact_collection_v1"
 BUFFER_SIZE = 8_192
 REQUIRED_DATASETS = ("obs", "next_obs", "mean_action", "episode_id")
 
 
 def enforce_scratch_headroom(scratch_dir: Path, local_output: Path | None = None) -> None:
-    safety_bytes = int(os.environ.get("AFQR_SCRATCH_SAFETY_BYTES", "0"))
-    work_bytes = int(os.environ.get("AFQR_SCRATCH_WORK_BYTES", "0"))
+    safety_bytes = int(os.environ.get("CATS_SCRATCH_SAFETY_BYTES", "0"))
+    work_bytes = int(os.environ.get("CATS_SCRATCH_WORK_BYTES", "0"))
     free_bytes = shutil.disk_usage(scratch_dir).free
     if safety_bytes and free_bytes < safety_bytes:
         print(

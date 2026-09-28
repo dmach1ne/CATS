@@ -13,7 +13,7 @@ from stable_baselines3.common.policies import ActorCriticPolicy
 from stable_baselines3.common.utils import explained_variance
 
 
-class CapsLinearNNPPO(PPO):
+class CATSNextNoisePPO(PPO):
     collect_rollouts = collect_rollouts_with_next_obs
 
     def __init__(

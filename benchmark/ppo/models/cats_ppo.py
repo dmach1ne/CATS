@@ -14,7 +14,7 @@ from stable_baselines3.common.utils import explained_variance
 from models.custom_buffer import CustomRolloutBuffer
 from models.collect_rollouts import collect_rollouts_with_next_obs
 from models.policy_evaluation import evaluate_actions_with_context
-from afqr_common.cats_schedules import linear_ramp_up_coefficient
+from cats_common.cats_schedules import linear_ramp_up_coefficient
 
 
 def _append_action_diff_poc_stats(stats: dict[str, list], action_diff: th.Tensor) -> None:
@@ -228,7 +228,7 @@ def _record_loss_tail_stats(logger, stats: dict[str, list]) -> None:
         logger.record("train/top10_mse_clipped_frac", float(np.mean(stats["top10_mse_clipped_frac"])))
 
 
-class CapsLinearPPO(PPO):
+class CATSPPO(PPO):
     collect_rollouts = collect_rollouts_with_next_obs
 
     def __init__(
@@ -305,7 +305,7 @@ class CapsLinearPPO(PPO):
             clip_range_vf = self.clip_range_vf(self._current_progress_remaining)
 
         record_auxiliary = os.environ.get(
-            "AFQR_DISABLE_AUXILIARY_METRICS", "0"
+            "CATS_DISABLE_AUXILIARY_METRICS", "0"
         ) != "1"
         entropy_losses = []
         pg_losses, value_losses = [], []

@@ -416,10 +416,10 @@ def run_evaluation(
     parser = build_parser(algorithm)
     args = parser.parse_args(argv)
     from importlib import import_module
-    from afqr_common.experiment_settings import selected_settings
+    from cats_common.experiment_settings import selected_settings
 
     alpha = float(selected_settings(algorithm, args.env)["cats"]["cats_alpha"])
-    cats = f"caps_linear_{algorithm}_alpha{alpha}"
+    cats = f"cats_{algorithm}_alpha{alpha}"
     args.obs_scale_alg = "vanilla_ppo" if algorithm == "ppo" else "vanilla"
     if args.experiment == "comparison":
         params = import_module(f"{algorithm}.tests.modules.params").alg_args["caps"][args.env]
@@ -428,7 +428,7 @@ def run_evaluation(
     elif args.experiment == "next-state-noise":
         if args.env not in {"lunar", "pendulum"}:
             parser.error("next-state-noise compares LunarLander and Pendulum")
-        args.algs = [args.obs_scale_alg, cats, f"caps_linear_nn_{algorithm}_alpha{alpha}_sigma0.05"]
+        args.algs = [args.obs_scale_alg, cats, f"cats_next_noise_{algorithm}_alpha{alpha}_sigma0.05"]
     else:
         if algorithm != "ppo" or args.env not in {"ant", "hopper", "walker"}:
             parser.error("ramp-up sensitivity compares PPO Ant, Hopper and Walker")
@@ -590,7 +590,7 @@ def run_evaluation(
                     del model
 
     payload = {
-        "format": "afqr_policy_output_sensitivity_v1",
+        "format": "cats_policy_output_sensitivity_v1",
         "status": "completed",
         "algorithm": algorithm,
         "environment": ENV_NAMES[args.env],

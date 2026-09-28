@@ -67,7 +67,7 @@ def main() -> None:
 
     if str(ROOT) not in sys.path:
         sys.path.insert(0, str(ROOT))
-    from afqr_common.experiment_settings import matched_coefficient
+    from cats_common.experiment_settings import matched_coefficient
 
     methods = METHODS if args.method == "all" else (args.method,)
     for method in methods:
@@ -89,7 +89,7 @@ def train_configuration(args) -> None:
     from tests.modules.controller import train_caps, train_caps_fixed, train_lipsnetpp
     from tests.modules.envs import make_hopper_env, make_walker_env
     from tests.modules.params import alg_args, env_args, env_timestep
-    from afqr_common.experiment_settings import selected_settings
+    from cats_common.experiment_settings import selected_settings
 
     lips_settings = selected_settings(args.algorithm, args.env)["lipsnetpp"]
     args.lambda_h = lips_settings["lipsnetpp_lambda_h"]
@@ -127,7 +127,7 @@ def train_configuration(args) -> None:
         train_args = method_args
         run_dirs = [save_dir / f"{prefix}_{seed}" for seed in seeds]
     else:
-        from afqr_common.lipsnetpp_experiment import (
+        from cats_common.lipsnetpp_experiment import (
             LipsNetPlusPlusProfile,
             run_name,
         )
@@ -203,7 +203,7 @@ def train_configuration(args) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
 
     if args.method == "lipsnetpp":
-        from afqr_common.lipsnetpp_evaluation import evaluate_profiles
+        from cats_common.lipsnetpp_evaluation import evaluate_profiles
         if args.algorithm == "ppo":
             from ppo.models.lipsnetpp_ppo import LipsNetPlusPlusPPO as model_class
         else:
@@ -219,7 +219,7 @@ def train_configuration(args) -> None:
             output_dir,
         )
     else:
-        from afqr_common.policy_evaluation import (
+        from cats_common.policy_evaluation import (
             EVALUATION_PROTOCOL,
             evaluate_flat_policy_checkpoints,
         )

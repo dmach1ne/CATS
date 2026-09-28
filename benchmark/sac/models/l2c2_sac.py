@@ -34,7 +34,7 @@ from stable_baselines3.common.torch_layers import (
 from stable_baselines3.common.distributions import SquashedDiagGaussianDistribution, StateDependentNoiseDistribution
 from stable_baselines3.common.preprocessing import get_action_dim
 
-from afqr_common.l2c2 import (
+from cats_common.l2c2 import (
     distance_dependent_gains,
     half_squared_l2_distance,
     monte_carlo_squared_hellinger,

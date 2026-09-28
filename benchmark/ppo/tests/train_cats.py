@@ -9,14 +9,14 @@ from datetime import datetime
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(str(Path(__file__).resolve().parents[2]))
 
-from afqr_common.experiment_settings import selected_settings
+from cats_common.experiment_settings import selected_settings
 
 from tests.modules.envs import make_ant_env, make_hopper_env, make_walker_env, make_pendulum_env, make_lunar_env
 
 from tests.modules.action_extractor import test_some_path
 
 from tests.modules.params import env_timestep, env_args, alg_args
-from tests.modules.controller import train_caps_linear
+from tests.modules.controller import train_cats
 
 train_envs_dict = {'ant': make_ant_env, 'hopper': make_hopper_env, 'lunar': make_lunar_env, 'pendulum': make_pendulum_env, 'walker': make_walker_env}
 
@@ -91,26 +91,26 @@ if __name__ == "__main__":
             time.sleep(0.1)
 
         for alpha_val in alpha_values:
-            if env_name in alg_args.get("caps_linear", {}):
-                base_args = alg_args["caps_linear"][env_name].copy()
+            if env_name in alg_args.get("cats", {}):
+                base_args = alg_args["cats"][env_name].copy()
             else:
                 base_args = {}
             current_alg_args = base_args.copy()
             current_alg_args["cats_alpha"] = alpha_val
 
             for seed in seeds:
-                folder_name = f"caps_linear_ppo_alpha{alpha_val}_{seed}"
+                folder_name = f"cats_ppo_alpha{alpha_val}_{seed}"
                 final_zip_path = os.path.join(save_dir, folder_name, "final.zip")
                 if os.path.isfile(final_zip_path):
                     print(f"[SKIP] {env_name}/{folder_name} - final.zip already exists")
                     skipped_count += 1
                     continue
 
-                job_name = f"{env_name}/caps_linear_ppo_alpha{alpha_val}_{seed}"
+                job_name = f"{env_name}/cats_ppo_alpha{alpha_val}_{seed}"
                 jobs.append((
                     job_name,
                     partial(
-                        run_job_with_logging, job_name, train_caps_linear,
+                        run_job_with_logging, job_name, train_cats,
                         seed, env_timestep[env_name], save_dir, log_dir,
                         train_envs_dict[env_name], env_args[env_name], current_alg_args,
                         args.device
@@ -130,7 +130,7 @@ if __name__ == "__main__":
                     print(f"[ERROR] {job_name} generated an exception: {exc}")
 
     print("\n=== Evaluation ===")
-    pth_names = [f"caps_linear_ppo_alpha{alpha_val}" for alpha_val in alpha_values]
+    pth_names = [f"cats_ppo_alpha{alpha_val}" for alpha_val in alpha_values]
 
     timestamp = datetime.now().strftime("%m%d_%H%M")
     alpha_str = "_".join([str(a) for a in alpha_values])

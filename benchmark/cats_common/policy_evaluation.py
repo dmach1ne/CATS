@@ -12,7 +12,7 @@ import gymnasium as gym
 import numpy as np
 from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 
-from afqr_common.lipsnetpp_evaluation import calculate_smoothness
+from cats_common.lipsnetpp_evaluation import calculate_smoothness
 
 
 EVALUATION_PROTOCOL = "explicit_validation_seed_raw_env_cpu_v1"

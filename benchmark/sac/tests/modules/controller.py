@@ -10,9 +10,9 @@ from typing import Callable
 
 from stable_baselines3.common.vec_env import DummyVecEnv, VecMonitor
 
-from afqr_common.lipsnetpp_experiment import LipsNetPlusPlusProfile, run_name
+from cats_common.lipsnetpp_experiment import LipsNetPlusPlusProfile, run_name
 
-from afqr_common.observation_history import ObservationHistoryVecEnv
+from cats_common.observation_history import ObservationHistoryVecEnv
 
 from models.custom_sac import CustomSAC
 
@@ -24,9 +24,9 @@ from models.grad_sac import GRADSAC
 
 from models.asap_sac import ASAPSAC, ASAPPolicy_soft
 
-from models.caps_linear_sac import CapsLinearSAC
+from models.cats_sac import CATSSAC
 
-from models.caps_linear_nn_sac import CapsLinearNNSAC
+from models.cats_next_noise_sac import CATSNextNoiseSAC
 
 from models.lipsnetpp_sac import LipsNetPlusPlusSAC, LipsNetPlusPlusSACPolicy
 
@@ -316,14 +316,14 @@ def train_asap(seed:int, total_time_steps:int, save_dir:str, log_dir:str, mkenv_
     vec_env.close()
     del model
 
-def train_caps_linear(seed:int, total_time_steps:int, save_dir:str, log_dir:str, mkenv_func : Callable, env_args:dict, alg_args:dict, device: str='auto', detail_info: bool=False):
+def train_cats(seed:int, total_time_steps:int, save_dir:str, log_dir:str, mkenv_func : Callable, env_args:dict, alg_args:dict, device: str='auto', detail_info: bool=False):
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
 
     if detail_info:
         alpha_val = alg_args.get('cats_alpha', 30.0)
-        pth_name = f"caps_linear_sac_alpha{alpha_val}_{seed}"
-        log_name = f"CAPS_LINEAR_SAC_alpha{alpha_val}_{seed}"
+        pth_name = f"cats_sac_alpha{alpha_val}_{seed}"
+        log_name = f"CATS_SAC_alpha{alpha_val}_{seed}"
 
         local_save_dir = os.path.join(save_dir, pth_name)
         if not os.path.exists(local_save_dir):
@@ -332,8 +332,8 @@ def train_caps_linear(seed:int, total_time_steps:int, save_dir:str, log_dir:str,
         save_path = os.path.join(local_save_dir, "final")
         mid_save_path = local_save_dir
     else:
-        pth_name = f"caps_linear_sac_{seed}"
-        log_name = f"CAPS_LINEAR_SAC_{seed}"
+        pth_name = f"cats_sac_{seed}"
+        log_name = f"CATS_SAC_{seed}"
         save_path = f"{save_dir}{pth_name}"
         mid_save_path = save_dir
 
@@ -344,7 +344,7 @@ def train_caps_linear(seed:int, total_time_steps:int, save_dir:str, log_dir:str,
     vec_env = VecMonitor(vec_env)
     sac_args = {k: v for k, v in env_args.items() if k != "n_envs"}
     sac_args.update(alg_args)
-    model = CapsLinearSAC("MlpPolicy", vec_env, verbose=0, tensorboard_log=log_dir, seed=seed, device=device,
+    model = CATSSAC("MlpPolicy", vec_env, verbose=0, tensorboard_log=log_dir, seed=seed, device=device,
                     **sac_args)
 
     callback = None
@@ -361,15 +361,15 @@ def train_caps_linear(seed:int, total_time_steps:int, save_dir:str, log_dir:str,
     vec_env.close()
     del model
 
-def train_caps_linear_nn(seed:int, total_time_steps:int, save_dir:str, log_dir:str, mkenv_func : Callable, env_args:dict, alg_args:dict, device: str='auto', detail_info: bool=False):
+def train_cats_next_noise(seed:int, total_time_steps:int, save_dir:str, log_dir:str, mkenv_func : Callable, env_args:dict, alg_args:dict, device: str='auto', detail_info: bool=False):
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
 
     if detail_info:
         alpha_val = alg_args.get('cats_alpha', 30.0)
         sigma_val = alg_args.get('next_noise_sigma', 0.1)
-        pth_name = f"caps_linear_nn_sac_alpha{alpha_val}_sigma{sigma_val}_{seed}"
-        log_name = f"CAPS_LINEAR_NN_SAC_alpha{alpha_val}_sigma{sigma_val}_{seed}"
+        pth_name = f"cats_next_noise_sac_alpha{alpha_val}_sigma{sigma_val}_{seed}"
+        log_name = f"CATS_NEXT_NOISE_SAC_alpha{alpha_val}_sigma{sigma_val}_{seed}"
 
         local_save_dir = os.path.join(save_dir, pth_name)
         if not os.path.exists(local_save_dir):
@@ -378,8 +378,8 @@ def train_caps_linear_nn(seed:int, total_time_steps:int, save_dir:str, log_dir:s
         save_path = os.path.join(local_save_dir, "final")
         mid_save_path = local_save_dir
     else:
-        pth_name = f"caps_linear_nn_sac_{seed}"
-        log_name = f"CAPS_LINEAR_NN_SAC_{seed}"
+        pth_name = f"cats_next_noise_sac_{seed}"
+        log_name = f"CATS_NEXT_NOISE_SAC_{seed}"
         save_path = f"{save_dir}{pth_name}"
         mid_save_path = save_dir
 
@@ -390,7 +390,7 @@ def train_caps_linear_nn(seed:int, total_time_steps:int, save_dir:str, log_dir:s
     vec_env = VecMonitor(vec_env)
     sac_args = {k: v for k, v in env_args.items() if k != "n_envs"}
     sac_args.update(alg_args)
-    model = CapsLinearNNSAC("MlpPolicy", vec_env, verbose=0, tensorboard_log=log_dir, seed=seed, device=device,
+    model = CATSNextNoiseSAC("MlpPolicy", vec_env, verbose=0, tensorboard_log=log_dir, seed=seed, device=device,
                     **sac_args)
 
     callback = None

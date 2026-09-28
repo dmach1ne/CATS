@@ -21,7 +21,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from tests.modules.controller import (
     train_asap,
     train_caps,
-    train_caps_linear,
+    train_cats,
     train_grad,
     train_l2c2,
     train_lipsnetpp,
@@ -37,7 +37,7 @@ METHODS = {
     "grad": ("grad", train_grad),
     "l2c2": ("l2c2", train_l2c2),
     "asap": ("asap", train_asap),
-    "cats": ("vanilla", train_caps_linear),
+    "cats": ("vanilla", train_cats),
     "lpp": ("lipsnetpp", train_lipsnetpp),
 }
 ENVIRONMENTS = {
@@ -56,7 +56,7 @@ def main() -> None:
     parser.add_argument("--device", default="cuda")
     args = parser.parse_args()
 
-    os.environ["AFQR_DISABLE_AUXILIARY_METRICS"] = "1"
+    os.environ["CATS_DISABLE_AUXILIARY_METRICS"] = "1"
 
     if args.device.startswith("cuda") and not torch.cuda.is_available():
         raise RuntimeError("CUDA is required for this timing benchmark")
