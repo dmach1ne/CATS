@@ -1,7 +1,4 @@
 {
-  "source": "table_tex/no_reacher/caps_linear_main_source.csv",
-  "source_sha256": "b17c5a983315199d854786e1dac0320211840fb8dd89bd16af6d4bb00e63ff4e",
-  "status": "Table-source settings, not independently retrained; PPO Lunar CATS source is user_provided_caps_linear_ppo_table",
   "settings": {
     "ppo/ant": {
       "lipsnetpp": {

@@ -23,8 +23,8 @@ class _PlacementMixin:
     placement_ik_iterations: int = 100
     placement_prep_steps: int = 300
     placement_grasp_guard_steps: int = 12
-    # FR3 readOnce capture20260914_103619_cube_grasp; cube XYZ is estimated,
-    # identity cube rotation is user-approved, not a measured orientation.
+    # Initialize from a captured grasp pose with estimated cube position
+    # and identity cube rotation.
     placement_initial_arm_positions: tuple | None = (
         0.05866348694477573, 0.3587113019815921, -0.05949372965396844,
         -2.5234578334544184, -0.0015859592232857196, 2.898845289280666,

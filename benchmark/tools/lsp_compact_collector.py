@@ -338,10 +338,7 @@ def collect_chunk(
     h5_path: Path,
     action_low: np.ndarray,
     action_high: np.ndarray,
-    history_len: int | None = None,
 ) -> tuple[dict[str, Any], int]:
-    if history_len is not None and history_len <= 0:
-        raise ValueError("history_len must be positive")
     writer = CompactChunkWriter(h5_path)
     use_sde = bool(getattr(model, "use_sde", False))
     sde_sample_freq = int(getattr(model, "sde_sample_freq", -1))
@@ -350,7 +347,6 @@ def collect_chunk(
     for local_index, eval_seed in enumerate(eval_seeds):
         global_episode_id = episode_start + local_index
         obs, _ = env.reset(seed=int(eval_seed))
-        history = None
         action_seed = derive_action_seed(int(eval_seed), global_episode_id)
         seed_action_rng(action_seed)
         episode_return = 0.0
@@ -361,16 +357,7 @@ def collect_chunk(
                 if observation_transform is not None
                 else np.asarray(obs, dtype=np.float32)
             )
-            if history_len is None:
-                policy_input = actor_obs
-            else:
-                if history is None:
-                    history = np.zeros(
-                        (history_len, actor_obs.shape[0]), dtype=np.float32
-                    )
-                history[1:] = history[:-1].copy()
-                history[0] = actor_obs
-                policy_input = history
+            policy_input = actor_obs
             mean_action, _ = model.predict(policy_input, deterministic=True)
             if use_sde and (
                 timestep == 0
@@ -425,7 +412,6 @@ def build_parser(algorithm: str) -> argparse.ArgumentParser:
     parser.add_argument("--publish-lanes", type=int, default=2)
     parser.add_argument("--max-models", type=int)
     parser.add_argument("--max-chunks-per-model", type=int)
-    parser.add_argument("--history-len", type=int)
     return parser
 
 
@@ -442,8 +428,6 @@ def run_compact_collection(
         raise SystemExit("episode-count must be divisible by chunk-size")
     if args.publish_lanes <= 0:
         raise SystemExit("publish-lanes must be positive")
-    if args.history_len is not None and args.history_len <= 0:
-        raise SystemExit("history-len must be positive")
     repo_root = Path(__file__).resolve().parents[1]
     collector_source_hash = sha256_file(Path(__file__))
     eval_seeds = load_eval_seeds(args.seed_file, args.episode_count)
@@ -469,18 +453,7 @@ def run_compact_collection(
         env = env_factories[args.env](None)()
         vec_normalize = None
         try:
-            if args.history_len is None:
-                model = model_class.load(str(model_path), env=env, device=args.device)
-            else:
-                model = model_class.load(str(model_path), device=args.device)
-                checkpoint_history_len = getattr(
-                    getattr(model, "policy", None), "history_len", None
-                )
-                if checkpoint_history_len != args.history_len:
-                    raise ValueError(
-                        "Checkpoint history length does not match --history-len: "
-                        f"{checkpoint_history_len} != {args.history_len}"
-                    )
+            model = model_class.load(str(model_path), env=env, device=args.device)
             if hasattr(model, "policy") and hasattr(model.policy, "set_training_mode"):
                 model.policy.set_training_mode(False)
             vec_normalize_path = model_path.parent / "vec_normalize.pkl"
@@ -546,7 +519,6 @@ def run_compact_collection(
                     local_h5,
                     np.asarray(env.action_space.low, dtype=np.float32),
                     np.asarray(env.action_space.high, dtype=np.float32),
-                    args.history_len,
                 )
                 if summary["mean_sample_action_mse"] == 0.0:
                     raise RuntimeError("Stochastic rollout matched mean actions exactly")
@@ -583,17 +555,7 @@ def run_compact_collection(
                         if vec_normalize is not None
                         else "raw_environment_observation"
                     ),
-                    "policy_input": (
-                        "current_observation"
-                        if args.history_len is None
-                        else "zero_padded_observation_history"
-                    ),
-                    "history_len": args.history_len,
-                    "history_order": (
-                        None
-                        if args.history_len is None
-                        else "row_0_is_current_then_newest_to_oldest"
-                    ),
+                    "policy_input": "current_observation",
                     "action_seed_rule": (
                         "(eval_seed * 1664525 + 1013904223 + global_episode_id) "
                         "% (2**31 - 1)"
@@ -664,12 +626,7 @@ def run_compact_collection(
         "models": len(model_paths),
         "episode_count_per_model": args.episode_count,
         "chunk_size": args.chunk_size,
-        "policy_input": (
-            "current_observation"
-            if args.history_len is None
-            else "zero_padded_observation_history"
-        ),
-        "history_len": args.history_len,
+        "policy_input": "current_observation",
         "expected_record_count": expected_record_count,
         "observed_record_count": len(records),
         "seed_file": str(args.seed_file),

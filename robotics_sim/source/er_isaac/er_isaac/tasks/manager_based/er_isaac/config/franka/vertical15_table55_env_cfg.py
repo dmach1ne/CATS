@@ -1,11 +1,10 @@
-"""Opt-in measured-table Lift variant; existing experiment geometry is unchanged."""
+"""Table geometry with an extension toward the robot base."""
 from isaaclab.assets import AssetBaseCfg
 import isaaclab.sim as sim_utils
 from isaaclab.utils import configclass
 from .vertical15_fixedcube_env_cfg import Vertical15FixedCubeEnvCfg, Vertical15FixedCubeEvalEnvCfg
 
-# Original worktop plus a separate extension toward the base. The model-derived
-# base edge and provisional cutout are not verified physical mounting dimensions.
+# The base edge and cutout dimensions are simulation geometry estimates.
 BASE_FRONT_X = 0.07156231
 MAIN_TABLE_NEAR_X = BASE_FRONT_X + 0.125
 TABLE_BOUNDS_X = (MAIN_TABLE_NEAR_X, MAIN_TABLE_NEAR_X + 0.80)
@@ -18,7 +17,7 @@ OPENING_Y = (-0.10, 0.10)
 TABLE_TOP_Z = 0.021
 BOARD_THICKNESS = 0.005
 WORK_SURFACE_Z = TABLE_TOP_Z + BOARD_THICKNESS
-TABLE_THICKNESS = 0.03  # Temporary: not measured.
+TABLE_THICKNESS = 0.03  # Assumed table thickness.
 
 
 @configclass

@@ -203,11 +203,7 @@ def build_normalizer(
         "environment": environment,
         "methods": [method for method, _ in cells],
         "type": "feature-wise pooled z-score",
-        "statistics_source": (
-            "all obs and next_obs across all five methods"
-            if len(cells) == 5
-            else f"all obs and next_obs across {len(cells)} supplied method cell(s)"
-        ),
+        "statistics_source": f"all obs and next_obs across {len(cells)} supplied method cell(s)",
         "collection_manifest_name": manifest_name,
         "collection_status": expected_status,
         "population_standard_deviation": True,

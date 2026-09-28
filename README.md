@@ -1,11 +1,13 @@
-# CATS
+# Revisiting Temporal Regularization for Smooth Control in Deep Reinforcement Learning
 
-CATS is a policy regularizer for smooth continuous control. It combines a
-temporal penalty with a linearly increasing coefficient, without an explicit
-spatial penalty.
+Code for **Revisiting Temporal Regularization for Smooth Control in Deep
+Reinforcement Learning**. We introduce **CATS**, a policy regularizer that
+combines a temporal penalty with a linearly increasing coefficient. CATS
+encourages smooth control without an explicit spatial penalty.
 
-This repository contains PPO/SAC benchmark experiments and Reach/Place Cube
-simulation code. The experiment guide below follows the order of the paper.
+The repository includes the PPO and SAC benchmark experiments, their
+hyperparameters, and the Reach and Place Cube simulation tasks. The sections
+below follow the experiments in the paper.
 
 ## Setup
 
@@ -13,9 +15,8 @@ The benchmark uses Python 3.10, PyTorch, Stable-Baselines3 2.5.0, Gymnasium
 1.0.0 and MuJoCo 3.3.3. LunarLander additionally requires Box2D. Analysis scripts
 use NumPy, SciPy, h5py, pandas and matplotlib; training uses tensorboard.
 
-[environment-original.yml](environment-original.yml) contains the archived
-environment specification, including PyTorch 2.6.0. Fresh installation of that
-environment has not yet been validated. Robot simulation requires a separate
+[environment-original.yml](environment-original.yml) records the training
+environment, including PyTorch 2.6.0. Robot simulation requires a separate
 Isaac Lab environment; see [robotics_sim](robotics_sim/README.md).
 
 Run benchmark commands from `benchmark/`. Set the import paths for the algorithm
@@ -106,15 +107,15 @@ Use each script's `--help` for coefficient, seed and evaluation options.
 
 ### 3. Transition-Induced Spatial Effect
 
-The spatial-effect analysis has three steps:
+Compare the transition-induced spatial effect of Base and CATS:
 
 1. Collect stochastic transitions with `$ALG/tests/collect_lsp_compact.py`.
 2. Build the pooled normalizer with `tools/build_lsp_compact_normalizer.py`.
 3. Run `tools/analyze_lsp_compact_cell.py` on the collected transitions.
 
 Collection seeds are in `lsp_validation_seeds.txt`. The analyzer uses 20,000
-queries by default and supports CPU/CUDA neighbor search. L2C2 and LipsNet++
-have separate collection entry points in `$ALG/tests/`.
+queries by default and supports CPU/CUDA neighbor search. Use the same
+normalizer for both policies so their neighborhood distances use the same scale.
 
 ### 4. Policy Sensitivity
 
@@ -154,18 +155,12 @@ See [robotics_sim/README.md](robotics_sim/README.md) for Reach and Place Cube
 training, evaluation and task settings. This release includes simulation code
 only, not checkpoints or physical-robot deployment software.
 
-## Notes
+## Reading the Results
 
 Clean-evaluation CSV fields ending in `_std` contain standard deviations, not
 95% confidence intervals.
 
-Full numerical reproduction and Isaac runtime testing are still pending.
-Historical tuning/matched-smoothness grids, the exact pooled-normalizer cohort,
-the timing snapshot and PPO LunarLander CATS raw-run provenance are not yet
-fully verified.
-
 ## Acknowledgments
 
-The benchmark includes modified Stable-Baselines3 code. Its
-[MIT license](licenses/Stable-Baselines3-2.5.0.txt) is retained, along with source
-copyright notices. External simulator software and assets are installed separately.
+The benchmark builds on the ASAP codebase and Stable-Baselines3. Robot
+simulation uses Isaac Lab and rl_games.

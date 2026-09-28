@@ -361,8 +361,6 @@ def build_parser(algorithm: str) -> argparse.ArgumentParser:
     parser.add_argument("--max_models", type=int, default=None)
     parser.add_argument("--noise_draws", type=int, default=10)
     parser.add_argument("--noise_seed", type=int, default=20260717)
-    parser.add_argument("--bank_seed", type=int, default=20260721)
-    parser.add_argument("--shared_bank_per_method", type=int, default=512)
     parser.add_argument("--batch_size", type=int, default=4096)
     parser.add_argument("--max_episode_steps", type=int, default=None)
     parser.add_argument("--device", default="auto")
@@ -422,8 +420,8 @@ def run_evaluation(
         raise ValueError("warmup_episodes cannot exceed eval_episodes")
     if args.noise_draws != 10:
         raise ValueError("This frozen protocol requires exactly 10 noise draws")
-    if args.shared_bank_per_method <= 0 or args.batch_size <= 0:
-        raise ValueError("Shared-bank size and batch size must be positive")
+    if args.batch_size <= 0:
+        raise ValueError("Batch size must be positive")
 
     sigmas = parse_sigmas(args.sigmas)
     eval_seeds = load_eval_seeds(Path(args.seed_file), args.eval_episodes)
@@ -521,8 +519,6 @@ def run_evaluation(
     observation_shapes = {rollout["obs"].shape[1:] for rollout in clean_rollouts.values()}
     if len(observation_shapes) != 1:
         raise ValueError(f"Observation shapes differ across methods: {observation_shapes}")
-    shared_banks: dict[str, dict[str, Any]] = {}
-    pass  # Paper scope: own-state sensitivity only.
 
     records: list[dict[str, Any]] = []
     for method, seed_map in model_paths.items():
@@ -548,9 +544,6 @@ def run_evaluation(
                     model, rollout["obs"], shared_observation_scale,
                     own_directions, sigmas, args.batch_size,
                 )
-                shared_metrics = None
-                shared_state_count = 0
-                pass  # Shared-state evaluation is not reported.
                 action_shape = list(
                     batched_policy_outputs(model, rollout["obs"][:1], 1).shape[1:]
                 )
@@ -559,17 +552,14 @@ def run_evaluation(
                     "train_seed": int(train_seed) if train_seed.isdigit() else train_seed,
                     "checkpoint": str(model_path),
                     "uses_vec_normalize": use_vec_env,
-                    "shared_states_normalized_by_target_wrapper": use_vec_env,
                     "n_own_states": int(len(rollout["obs"])),
                     "episode_lengths": rollout["episode_length"].tolist(),
                     "observation_shape": list(rollout["obs"].shape[1:]),
                     "policy_action_shape": action_shape,
                     "own": own_metrics,
-                    "shared": shared_metrics,
                 })
                 print(
-                    f"Evaluated {method} seed {train_seed}: own={len(rollout['obs'])}, "
-                    f"shared={shared_state_count}",
+                    f"Evaluated {method} seed {train_seed}: own={len(rollout['obs'])}",
                     flush=True,
                 )
             finally:
@@ -594,33 +584,18 @@ def run_evaluation(
         "noise_draws_per_state": args.noise_draws,
         "noise_reuse_across_sigmas": True,
         "noise_seed": args.noise_seed,
-        "bank_seed": args.bank_seed,
         "eval_episodes": args.eval_episodes,
         "warmup_episodes": args.warmup_episodes,
         "evaluation_seeds": eval_seeds,
         "models_per_method": args.expected_models,
         "primary_state_distribution": "each policy's own clean deterministic visitation",
         "primary_state_weighting": "uniform over all visited timesteps within each policy",
-        "shared_bank_per_source_method": args.shared_bank_per_method,
-        "shared_bank_total_states": 0 if args.own_only else args.shared_bank_per_method * len(args.algs),
-        "shared_bank_sources": [] if args.own_only else args.algs,
         "own_only": args.own_only,
-        "shared_bank_state_space": "raw environment observations",
-        "shared_bank_actor_input_transform": (
-            "each target policy's own VecNormalize wrapper, when present"
-        ),
         "metric": "0.5 * mean squared deterministic action-output difference",
         "policy_output": "policy._predict(..., deterministic=True)",
         "environment_output": "model.predict(..., deterministic=True)",
         "batch_size": args.batch_size,
         "records": records,
-        "shared_bank_metadata": {
-            train_seed: {
-                "source_counts": bank["source_counts"],
-                "selected_indices": bank["selected_indices"],
-            }
-            for train_seed, bank in shared_banks.items()
-        },
     }
     atomic_write_json(output_path, payload)
     print(f"Saved {len(records)} policy records to {output_path}", flush=True)

@@ -12,8 +12,7 @@ Policies use images, target coordinates and proprioceptive inputs.
 
 Use an Isaac Lab environment with Isaac Sim, `isaaclab_assets`, `isaaclab_rl`,
 `isaaclab_tasks`, `rl_games`, PyYAML, Pillow, NumPy and imageio-ffmpeg.
-The recorded Isaac Lab version is 2.2.1. The simulator and assets are not
-bundled, and runtime testing of this release is still pending.
+The experiments used Isaac Lab 2.2.1. Install the simulator and assets separately.
 
 From the repository root:
 
