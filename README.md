@@ -46,35 +46,38 @@ as described below.
 The benchmark covers Ant, Hopper, Walker, continuous LunarLander and Pendulum,
 with Base, CATS, CAPS, L2C2, Grad-CAPS (GRAD), ASAP and LipsNet++.
 
-Train CATS on PPO Hopper:
+#### Training and Clean Evaluation (Table I)
+
+With `ALG` and the import paths set as above, train and evaluate the methods
+on Hopper:
 
 ```bash
-python ppo/tests/train_cats.py --env hopper --device auto
-```
+python "$ALG/tests/train_cats.py" --env hopper --device auto
 
-Train the comparison methods:
-
-```bash
-python ppo/tests/test_all.py \
+python "$ALG/tests/test_all.py" \
   --envs hopper --algs vanilla caps l2c2 grad asap --device auto
+
+python "$ALG/tests/train_lipsnetpp.py" --env hopper --device auto
+python "$ALG/tests/evaluate_lipsnetpp.py" --env hopper
 ```
 
-These scripts run full-budget training and then evaluate the saved policies.
+Replace `hopper` with `ant`, `walker`, `lunar` or `pendulum` for the other tasks.
+For SAC, set `ALG=sac` and update the import paths as shown in Setup.
+
+Training uses ten seeds and each task's full training budget. CATS and the
+comparison-method launcher evaluate their saved policies after training;
+LipsNet++ uses the separate evaluation command above. Keep these checkpoints
+for the observation-noise, spatial-effect and policy-sensitivity evaluations.
+
 Task budgets and method parameters are in `$ALG/tests/modules/params.py`.
-CATS and LipsNet++ load their selected hyperparameters directly from
+CATS and LipsNet++ load their selected hyperparameters from
 [selected_settings.json](benchmark/selected_settings.json).
-To train and evaluate LipsNet++ on PPO Hopper:
 
-```bash
-python ppo/tests/train_lipsnetpp.py --env hopper
-python ppo/tests/evaluate_lipsnetpp.py --env hopper
-```
+#### Observation-Noise Evaluation (Table II)
 
-Training uses ten seeds. For SAC, switch the import paths and script paths to
-`sac`.
-
-**Observation noise (Table II).** Evaluate the trained policies on Hopper and
-Walker under PPO and SAC, with noise magnitudes from 0 to 0.5 in steps of 0.1:
+Evaluate the checkpoints trained above on Hopper and Walker under PPO and SAC,
+with noise magnitudes from 0 to 0.5 in steps of 0.1. No additional training is
+required:
 
 ```bash
 for TASK in hopper walker; do
@@ -85,9 +88,12 @@ done
 This evaluates Base, CAPS, L2C2, GRAD, ASAP and CATS. LipsNet++ uses
 `tools/evaluate_lipsnetpp_noise.py` with the same noise magnitudes.
 
-**Training cost.** Use `ppo/tests/benchmark_training_cost.py` to measure
-wall-clock training time. Match the hardware and training configuration when
-comparing overhead.
+#### Training Overhead
+
+Use `ppo/tests/benchmark_training_cost.py` to measure wall-clock training time
+on PPO Walker. This runs training separately rather than evaluating an existing
+checkpoint. Use the same hardware and training configuration for each method
+when comparing overhead.
 
 ### 2. Temporal vs. Spatial Regularization
 
