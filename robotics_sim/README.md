@@ -32,9 +32,7 @@ Use the following training seeds for each method:
 | Reach | 178132, 410580, 922852, 787576, 660993 | 128 | 3000 |
 | Place Cube | 178132, 410580, 922852 | 512 | 1500 |
 
-Run each seed with the corresponding command below. Jobs may be scheduled
-independently on available GPUs. The Place Cube commands below override the
-YAML defaults with the experiment settings.
+Run each seed with the commands below.
 
 For evaluation, set `CHECKPOINT` to the trained checkpoint and `AGENT_CFG`
 to its saved `agent.yaml`. Each command evaluates five seeds; Reach uses
@@ -43,114 +41,66 @@ for the paired Place Cube target schedule.
 
 ## Policy and Observations
 
-### Inputs
+Policies receive a fixed-camera RGB image with a target marker, plus robot
+measurements and target XYZ in the robot base frame. Joint positions,
+velocities, previous actions and end-effector height follow
+[Azimi et al.][azimi]; target coordinates and the image marker are additions.
 
-Each observation contains one 84 x 84 RGB image from a fixed external
-camera and a vector of robot measurements and target coordinates. The target
-is projected onto the image as a marker and is also supplied as XYZ coordinates
-in the robot base frame.
-
-Our proprioceptive inputs follow [Azimi et al.][azimi]: joint positions,
-joint velocities, previous action and end-effector height. We additionally
-provide target coordinates and a target marker in the image.
-
-| Input | Reach | Place Cube |
+| Input / output | Reach | Place Cube |
 | --- | --- | --- |
 | RGB image | 84 x 84 x 3 | 84 x 84 x 3 |
-| Arm joint positions / velocities | 7 / 7 | 7 / 7 |
-| Previous action | 7 arm outputs | 7 arm outputs + gripper |
-| End-effector height | 1 | 1 |
-| Target XYZ in robot base frame | 3 | 3 |
-| **Total non-image inputs** | **25** | **26** |
+| Joint positions / velocities | 7 / 7 | 7 / 7 |
+| Previous action | 7 | 8 |
+| End-effector height / target XYZ | 1 / 3 | 1 / 3 |
+| Total non-image inputs | 25 | 26 |
+| Action outputs | 7 arm | 7 arm + gripper |
 
-Height is measured relative to the environment origin. Cube pose, contact
-flags and reward-stage variables are not additional policy inputs.
-
-The network divides RGB values by 255. Joint positions are scaled by 1/pi,
-joint velocities by 0.5, and height and target coordinates by 2; previous
-actions are unchanged. These are fixed scales, not running observation
-statistics. See the [observation construction][observations] and
-[network implementation][network].
-
-### Network
-
-Reach and Place Cube use the same encoder and hidden-layer architecture, but
-different input and action dimensions. Each task and method is trained
-independently; weights are not shared across tasks or methods. Within each
-policy, the actor and critic share the feature extractor and fused MLP.
+Both tasks use the same hidden-layer architecture, with task-specific input
+and output dimensions. Each policy shares its encoder and MLP between actor
+and critic; policies are trained independently.
 
 | Component | Architecture |
 | --- | --- |
-| Image encoder | Four ReLU convolutions: channels 16/32/64/64, kernels 6/4/3/3, strides 2/2/1/1 |
-| Visual projection | Average pooling to 4 x 4, flatten, Linear(1024, 256) + ReLU |
-| Measurement encoder | MLP: 25 or 26 inputs -> 64 -> 128, ReLU |
-| Fusion | Concatenate 256 visual + 128 measurement features |
-| Shared actor-critic MLP | 384 -> 256 -> 128, ReLU |
-| Policy mean head | 128 -> 7 for Reach; 128 -> 8 for Place Cube |
-| Value head | 128 -> 1 |
+| Image encoder | ReLU CNN: channels 16/32/64/64, kernels 6/4/3/3, strides 2/2/1/1 |
+| Visual projection | 4 x 4 average pooling -> 1024 -> 256 |
+| Measurement encoder | 25 or 26 -> 64 -> 128, ReLU |
+| Fused MLP | 384 -> 256 -> 128, ReLU |
+| Output heads | Gaussian policy mean and scalar value |
 
-Training uses a Gaussian policy with a learned, state-independent log standard
-deviation. Evaluation uses the policy mean. The two registered network names
-resolve to the same [builder][network]; their task-specific dimensions are
-set in the [Reach YAML][reach-agent] and [Place YAML][place-agent].
+See [observations][observations] and [network][network] for fixed input scaling
+and implementation. PPO settings are in the [Reach YAML][reach-agent] and
+[Place YAML][place-agent]; the Place commands below include the required overrides.
 
 ## Actions and Control
 
-Both tasks run physics at 60 Hz and apply a policy action every two physics
-steps, giving a 30 Hz control rate. The seven arm outputs specify joint-position
-targets, not torques or increments from the current joint position:
+Both tasks use 30 Hz joint-position control with 60 Hz physics:
 `joint target = default joint position + 0.5 * policy output`.
-The simulator uses the Franka Panda asset and its joint-position actuators,
-configured by the [shared controller setup][controller].
-
-Place Cube adds an eighth output for the gripper. A nonnegative command starts
-opening; opening remains latched until the trial resets. Finger targets advance
-gradually rather than jumping immediately to the open position. See
-[OpeningState][placement-math]. All three methods use the same controller.
+Place adds a gripper command; a nonnegative output starts opening, latched
+until reset. All methods use the same [controller][controller].
 
 ## Tasks and Rewards
 
-Reach and Place Cube use the same Table55 table and protective-board geometry.
-Reach retains its free-space targets and has no cube. Both Reach training and
-its evaluation command use this layout; use checkpoints trained with the same
-layout when reproducing these commands. See the [Reach scene configuration][reach-scene].
+Both tasks use the same Table55 table and protective board.
+Use checkpoints trained with the corresponding scene.
 
-**Reach** tracks successive targets in free space. Training episodes last
-18 seconds, with a new target every 6 seconds. The reward combines position
-tracking, fine-grained position tracking and orientation tracking. The selected
-configuration disables action-rate, joint-velocity and low-height penalties.
-Target ranges, camera geometry and observation settings are defined in the
-[Reach configuration][reach-config] and its [base task configuration][reach-base].
-
-**Place Cube** starts from a prepared grasp, so learning to grasp is not part of
-the task. Each trial lasts up to 3 seconds and uses one target on the table.
-Targets are sampled on a forward semicircle of radius 0.25 m centered at
-XY (0.45, 0), rather than uniformly inside a disk. The staged reward encourages
-transport, lowering and release; it also rewards object and robot stillness
-near the goal. The training-stage logic requires an elevated arrival before
-lowering and uses a continuous hold for success. The reported success metric
-is computed separately below. See the [Place configuration][place-config],
-[reset and goal sampling][placement], and [reward and stage logic][placement-math].
+- **Reach:** 18-second episodes with a new target every 6 seconds. Position
+  and orientation tracking rewards; action-rate, joint-velocity and low-height
+  penalties are disabled. [Scene][reach-scene] / [Rewards][reach-base].
+- **Place Cube:** starts with a grasped cube; trials last up to 3 seconds.
+  Targets lie on a forward semicircle of radius 0.25 m centered at XY (0.45, 0).
+  Rewards cover transport, lowering, release and stillness near the goal.
+  [Scene][place-config] / [Reward logic][placement-math].
 
 ## Regularization
 
-Regularizers act on the seven arm policy means before controller scaling;
-the gripper output is excluded. CATS penalizes consecutive mean-action
-differences and increases the coefficient linearly with training progress to
-`--alpha-max`. Transitions ending in an environment reset are masked out.
-The temporal loss averages half the squared difference over valid transitions
-and arm coordinates. See [the loss][cats-loss] and [the PPO integration][cats-agent].
+CATS and CAPS regularize the seven arm policy means, excluding the gripper.
+CATS linearly increases the temporal coefficient to `--alpha-max` and masks
+transitions ending in a reset. CAPS uses fixed temporal and spatial coefficients.
 
-CAPS combines this temporal loss with a spatial loss at fixed coefficients.
-Its spatial perturbation adds Gaussian noise to RGB, joint positions, joint
-velocities and end-effector height, scaled to give the requested standard
-deviation after network preprocessing. Previous actions and target coordinates
-are left unchanged. The Reach command also preserves target-marker pixels;
-the Place command does not enable that mask. See [the spatial perturbation][caps-loss].
-
-Network and PPO defaults are in the [Reach YAML][reach-agent] and
-[Place YAML][place-agent]. The Place commands below override several PPO values;
-use the saved `agent.yaml` from each run when evaluating its checkpoint.
+CAPS perturbs RGB, joint positions/velocities and end-effector height with
+Gaussian noise, leaving previous actions and target coordinates unchanged.
+Reach also preserves target-marker pixels. See [CATS][cats-agent] and
+[CAPS perturbations][caps-loss].
 
 ## Training and Evaluation
 
@@ -307,11 +257,8 @@ python scripts/evaluation/eval_transport10_parallel.py \
 
 ### Reach Success
 
-For Reach, use `success_rate`
-(equivalently, `hold_success_1s`), which requires staying within the distance
-threshold continuously for one second. The reported thresholds are 5 and
-10 cm; `minimum_distance_success_rate` is a different metric and does not
-require holding the target.
+Use `success_rate` for staying within 5 or 10 cm continuously for one second,
+not `minimum_distance_success_rate`.
 
 ### Place Cube Success
 
@@ -328,29 +275,22 @@ hold-time requirement. This differs from the training success metric.
 
 ### Smoothness
 
-Smoothness is the frequency-weighted action score computed separately for
-each of the seven arm outputs at 30 Hz, then averaged across coordinates and
-target windows or trials. It uses policy outputs before joint-position
-scaling, not measured joint motion, and excludes the gripper. Lower is smoother.
-See [the metric implementation][metrics].
+Evaluation uses deterministic policy means. The [smoothness score][metrics]
+is computed from the seven arm outputs before controller scaling at 30 Hz,
+then averaged over coordinates and trials or target windows. Lower is smoother.
 
 ### Aggregation
 
-Report training-seed means with untruncated 95% t-confidence intervals.
-Evaluation seeds and trials are averaged within each trained policy first;
-training seeds, not individual trials, are the independent units for these
-intervals. Keep the per-training-seed evaluation outputs for this aggregation.
+Average evaluation trials within each trained policy, then report the
+training-seed mean and untruncated 95% t-confidence interval.
 
 [azimi]: https://arxiv.org/abs/2606.18594
 [observations]: source/er_isaac/er_isaac/tasks/manager_based/er_isaac/mdp/observation.py
 [network]: scripts/rl_games/models/visual_proprio_network.py
 [controller]: source/er_isaac/er_isaac/tasks/manager_based/er_isaac/config/franka/joint_pos_camera_env_cfg.py
-[reach-config]: source/er_isaac/er_isaac/tasks/manager_based/er_isaac/config/franka/real_cam_env_cfg.py
 [reach-base]: source/er_isaac/er_isaac/tasks/manager_based/er_isaac/reach_cfg.py
 [place-config]: source/er_isaac/er_isaac/tasks/manager_based/er_isaac/config/franka/pregrasped_placement_env_cfg.py
-[placement]: source/er_isaac/er_isaac/tasks/manager_based/er_isaac/mdp/placement.py
 [placement-math]: source/er_isaac/er_isaac/tasks/manager_based/er_isaac/mdp/placement_math.py
-[cats-loss]: scripts/rl_games/models/cats.py
 [cats-agent]: scripts/rl_games/models/a2c_continuous_cats.py
 [caps-loss]: scripts/rl_games/models/caps.py
 [reach-agent]: source/er_isaac/er_isaac/tasks/manager_based/er_isaac/config/franka/agents/rl_games_visual_reach_compact_proprio_goal_fixed_scale_ppo_cfg.yaml
