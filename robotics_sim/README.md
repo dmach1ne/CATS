@@ -71,7 +71,7 @@ and critic; policies are trained independently.
 
 See [observations][observations] and [network][network] for fixed input scaling
 and implementation. PPO settings are in the [Reach YAML][reach-agent] and
-[Place YAML][place-agent]; the Place commands below include the required overrides.
+[Place YAML][place-agent].
 
 ## Actions and Control
 
@@ -170,21 +170,7 @@ python scripts/rl_games/train.py \
   --agent rl_games_goal_fixed_scale_cfg_entry_point \
   --mode base \
   --seed "$SEED" --num_envs 512 --max_iterations 1500 \
-  --headless --enable_cameras \
-  agent.params.config.horizon_length=50 \
-  agent.params.config.save_frequency=100 \
-  agent.params.config.entropy_coef=0.0 \
-  agent.params.config.lr_schedule=null \
-  agent.params.config.learning_rate=0.0003 \
-  agent.params.config.mini_epochs=4 \
-  agent.params.network.separate=false \
-  agent.params.config.gamma=0.8 \
-  agent.params.config.tau=0.9 \
-  agent.params.config.e_clip=0.2 \
-  agent.params.config.critic_coef=0.5 \
-  agent.params.config.grad_norm=0.5 \
-  agent.params.config.minibatch_size=800 \
-  'agent.params.network.image_shape=[84,84,3]'
+  --headless --enable_cameras
 ```
 
 **CAPS**
@@ -198,21 +184,7 @@ python scripts/rl_games/train.py \
   --headless --enable_cameras \
   --caps-lambda-t 0.5 \
   --caps-lambda-s 0.1 \
-  --caps-sigma 0.2 \
-  agent.params.config.horizon_length=50 \
-  agent.params.config.save_frequency=100 \
-  agent.params.config.entropy_coef=0.0 \
-  agent.params.config.lr_schedule=null \
-  agent.params.config.learning_rate=0.0003 \
-  agent.params.config.mini_epochs=4 \
-  agent.params.network.separate=false \
-  agent.params.config.gamma=0.8 \
-  agent.params.config.tau=0.9 \
-  agent.params.config.e_clip=0.2 \
-  agent.params.config.critic_coef=0.5 \
-  agent.params.config.grad_norm=0.5 \
-  agent.params.config.minibatch_size=800 \
-  'agent.params.network.image_shape=[84,84,3]'
+  --caps-sigma 0.2
 ```
 
 **CATS**
@@ -224,21 +196,7 @@ python scripts/rl_games/train.py \
   --mode cats \
   --seed "$SEED" --num_envs 512 --max_iterations 1500 \
   --headless --enable_cameras \
-  --alpha-max 1.0 \
-  agent.params.config.horizon_length=50 \
-  agent.params.config.save_frequency=100 \
-  agent.params.config.entropy_coef=0.0 \
-  agent.params.config.lr_schedule=null \
-  agent.params.config.learning_rate=0.0003 \
-  agent.params.config.mini_epochs=4 \
-  agent.params.network.separate=false \
-  agent.params.config.gamma=0.8 \
-  agent.params.config.tau=0.9 \
-  agent.params.config.e_clip=0.2 \
-  agent.params.config.critic_coef=0.5 \
-  agent.params.config.grad_norm=0.5 \
-  agent.params.config.minibatch_size=800 \
-  'agent.params.network.image_shape=[84,84,3]'
+  --alpha-max 1.0
 ```
 
 **Evaluation**

@@ -70,15 +70,13 @@ for TASK in hopper walker; do
 done
 ```
 
-This evaluates Base, CAPS, L2C2, GRAD, ASAP and CATS. LipsNet++ uses
-the same noise magnitudes through the command below. First prepare the
-[checkpoint list](#lipsnet-checkpoint-list) for each algorithm and task.
+This evaluates Base, CAPS, L2C2, GRAD, ASAP and CATS. Evaluate LipsNet++
+at the same noise magnitudes with:
 
 ```bash
 for TASK in hopper walker; do
   python tools/evaluate_lipsnetpp_noise.py \
     --algorithm "$ALG" --environment "$TASK" \
-    --checkpoint-manifest "$ALG/results/lipsnetpp_${TASK}_checkpoints.json" \
     --output "$ALG/results/lipsnetpp_noise/$TASK"
 done
 ```
@@ -174,16 +172,12 @@ Each policy is evaluated on its own clean visited observations, using ten noise
 draws per observation. The reported metric is half the mean squared difference
 between clean and perturbed policy outputs. The noise magnitudes are
 0, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90 and 1.00.
-LipsNet++ uses `tools/evaluate_lipsnetpp_policy_sensitivity.py` with the same
-noise magnitudes and its selected configuration.
-
-After preparing the [checkpoint lists](#lipsnet-checkpoint-list), run:
+Evaluate LipsNet++ at the same noise magnitudes with:
 
 ```bash
 for TASK in ant hopper lunar pendulum walker; do
   python tools/evaluate_lipsnetpp_policy_sensitivity.py \
     --algorithm "$ALG" --environment "$TASK" \
-    --checkpoint-manifest "$ALG/results/lipsnetpp_${TASK}_checkpoints.json" \
     --output "$ALG/results/lipsnetpp_sensitivity/$TASK"
 done
 ```
@@ -239,38 +233,3 @@ output directories for transition analysis and LipsNet++ noise evaluations.
 
 Clean-evaluation CSV fields ending in `_std` contain standard deviations, not
 95% confidence intervals.
-
-### LipsNet++ Checkpoint List
-
-The LipsNet++ noise and sensitivity evaluators take an explicit list of Base
-and LipsNet++ checkpoints. After training both methods in Section 1, run this
-from `benchmark/` for each task to be evaluated. It uses the existing training
-seeds and selected configuration, and stops if any checkpoint is missing.
-
-```bash
-export ALG=ppo TASK=hopper  # set sac and the other tasks as needed
-python - <<'PY'
-import json
-import os
-from pathlib import Path
-from cats_common.lipsnetpp_experiment import selected_profile, run_name
-
-algorithm, task = os.environ['ALG'], os.environ['TASK']
-profile = selected_profile(algorithm, task)
-root = Path(algorithm) / 'results' / 'pths' / task
-seeds = [int(s) for s in (Path(algorithm) / 'tests' / 'seeds.txt').read_text().split()][:10]
-payload = dict(algorithm=algorithm, environment=task, profile=profile.name,
-               base_checkpoints=[], lipsnetpp_checkpoints=[])
-for seed in seeds:
-    base = (root / f'vanilla_ppo_{seed}' / 'final.zip' if algorithm == 'ppo'
-            else root / f'vanilla_{seed}.zip')
-    lipsnet = root / run_name(algorithm, profile, seed) / 'final.zip'
-    for key, path in [('base_checkpoints', base), ('lipsnetpp_checkpoints', lipsnet)]:
-        if not path.is_file():
-            raise FileNotFoundError(path)
-        payload[key].append(dict(training_seed=seed, path=str(path.resolve())))
-output = Path(algorithm) / 'results' / f'lipsnetpp_{task}_checkpoints.json'
-output.write_text(json.dumps(payload, indent=2) + '\n')
-print(output)
-PY
-```

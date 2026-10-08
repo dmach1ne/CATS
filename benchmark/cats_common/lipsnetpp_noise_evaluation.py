@@ -14,13 +14,48 @@ from cats_common.lipsnetpp_evaluation import (
     calculate_smoothness,
     make_environment,
 )
-from cats_common.lipsnetpp_experiment import LipsNetPlusPlusProfile
+from cats_common.lipsnetpp_experiment import (
+    LipsNetPlusPlusProfile,
+    run_name,
+    selected_profile,
+)
 
 
 @dataclass(frozen=True)
 class PolicyCheckpoint:
     training_seed: int
     path: Path
+
+
+def discover_selected_checkpoints(
+    algorithm: str,
+    environment: str,
+    benchmark_root: Path | None = None,
+) -> tuple[list[PolicyCheckpoint], list[PolicyCheckpoint]]:
+    """Find the ten paired Base/LipsNet++ runs saved by the training scripts."""
+    root = (
+        benchmark_root if benchmark_root is not None
+        else Path(__file__).resolve().parents[1]
+    )
+    seed_path = root / algorithm / "tests" / "seeds.txt"
+    seeds = [int(value) for value in seed_path.read_text().split()][:10]
+    if len(seeds) != 10 or len(set(seeds)) != 10:
+        raise ValueError(f"{seed_path} must contain ten distinct training seeds")
+    profile = selected_profile(algorithm, environment)
+    results = root / algorithm / "results" / "pths" / environment
+    base_checkpoints = []
+    lipsnetpp_checkpoints = []
+    for seed in seeds:
+        base_path = (
+            results / f"vanilla_ppo_{seed}" / "final.zip"
+            if algorithm == "ppo" else results / f"vanilla_{seed}.zip"
+        )
+        lipsnet_path = results / run_name(algorithm, profile, seed) / "final.zip"
+        base_checkpoints.append(PolicyCheckpoint(seed, base_path))
+        lipsnetpp_checkpoints.append(PolicyCheckpoint(seed, lipsnet_path))
+    _validate_checkpoints(base_checkpoints)
+    _validate_checkpoints(lipsnetpp_checkpoints)
+    return base_checkpoints, lipsnetpp_checkpoints
 
 
 def make_noise_rng(

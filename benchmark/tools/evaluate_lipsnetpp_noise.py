@@ -14,6 +14,7 @@ from cats_common.lipsnetpp_experiment import selected_profile
 from cats_common.lipsnetpp_noise_evaluation import (
     PolicyCheckpoint,
     compute_base_observation_scale,
+    discover_selected_checkpoints,
     evaluate_lipsnetpp_noise,
 )
 
@@ -82,13 +83,17 @@ def main() -> None:
             PolicyCheckpoint(int(item["training_seed"]), Path(item["path"]))
             for item in manifest["lipsnetpp_checkpoints"]
         ]
-    else:
+    elif args.base_checkpoint or args.lipsnetpp_checkpoint:
         if not args.base_checkpoint or not args.lipsnetpp_checkpoint:
             parser.error(
                 "provide --checkpoint-manifest or both repeated checkpoint options"
             )
         base_checkpoints = args.base_checkpoint
         lipsnetpp_checkpoints = args.lipsnetpp_checkpoint
+    else:
+        base_checkpoints, lipsnetpp_checkpoints = discover_selected_checkpoints(
+            args.algorithm, args.environment
+        )
 
     algorithm_root = ROOT / args.algorithm
     for import_root in (algorithm_root, algorithm_root / "tests"):

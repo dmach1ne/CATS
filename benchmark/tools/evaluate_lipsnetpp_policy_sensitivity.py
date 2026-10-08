@@ -14,6 +14,7 @@ from cats_common.lipsnetpp_experiment import selected_profile
 from cats_common.lipsnetpp_noise_evaluation import (
     PolicyCheckpoint,
     compute_base_observation_scale,
+    discover_selected_checkpoints,
 )
 from cats_common.lipsnetpp_sensitivity_evaluation import (
     evaluate_lipsnetpp_policy_sensitivity,
@@ -28,7 +29,7 @@ def main() -> None:
         choices=("ant", "hopper", "lunar", "pendulum", "walker"),
         required=True,
     )
-    parser.add_argument("--checkpoint-manifest", type=Path, required=True)
+    parser.add_argument("--checkpoint-manifest", type=Path)
     parser.add_argument(
         "--sigmas",
         default="0.0,0.05,0.1,0.15,0.2,0.25,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0",
@@ -43,27 +44,32 @@ def main() -> None:
     args = parser.parse_args()
     profile = selected_profile(args.algorithm, args.environment)
 
-    manifest = json.loads(
-        args.checkpoint_manifest.read_text(encoding="utf-8")
-    )
-    for field, expected in (
-        ("algorithm", args.algorithm),
-        ("environment", args.environment),
-        ("profile", profile.name),
-    ):
-        if str(manifest[field]).lower() != str(expected).lower():
-            raise ValueError(
-                f"checkpoint manifest {field}={manifest[field]!r}, "
-                f"expected {expected!r}"
-            )
-    base_checkpoints = [
-        PolicyCheckpoint(int(item["training_seed"]), Path(item["path"]))
-        for item in manifest["base_checkpoints"]
-    ]
-    lipsnetpp_checkpoints = [
-        PolicyCheckpoint(int(item["training_seed"]), Path(item["path"]))
-        for item in manifest["lipsnetpp_checkpoints"]
-    ]
+    if args.checkpoint_manifest is None:
+        base_checkpoints, lipsnetpp_checkpoints = discover_selected_checkpoints(
+            args.algorithm, args.environment
+        )
+    else:
+        manifest = json.loads(
+            args.checkpoint_manifest.read_text(encoding="utf-8")
+        )
+        for field, expected in (
+            ("algorithm", args.algorithm),
+            ("environment", args.environment),
+            ("profile", profile.name),
+        ):
+            if str(manifest[field]).lower() != str(expected).lower():
+                raise ValueError(
+                    f"checkpoint manifest {field}={manifest[field]!r}, "
+                    f"expected {expected!r}"
+                )
+        base_checkpoints = [
+            PolicyCheckpoint(int(item["training_seed"]), Path(item["path"]))
+            for item in manifest["base_checkpoints"]
+        ]
+        lipsnetpp_checkpoints = [
+            PolicyCheckpoint(int(item["training_seed"]), Path(item["path"]))
+            for item in manifest["lipsnetpp_checkpoints"]
+        ]
 
     algorithm_root = ROOT / args.algorithm
     for import_root in (algorithm_root, algorithm_root / "tests"):

@@ -49,7 +49,7 @@ parser.add_argument(
 )
 parser.add_argument("--label", type=str, default="")
 parser.add_argument("--agent-cfg", type=str, required=True,
-                    help="Path to the rl_games agent YAML; defaults to the historical project path.")
+                    help="Path to the saved rl_games agent YAML.")
 parser.add_argument("--summary", type=str, default=None,
                     help="Optional JSON path for structured evaluation metrics.")
 AppLauncher.add_app_launcher_args(parser)
