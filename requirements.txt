@@ -1,0 +1,10 @@
+# Benchmark dependencies. Robot simulation uses a separate Isaac Lab environment.
+torch==2.6.0
+stable-baselines3==2.5.0
+gymnasium[box2d,mujoco]==1.0.0
+mujoco==3.3.3
+numpy
+scipy
+h5py
+tensorboard
+psutil

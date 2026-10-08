@@ -12,3 +12,5 @@ logs/
 *.mp4
 *.gif
 *.h5
+benchmark/ppo/results/
+benchmark/sac/results/

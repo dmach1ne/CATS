@@ -1,5 +1,7 @@
 # Robot Simulation
 
+[Back to the project README](../README.md)
+
 Training and evaluation for Reach and Place Cube in Isaac Lab, comparing
 Base PPO, CAPS and CATS.
 
