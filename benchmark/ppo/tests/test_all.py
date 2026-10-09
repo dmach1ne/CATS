@@ -144,6 +144,7 @@ if __name__ == "__main__":
                 future.result()
             except Exception as exc:
                 print(f"[ERROR] {job_name} generated an exception: {exc}")
+                raise
 
     print(f"=== All jobs completed ===")
 
@@ -167,5 +168,5 @@ if __name__ == "__main__":
     print(f"Evaluating envs: {args.envs}")
     print(f"Evaluating algs: {eval_pth_names}")
 
-    test_some_path(save_dir_root, True, eval_pth_names, sub_dir, target_envs=args.envs)
+    test_some_path(save_dir_root, True, eval_pth_names, sub_dir, target_envs=args.envs, expected_seeds=seeds[:max_num])
     print(f"Results saved to: {save_dir_root}{sub_dir}/")

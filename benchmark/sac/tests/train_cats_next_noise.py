@@ -61,6 +61,8 @@ if __name__ == "__main__":
         parser.error("--workers must be positive")
 
     seeds = load_seeds(seed_file_path)[:args.seeds]
+    if args.seeds <= 0 or len(seeds) != args.seeds or len(set(seeds)) != len(seeds):
+        parser.error("--seeds must select a positive number of unique available seeds")
     alpha_values = [float(selected_settings("sac", args.env)["cats"]["cats_alpha"])]
     args.next_noise_sigma = 0.05
 
@@ -116,6 +118,7 @@ if __name__ == "__main__":
                     future.result()
                 except Exception as exc:
                     print(f"[ERROR] {job_name} generated an exception: {exc}")
+                    raise
 
     print("\n=== Evaluation ===")
     pth_names = [f"cats_next_noise_sac_alpha{alpha}_sigma{args.next_noise_sigma}" for alpha in alpha_values]
@@ -124,5 +127,5 @@ if __name__ == "__main__":
     env_folder = args.env if args.env else "all"
     sub_dir = f"cats_next_noise/{env_folder}/{timestamp}_alpha{alpha_str}_sigma{args.next_noise_sigma}"
 
-    test_some_path(save_dir_root, True, pth_names, sub_dir, target_envs=target_envs)
+    test_some_path(save_dir_root, True, pth_names, sub_dir, target_envs=target_envs, expected_seeds=seeds)
     print("Results saved to:", os.path.join(save_dir_root, sub_dir))

@@ -68,6 +68,8 @@ if __name__ == "__main__":
         parser.error("--workers must be positive")
 
     seeds = load_seeds(seed_file_path)[:args.seeds]
+    if args.seeds <= 0 or len(seeds) != args.seeds or len(set(seeds)) != len(seeds):
+        parser.error("--seeds must select a positive number of unique available seeds")
 
     if args.env is None:
         parser.error("--env is required")
@@ -148,6 +150,7 @@ if __name__ == "__main__":
                     future.result()
                 except Exception as exc:
                     print(f"[ERROR] {job_name} generated an exception: {exc}")
+                    raise
     
     # Free training memory before eval
     import gc
@@ -167,5 +170,5 @@ if __name__ == "__main__":
     env_folder = args.env if args.env else "all"
     sub_dir = f"fixed_controls/{env_folder}/{timestamp}_{pair_str}"
 
-    test_some_path(save_dir_root, True, pth_names, sub_dir, target_envs=target_envs)
+    test_some_path(save_dir_root, True, pth_names, sub_dir, target_envs=target_envs, expected_seeds=seeds)
     print("Results saved to:", os.path.join(save_dir_root, sub_dir))

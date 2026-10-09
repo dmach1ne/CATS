@@ -15,9 +15,20 @@ Base PPO, CAPS and CATS.
 
 ## Setup
 
-Use an Isaac Lab environment with Isaac Sim, `isaaclab_assets`, `isaaclab_rl`,
-`isaaclab_tasks`, `rl_games`, PyYAML, Pillow, NumPy and imageio-ffmpeg.
-The experiments used Isaac Lab 2.2.1. Install the simulator and assets separately.
+Use Isaac Lab 2.2.1 with Isaac Sim 5.0.0 and Python 3.11. Follow the
+[Isaac Lab installation guide](https://isaac-sim.github.io/IsaacLab/v2.2.1/source/setup/installation/pip_installation.html)
+for simulator installation and system requirements. In that Python environment,
+install Isaac Lab and its RL-Games dependencies:
+
+```bash
+git clone --branch v2.2.1 --depth 1 https://github.com/isaac-sim/IsaacLab.git
+cd IsaacLab
+./isaaclab.sh --install rl_games
+python -m pip install PyYAML Pillow imageio-ffmpeg
+```
+
+The `rl_games` extra installs the Isaac Sim fork's `python3.11` branch,
+as specified by [Isaac Lab 2.2.1](https://github.com/isaac-sim/IsaacLab/blob/v2.2.1/source/isaaclab_rl/setup.py).
 
 From the repository root:
 
@@ -83,7 +94,6 @@ until reset. All methods use the same [controller][controller].
 ## Tasks and Rewards
 
 Both tasks use the same Table55 table and protective board.
-Use checkpoints trained with the corresponding scene.
 
 - **Reach:** 18-second episodes with a new target every 6 seconds. Position
   and orientation tracking rewards; action-rate, joint-velocity and low-height
@@ -149,6 +159,9 @@ python scripts/rl_games/train.py \
 **Evaluation**
 
 ```bash
+METHOD=cats  # base, caps, or cats
+OUT="results/reach/$METHOD/seed_$SEED"
+mkdir -p "$OUT"
 python scripts/eval_success.py \
   --checkpoint "$CHECKPOINT" \
   --agent-cfg "$AGENT_CFG" \
@@ -156,8 +169,8 @@ python scripts/eval_success.py \
   --headless --enable_cameras \
   --targets 30 \
   --eval-seeds 652165 709797 242820 579787 70701 \
-  --out evaluation.mp4 \
-  --summary summary.json
+  --out "$OUT/evaluation.mp4" \
+  --summary "$OUT/summary.json"
 ```
 
 ### Place Cube
@@ -202,6 +215,9 @@ python scripts/rl_games/train.py \
 **Evaluation**
 
 ```bash
+METHOD=cats  # base, caps, or cats
+OUT="results/place_cube/$METHOD/seed_$SEED"
+mkdir -p "$OUT"
 python scripts/evaluation/eval_place.py \
   --checkpoint "$CHECKPOINT" \
   --agent-cfg "$AGENT_CFG" \
@@ -210,7 +226,7 @@ python scripts/evaluation/eval_place.py \
   --trials 50 \
   --eval-seeds 652165 709797 242820 579787 70701 \
   --goal-schedule goals.json \
-  --out summary.json
+  --out "$OUT/summary.json"
 ```
 
 ## Evaluation Metrics
@@ -225,8 +241,8 @@ not `minimum_distance_success_rate`.
 After Place evaluation, compute the reported success metric:
 
 ```bash
-python score_place.py summary.json \
-  --output reported_metrics.json
+python score_place.py "$OUT/summary.json" \
+  --output "$OUT/reported_metrics.json"
 ```
 
 Success requires XY error at most 5 cm, cube height within 0.0505 m +/- 0.005 m,

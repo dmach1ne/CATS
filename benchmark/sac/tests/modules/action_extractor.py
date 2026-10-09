@@ -1,4 +1,7 @@
 import os
+from pathlib import Path
+
+from cats_common.checkpoints import select_checkpoints
 
 import numpy as np
 
@@ -61,7 +64,7 @@ def find_matching_files(save_dir: str, al_name: str) -> list[str]:
         full_path = os.path.join(save_dir, fname)
         # Check if fname starts with search pattern
         if fname.startswith(search_pattern):
-            if os.path.isfile(full_path):
+            if os.path.isfile(full_path) and fname.endswith(".zip"):
                  # It's a file (e.g. .zip)
                  # We need only full path so load function can treat it
                  pass # Actually the original logic was returning just fname, but let's see how load uses it.
@@ -75,18 +78,20 @@ def find_matching_files(save_dir: str, al_name: str) -> list[str]:
                     matched_files.append(os.path.join(fname, "final.zip"))
     return matched_files
 
-def test_vanilla(root_dir, al_name, env_name, deterministic=True, mode="rgb_array"):
+def test_vanilla(root_dir, al_name, env_name, deterministic=True, mode="rgb_array", expected_seeds=None):
     try:
         seeds = load_seeds(seed_file_path)
         counter = 0
         if env_name not in train_envs_dict:
-            print(f"invalid env : {env_name}")
-            return 0.0
+            raise ValueError(f"Unknown environment: {env_name}")
         save_dir = root_dir + env_name + "/"
-        env = train_envs_dict[env_name](mode)()
         
         # Sort files to ensure deterministic order
-        files = sorted(find_matching_files(save_dir, al_name))
+        if expected_seeds is None:
+            training_seed_file = Path(__file__).resolve().parents[1] / "seeds.txt"
+            expected_seeds = load_seeds(training_seed_file)[:10]
+        files = select_checkpoints(sorted(find_matching_files(save_dir, al_name)), expected_seeds)
+        env = train_envs_dict[env_name](mode)()
         
         # Store mean values for each model (seed)
         seed_mean_smoothness = []
@@ -130,8 +135,7 @@ def test_vanilla(root_dir, al_name, env_name, deterministic=True, mode="rgb_arra
                 seed_mean_rewards.append(np.mean(model_rewards_list))
 
         if len(seed_mean_smoothness) == 0:
-            print(f"[SKIP] No models found for '{al_name}' in env '{env_name}'")
-            return 0.0, 0.0, 0.0, 0.0, np.array([]), 0
+            raise RuntimeError(f"No evaluation results for {al_name} on {env_name}")
         else:
             # Final statistics across seeds (N=len(files))
             smoothness_avg = np.mean(seed_mean_smoothness)
@@ -143,9 +147,9 @@ def test_vanilla(root_dir, al_name, env_name, deterministic=True, mode="rgb_arra
     except Exception as e:
         print(f"Error in test_vanilla: {e}")
         traceback.print_exc()
-        return 0.0, 0.0, 0.0, 0.0, np.array([])
+        raise
 
-def test_some_path(root_dir, deterministic=True, add_al_names : list[str] = [], sub_dir="", target_envs=None):
+def test_some_path(root_dir, deterministic=True, add_al_names : list[str] = [], sub_dir="", target_envs=None, expected_seeds=None):
     basic_al = []
     basic_envs = target_envs if target_envs is not None else list(train_envs_dict.keys())
 
@@ -165,7 +169,7 @@ def test_some_path(root_dir, deterministic=True, add_al_names : list[str] = [], 
         re_mean_row = [al_name]
         re_std_row = [al_name]
         for env_name in basic_envs:
-            smoothness_mean, smoothness_std, reward_mean, reward_std, action_np, _ = test_vanilla(root_dir, al_name, env_name, deterministic)
+            smoothness_mean, smoothness_std, reward_mean, reward_std, action_np, _ = test_vanilla(root_dir, al_name, env_name, deterministic, expected_seeds=expected_seeds)
             
             if isinstance(action_np, np.ndarray) and action_np.size != 0:
                 comb_env_path = os.path.join(combined_path, env_name)

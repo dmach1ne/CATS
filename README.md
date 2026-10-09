@@ -11,8 +11,7 @@ Smoothness)**. CATS combines a temporal penalty with a linearly increasing
 coefficient to learn smooth control without an explicit spatial penalty.
 
 This repository contains the PPO and SAC experiments, the hyperparameters used
-in the paper, and the Reach and Place Cube simulation tasks. Pretrained
-checkpoints and real-robot deployment code are not included.
+in the paper, and the Reach and Place Cube simulation tasks.
 
 ## Installation
 
@@ -32,8 +31,7 @@ or use `MUJOCO_GL=osmesa` with the OSMesa system library installed.
 
 [environment-original.yml](environment-original.yml) preserves the original
 environment specification. Robot simulation uses a **separate Isaac Lab
-environment**; follow its [setup instructions](robotics_sim/README.md)
-instead of installing these benchmark dependencies into Isaac Lab.
+environment**; see its [setup instructions](robotics_sim/README.md).
 
 ## Quick Start
 
@@ -88,8 +86,7 @@ We thank its authors for releasing their code, including the PPO/SAC experiment
 infrastructure and smoothness evaluation routines on which this repository builds.
 The benchmark also uses [Stable-Baselines3](https://github.com/DLR-RM/stable-baselines3).
 Robot simulation uses [Isaac Lab](https://github.com/isaac-sim/IsaacLab) and
-[rl_games](https://github.com/Denys88/rl_games). Upstream notices are retained in
-[`licenses/`](licenses/).
+[rl_games](https://github.com/Denys88/rl_games).
 
 ## Citation
 

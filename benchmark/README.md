@@ -23,8 +23,7 @@ and defaults to the number of training seeds. Lower it if GPU memory is limited.
 Start by training the benchmark policies in Section 1. We reuse these checkpoints
 to evaluate observation-noise robustness, the transition-induced spatial effect,
 and policy sensitivity. The regularization comparison, next-state-noise extension,
-fixed-coefficient controls, and robot experiments require additional training,
-as described below.
+fixed-coefficient controls, and robot experiments require additional training.
 
 ### 1. Main Results
 
@@ -33,8 +32,7 @@ with Base, CATS, CAPS, L2C2, Grad-CAPS (GRAD), ASAP and LipsNet++.
 
 #### Training and Clean Evaluation (Table I)
 
-With `ALG` and the import paths set as above, train and evaluate the methods
-on Hopper:
+Train and evaluate on Hopper:
 
 ```bash
 python "$ALG/tests/train_cats.py" --env hopper --device auto
@@ -47,12 +45,10 @@ python "$ALG/tests/evaluate_lipsnetpp.py" --env hopper
 ```
 
 Replace `hopper` with `ant`, `walker`, `lunar` or `pendulum` for the other tasks.
-For SAC, set `ALG=sac` and update the import paths as shown at the top of this guide.
 
 Training uses ten seeds and each task's full training budget. CATS and the
 comparison-method launcher evaluate their saved policies after training;
-LipsNet++ uses the separate evaluation command above. Keep these checkpoints
-for the observation-noise, spatial-effect and policy-sensitivity evaluations.
+LipsNet++ uses the separate evaluation command.
 
 Task budgets and method parameters are in `$ALG/tests/modules/params.py`.
 CATS and LipsNet++ load their selected hyperparameters from
@@ -60,9 +56,8 @@ CATS and LipsNet++ load their selected hyperparameters from
 
 #### Observation-Noise Evaluation (Table II)
 
-Evaluate the checkpoints trained above on Hopper and Walker under PPO and SAC,
-with noise magnitudes from 0 to 0.5 in steps of 0.1. No additional training is
-required:
+Evaluate the Table I checkpoints on Hopper and Walker under PPO and SAC,
+with noise magnitudes from 0 to 0.5 in steps of 0.1:
 
 ```bash
 for TASK in hopper walker; do
@@ -84,9 +79,7 @@ done
 #### Training Overhead
 
 Use `ppo/tests/benchmark_training_cost.py` to measure wall-clock training time
-on PPO Walker. This runs training separately rather than evaluating an existing
-checkpoint. Use the same hardware and training configuration for each method
-when comparing overhead.
+on PPO Walker. Use the same hardware and training configuration for each method.
 
 With `ALG=ppo` and the PPO import paths set, run the timing measurements
 sequentially so methods do not compete for the same GPU:
@@ -228,8 +221,7 @@ training, evaluation and task settings.
 Training writes checkpoints to `$ALG/results/pths/` and TensorBoard logs to
 `$ALG/results/tensorboard_logs/`. Clean evaluation prints its output directory;
 LipsNet++ clean evaluation writes `summary.csv` and `episodes.csv` under
-`$ALG/results/pths/lipsnetpp_evaluation/<task>/`. The commands above give explicit
-output directories for transition analysis and LipsNet++ noise evaluations.
+`$ALG/results/pths/lipsnetpp_evaluation/<task>/`.
 
 Clean-evaluation CSV fields ending in `_std` contain standard deviations, not
 95% confidence intervals.

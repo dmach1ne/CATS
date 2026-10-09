@@ -1,4 +1,7 @@
 import os
+from pathlib import Path
+
+from cats_common.checkpoints import select_checkpoints
 
 import numpy as np
 
@@ -63,16 +66,16 @@ def find_matching_files(save_dir: str, al_name: str) -> list[str]:
         if fname.startswith(search_pattern) and os.path.isfile(os.path.join(os.path.join(save_dir, fname), 'final.zip'))
     ]
 
-def test_vanilla(root_dir, al_name, env_name, deterministic=True, mode="rgb_array", max_seeds=None):
+def test_vanilla(root_dir, al_name, env_name, deterministic=True, mode="rgb_array", max_seeds=None, expected_seeds=None):
     try:
         seeds = load_seeds(seed_file_path)
         if env_name not in train_envs_dict:
-            print(f"invalid env : {env_name}")
-            return 0.0
+            raise ValueError(f"Unknown environment: {env_name}")
         save_dir = root_dir + env_name + "/"
-        files = sorted(find_matching_files(save_dir, al_name))
-        if max_seeds is not None and max_seeds > 0:
-            files = files[:max_seeds]
+        if expected_seeds is None:
+            training_seed_file = Path(__file__).resolve().parents[1] / "seeds.txt"
+            expected_seeds = load_seeds(training_seed_file)[:max_seeds if max_seeds is not None else 10]
+        files = select_checkpoints(sorted(find_matching_files(save_dir, al_name)), expected_seeds)
 
         # Store mean values for each model (seed)
         seed_mean_smoothness = []
@@ -141,8 +144,7 @@ def test_vanilla(root_dir, al_name, env_name, deterministic=True, mode="rgb_arra
                 seed_mean_rewards.append(np.mean(model_rewards_list))
 
         if len(seed_mean_smoothness) == 0:
-            print(f"[SKIP] No models found for '{al_name}' in env '{env_name}'")
-            return 0.0, 0.0, 0.0, 0.0, np.array([]), 0
+            raise RuntimeError(f"No evaluation results for {al_name} on {env_name}")
         else:
             # Final statistics across seeds (N=len(files))
             smoothness_avg = np.mean(seed_mean_smoothness)
@@ -154,9 +156,9 @@ def test_vanilla(root_dir, al_name, env_name, deterministic=True, mode="rgb_arra
     except Exception as e:
         print(f"Error in test_vanilla: {e}")
         traceback.print_exc()
-        return 0.0, 0.0, 0.0, 0.0, np.array([]), 0
+        raise
 
-def test_some_path(root_dir, deterministic=True, add_al_names: list[str] = [], sub_dir="", target_envs: list[str] = None, max_seeds: int = None):
+def test_some_path(root_dir, deterministic=True, add_al_names: list[str] = [], sub_dir="", target_envs: list[str] = None, max_seeds: int = None, expected_seeds=None):
     basic_al = []
     if target_envs:
         basic_envs = target_envs
@@ -182,7 +184,7 @@ def test_some_path(root_dir, deterministic=True, add_al_names: list[str] = [], s
         current_seeds = []
         
         for env_name in basic_envs:
-            smoothness_mean, smoothness_std, reward_mean, reward_std, action_np, num_seeds = test_vanilla(root_dir, al_name, env_name, deterministic, max_seeds=max_seeds)
+            smoothness_mean, smoothness_std, reward_mean, reward_std, action_np, num_seeds = test_vanilla(root_dir, al_name, env_name, deterministic, max_seeds=max_seeds, expected_seeds=expected_seeds)
 
             if isinstance(action_np, np.ndarray) and action_np.size != 0:
                 comb_env_path = os.path.join(combined_path, env_name)
