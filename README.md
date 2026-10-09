@@ -6,12 +6,39 @@ College of Software, Kyung Hee University
 
 [Paper](https://arxiv.org/abs/2610.07910) | [Benchmark experiments](benchmark/README.md) | [Robot simulation](robotics_sim/README.md)
 
-Official implementation of **CATS (Conditioning for Action using only Temporal
-Smoothness)**. CATS combines a temporal penalty with a linearly increasing
-coefficient to learn smooth control without an explicit spatial penalty.
+Official implementation of **CATS (Conditioning for Action using only Temporal Smoothness)**.
 
-This repository contains the PPO and SAC experiments, the hyperparameters used
-in the paper, and the Reach and Place Cube simulation tasks.
+## Abstract
+
+Deep Reinforcement Learning policies can produce nonsmooth action oscillations that hinder deployment on physical robots. Existing architectural and penalty-based approaches seek spatial smoothness by directly reducing sensitivity to changes in state inputs, but their broad constraints can degrade task performance as stronger smoothing is pursued. Temporal regularization instead constrains action differences along observed transitions, but has been considered unable to provide the spatial smoothness needed under observation noise. We revisit this assumption by proving that the temporal penalty bounds the expected action differences between current states sharing a next state, revealing a spatial effect that empirically extends to spatial smoothness. Building on this finding, we propose Conditioning for Action using only Temporal Smoothness (CATS), which combines a temporal penalty with linear ramp-up. We highlight temporal regularization's ability to provide spatial smoothness while better preserving task performance than explicit spatial regularization. Through linear ramp-up, CATS allows the policy to learn rewarding behavior before progressively smoothing its actions, improving return preservation and both temporal and spatial smoothness. Experiments in both simulation and the real world show that CATS substantially reduces action oscillation without degrading task performance, with little computational overhead.
+
+This repository contains the PPO and SAC experiments, the hyperparameters used in the paper, and the Reach and Place Cube tasks.
+
+## Results
+
+### Action Smoothness on Ant
+
+[![PPO vs. CATS on Ant](benchmark/assets/ant_ppo_vs_cats.png)](benchmark/assets/ant_ppo_vs_cats.mp4)
+
+### Spatial Regularization Comparison at Matched Smoothness
+
+[![Spatial regularization vs. CATS](benchmark/assets/spatial_regularization_vs_cats.png)](benchmark/assets/spatial_regularization_vs_cats.mp4)
+
+Because CATS does not directly impose broad constraints, it can provide both forms of smoothness while preserving performance.
+
+### Observation Noise
+
+[![PPO vs. CATS under observation noise](benchmark/assets/hopper_observation_noise.png)](benchmark/assets/hopper_observation_noise.mp4)
+
+The induced spatial smoothness allows CATS to remain smooth and achieve higher returns under observation noise.
+
+### Real-World Reach
+
+| Main view | Additional view |
+| --- | --- |
+| [![Reach main-camera comparison](robotics_sim/assets/reach_real_comparison.png)](robotics_sim/assets/reach_real_ppo_vs_cats.mp4) | [![Reach additional-view comparison](robotics_sim/assets/reach_context_comparison.png)](robotics_sim/assets/reach_context_ppo_vs_cats.mp4) |
+
+We compare PPO and CATS on a real robot. We recorded an additional camera view to show PPO's small oscillations more clearly.
 
 ## Installation
 
