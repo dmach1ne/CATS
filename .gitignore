@@ -20,3 +20,8 @@ robotics_sim/results/
 !benchmark/assets/spatial_regularization_vs_cats.mp4
 !benchmark/assets/hopper_observation_noise.mp4
 !benchmark/assets/ant_ppo_vs_cats.mp4
+!benchmark/assets/ant_ppo_vs_cats.gif
+!benchmark/assets/spatial_regularization_vs_cats.gif
+!benchmark/assets/hopper_observation_noise.gif
+!robotics_sim/assets/reach_real_ppo_vs_cats.gif
+!robotics_sim/assets/reach_context_ppo_vs_cats.gif

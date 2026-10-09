@@ -12,9 +12,13 @@ Base PPO, CAPS and CATS.
 
 ### Reach: PPO vs. CATS
 
-| Main view | Additional view |
-| --- | --- |
-| [![Reach real-robot comparison](assets/reach_real_comparison.png)](assets/reach_real_ppo_vs_cats.mp4) | [![Reach additional-view comparison](assets/reach_context_comparison.png)](assets/reach_context_ppo_vs_cats.mp4) |
+**Main view**
+
+[![Reach real-robot comparison](assets/reach_real_ppo_vs_cats.gif)](assets/reach_real_ppo_vs_cats.mp4)
+
+**Additional view**
+
+[![Reach additional-view comparison](assets/reach_context_ppo_vs_cats.gif)](assets/reach_context_ppo_vs_cats.mp4)
 
 [Setup](#setup) | [Policy](#policy-and-observations) |
 [Control](#actions-and-control) | [Tasks](#tasks-and-rewards) |

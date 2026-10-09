@@ -18,25 +18,29 @@ This repository contains the PPO and SAC experiments, the hyperparameters used i
 
 ### Action Smoothness on Ant
 
-[![PPO vs. CATS on Ant](benchmark/assets/ant_ppo_vs_cats.png)](benchmark/assets/ant_ppo_vs_cats.mp4)
+[![PPO vs. CATS on Ant](benchmark/assets/ant_ppo_vs_cats.gif)](benchmark/assets/ant_ppo_vs_cats.mp4)
 
 ### Spatial Regularization Comparison at Matched Smoothness
 
-[![Spatial regularization vs. CATS](benchmark/assets/spatial_regularization_vs_cats.png)](benchmark/assets/spatial_regularization_vs_cats.mp4)
+[![Spatial regularization vs. CATS](benchmark/assets/spatial_regularization_vs_cats.gif)](benchmark/assets/spatial_regularization_vs_cats.mp4)
 
 Because CATS does not directly impose broad constraints, it can provide both forms of smoothness while preserving performance.
 
 ### Observation Noise
 
-[![PPO vs. CATS under observation noise](benchmark/assets/hopper_observation_noise.png)](benchmark/assets/hopper_observation_noise.mp4)
+[![PPO vs. CATS under observation noise](benchmark/assets/hopper_observation_noise.gif)](benchmark/assets/hopper_observation_noise.mp4)
 
 The induced spatial smoothness allows CATS to remain smooth and achieve higher returns under observation noise.
 
 ### Real-World Reach
 
-| Main view | Additional view |
-| --- | --- |
-| [![Reach main-camera comparison](robotics_sim/assets/reach_real_comparison.png)](robotics_sim/assets/reach_real_ppo_vs_cats.mp4) | [![Reach additional-view comparison](robotics_sim/assets/reach_context_comparison.png)](robotics_sim/assets/reach_context_ppo_vs_cats.mp4) |
+**Main view**
+
+[![Reach main-camera comparison](robotics_sim/assets/reach_real_ppo_vs_cats.gif)](robotics_sim/assets/reach_real_ppo_vs_cats.mp4)
+
+**Additional view**
+
+[![Reach additional-view comparison](robotics_sim/assets/reach_context_ppo_vs_cats.gif)](robotics_sim/assets/reach_context_ppo_vs_cats.mp4)
 
 We compare PPO and CATS on a real robot. We recorded an additional camera view to show PPO's small oscillations more clearly.
 
