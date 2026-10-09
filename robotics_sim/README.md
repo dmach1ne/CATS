@@ -5,8 +5,10 @@
 Training and evaluation for Reach and Place Cube in Isaac Lab, comparing
 Base PPO, CAPS and CATS.
 
-- **Reach:** move the end effector to a target in free space.
-- **Place Cube:** start with a grasped cube and place it at a target on the table.
+| Reach | Place Cube |
+| --- | --- |
+| ![Reach simulation](assets/reach.png) | ![Place Cube simulation](assets/place_cube.png) |
+| Move the end effector to a target in free space. | Start with a grasped cube and place it at a target on the table. |
 
 [Setup](#setup) | [Policy](#policy-and-observations) |
 [Control](#actions-and-control) | [Tasks](#tasks-and-rewards) |
