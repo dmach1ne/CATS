@@ -26,9 +26,6 @@ section { scroll-margin-top: 20px; }
 .skip-link:focus { top: 12px; }
 .container.is-max-desktop { max-width: 960px !important; }
 .hero-body { padding: 48px 24px 28px; }
-.section-links { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px 24px; margin-top: 24px; font-size: 14px; }
-.section-links a { color: #626262; }
-.section-links a:hover { color: #1686c9; }
 .publication-title { font-size: 34px; line-height: 1.16; font-weight: 700; margin-bottom: 24px !important; color: #363636; }
 .publication-authors { font-size: 20px; line-height: 1.7; color: #1686c9; }
 .author-block { display: inline-block; margin: 0 3px; }
@@ -41,7 +38,7 @@ section { scroll-margin-top: 20px; }
 .section { padding: 48px 24px; }
 .teaser { padding-top: 0; padding-bottom: 38px; }
 .result-video { display: block; width: 100%; height: auto; background: #fff; object-fit: contain; }
-figcaption, .result-caption { max-width: 960px; margin-left: auto; margin-right: auto; font-size: 17px; line-height: 1.65; margin-top: 18px; text-align: center; }
+figcaption, .result-caption { max-width: 960px; margin-left: auto; margin-right: auto; font-size: 16px; line-height: 1.65; margin-top: 18px; text-align: center; }
 .teaser-caption { font-size: 20px; margin-top: 14px; }
 .abstract-section { background: #f5f5f5; }
 .abstract-section { padding-top: 24px; padding-bottom: 24px; }
@@ -55,16 +52,18 @@ figcaption, .result-caption { max-width: 960px; margin-left: auto; margin-right:
 .wide-container { max-width: 1100px !important; }
 .concept-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 26px; margin-top: 34px; }
 .two-column-media { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; }
-.two-column-media figcaption { font-size: 16px; text-align: left; }
+.two-column-media figcaption { font-size: 15px; text-align: left; }
 .motivation-media .result-video { aspect-ratio: 1.246; object-fit: contain; }
 .motivation-media { max-width: 740px; margin: auto; }
 .two-column-media .figure-note { font-size: 12px; line-height: 1.5; color: #737373; margin-top: 8px; }
 .temporal-media { max-width: 1000px; margin: 34px auto 0; }
 .temporal-media .concept-video { aspect-ratio: 1.856; }
+#spatial-motivation .two-column-media { max-width: 960px; gap: 12px; }
+#spatial-motivation .tradeoff-figure { display: block; width: 100%; height: auto; }
 .method-algorithm { display: block; font-weight: 400; font-size: 14px; color: #626262; margin-top: 4px; }
 .concept-title { font-size: 20px; line-height: 1.4; font-weight: 700; text-align: center; min-height: 56px; }
 .concept-video { aspect-ratio: 1.44; object-fit: contain; }
-.concept-grid figcaption { font-size: 16px; text-align: left; line-height: 1.7; margin-top: 16px; }
+.concept-grid figcaption { font-size: 15px; text-align: left; line-height: 1.7; margin-top: 16px; }
 .spatial-color { color: #b73339; }
 .temporal-color { color: #1767ae; }
 .induced-color { color: #247a4f; }
@@ -72,7 +71,6 @@ figcaption, .result-caption { max-width: 960px; margin-left: auto; margin-right:
 .ramp-section figure { max-width: 860px; margin: auto; }
 .comparison-controls { display: grid; grid-template-columns: 60px minmax(0, 140px) 60px; align-items: center; gap: 20px; width: 100%; max-width: 300px; margin: 0 auto 22px; }
 #comparison-condition { display: flex; align-items: center; justify-content: center; min-width: 0; text-align: center; white-space: nowrap; }
-#real-main-video { aspect-ratio: 1996 / 666; height: auto; object-fit: cover; object-position: center top; }
 .noise-controls { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 12px; margin-bottom: 22px; font-size: 14px; }
 .noise-scale-buttons { display: flex; border: 1px solid #d1d1d1; border-radius: 4px; overflow: hidden; }
 .noise-scale-buttons button { --grain-opacity: 0; --button-background: #fff; position: relative; isolation: isolate; overflow: hidden; width: 44px; height: 38px; border: 0; border-right: 1px solid #d1d1d1; background: var(--button-background); color: #333; font: inherit; text-shadow: 0 0 3px var(--button-background), 0 0 3px var(--button-background); cursor: pointer; }
@@ -95,6 +93,7 @@ figcaption, .result-caption { max-width: 960px; margin-left: auto; margin-right:
 .abstract-container { max-width: 800px !important; }
 .abstract-section .content { font-size: 16px; line-height: 1.85; text-align: justify; }
 .title.is-3 { font-size: 30px; line-height: 1.3; color: #363636; margin-bottom: 28px; }
+.title-qualifier { font-size: 20px; }
 .result-section { padding-top: 52px; padding-bottom: 30px; }
 .view-title { font-size: 18px; line-height: 1.4; margin-bottom: 10px; font-weight: 700; }
 .real-views { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; }
@@ -103,8 +102,15 @@ figcaption, .result-caption { max-width: 960px; margin-left: auto; margin-right:
 #noise .compact-media > .result-video, #noise .comparison-labels { max-width: 800px; margin-left: auto; margin-right: auto; }
 .comparison-labels { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; text-align: center; font-weight: 700; font-size: 17px; margin-bottom: 10px; }
 .comparison-labels.two-labels { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.comparison-labels .method-label { min-width: 0; }
+.video-metrics { display: inline-block; font-size: 12px; font-weight: 400; line-height: 1.5; color: #555; font-variant-numeric: tabular-nums; }
+#spatial .comparison-labels { gap: 1.652893%; }
+#noise .comparison-labels { gap: 1.910828%; }
+#real .comparison-labels { gap: 2.439024%; }
 .sensitivity-figure img { display: block; width: 100%; height: auto; }
 .sensitivity-note { margin: -16px 0 22px; text-align: center; font-size: 14px; line-height: 1.5; color: #666; }
+.conclusion-section { padding-bottom: 0; }
+.conclusion-content p { font-size: 16px; line-height: 1.8; text-align: center; }
 .citation-section { padding-top: 60px; }
 .citation-heading { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
 .citation-heading .title { margin: 0; }
@@ -123,14 +129,14 @@ pre { border-radius: 4px; padding: 24px; background: #f5f5f5; white-space: pre-w
   .title.is-3 { font-size: 25px; }
   .teaser-caption { font-size: 17px; }
   .abstract-section .content { text-align: left; line-height: 1.75; }
-  figcaption, .result-caption { text-align: left; font-size: 16px; }
+  figcaption, .result-caption, .conclusion-content p { text-align: left; font-size: 15px; }
   .teaser-caption { text-align: center; }
   pre { padding: 16px; font-size: 12px; }
   .section-intro { text-align: left; font-size: 16px; }
   .comparison-controls { gap: 12px; }
   .comparison-controls label { justify-content: space-between; width: 100%; }
   .comparison-labels { font-size: 12px; gap: 4px; }
-  #spatial .comparison-labels { display: none; }
+  #spatial .comparison-labels { grid-template-columns: minmax(0, 1fr); gap: 4px; }
 }
 @media (max-width: 900px) {
   .concept-grid { grid-template-columns: minmax(0, 1fr); gap: 36px; max-width: 640px; margin-left: auto; margin-right: auto; }
@@ -138,3 +144,4 @@ pre { border-radius: 4px; padding: 24px; background: #f5f5f5; white-space: pre-w
   .concept-video { aspect-ratio: auto; }
 }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+#spatial-motivation figcaption, #temporal figcaption { font-size: 14px; }

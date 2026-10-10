@@ -25,3 +25,4 @@ robotics_sim/results/
 !benchmark/assets/hopper_observation_noise.gif
 !robotics_sim/assets/reach_real_ppo_vs_cats.gif
 !robotics_sim/assets/reach_context_ppo_vs_cats.gif
+!project-page/static/media/presentation/*.mp4

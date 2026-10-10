@@ -8,6 +8,7 @@
   <title>CATS | Revisiting Temporal Regularization for Smooth Control</title>
   <link rel="stylesheet" href="static/css/bulma.min.css">
   <link rel="stylesheet" href="static/css/site.css">
+  <script defer src="static/js/video-metrics.js"></script>
   <script defer src="static/js/site.js"></script>
 </head>
 <body>
@@ -28,13 +29,6 @@
           <a class="button is-dark is-rounded" href="https://arxiv.org/abs/2610.07910">arXiv</a>
           <a class="button is-dark is-rounded" href="https://github.com/dmach1ne/CATS"><img class="link-icon" src="static/icons/code-xml.svg" alt="">Code</a>
         </div>
-        <nav class="section-links" aria-label="Page sections">
-          <a href="#overview">Overview</a>
-          <a href="#method">Method</a>
-          <a href="#spatial">Results</a>
-          <a href="#real">Real robot</a>
-          <a href="#citation">BibTeX</a>
-        </nav>
       </div>
     </div>
   </header>
@@ -70,8 +64,8 @@
     </section>
     <section class="section method-section" id="spatial-motivation" aria-labelledby="spatial-motivation-title">
       <div class="container wide-container">
-        <h2 class="title is-3 has-text-centered" id="spatial-motivation-title">Why broad spatial constraints can hurt performance</h2>
-        <p class="section-intro">Although policy inputs are temporally related, many existing methods characterize smoothness over the state space. Such spatial regularization imposes broad, direct constraints that may suppress important action changes.</p>
+        <h2 class="title is-3 has-text-centered" id="spatial-motivation-title">Limitations of Spatial Regularization</h2>
+        <p class="section-intro">Although action oscillation is fundamentally a change in policy outputs over time, many existing methods seek smoothness across the state space without considering the temporal ordering of inputs. While they can promote spatial smoothness, their broad constraints may also restrict action changes needed for high return.</p>
         <div class="two-column-media temporal-media">
           <figure>
             <h3 class="concept-title spatial-color">Spatial regularization</h3>
@@ -80,10 +74,8 @@
             </video>
           </figure>
           <figure>
-            <h3 class="concept-title">CAPS spatial-only</h3>
-            <video id="caps-example-video" class="result-video concept-video" muted loop playsinline preload="none" width="924" height="742" poster="static/media/example-ppo-hopper-caps_spatial.jpg" aria-label="CAPS spatial-only on PPO Hopper">
-              <source data-src="static/media/example-ppo-hopper-caps_spatial.mp4" type="video/mp4">
-            </video>
+            <a href="static/media/regularization-return-smoothness.png"><img class="tradeoff-figure" src="static/media/regularization-return-smoothness.png" alt="Figure 2: temporal-only CAPS preserves more return than spatial-only CAPS and LipsNet++ under stronger smoothing on Hopper and Walker." loading="lazy"></a>
+            <figcaption>At stronger smoothing levels (from right to left), temporal regularization preserves more return than spatial regularization.</figcaption>
           </figure>
         </div>
       </div>
@@ -97,21 +89,21 @@
             <video id="temporal-concept-video" class="result-video concept-video" muted loop playsinline preload="none" width="1440" height="776" poster="static/media/temporal-regularization.jpg" aria-label="Temporal regularization follows sampled next-state directions">
               <source data-src="static/media/temporal-regularization.mp4" type="video/mp4">
             </video>
-            <figcaption>Because temporal regularization only constrains actions along transitions, it has been regarded as unrelated to spatial smoothness. Prior methods have thus added spatial penalties, reintroducing broad constraints and extra cost.</figcaption>
+            <figcaption>Temporal regularization instead constrains action differences only along observed transitions, better preserving return under strong smoothing. However, sensitivity to noise in other directions appears unaddressed. Prior methods have thus added spatial penalties, reintroducing broad constraints and unclear penalty weighting.</figcaption>
           </figure>
           <figure>
             <h3 class="concept-title induced-color">Induced spatial smoothness</h3>
             <video id="induced-concept-video" class="result-video concept-video" muted loop playsinline preload="none" width="1440" height="776" poster="static/media/induced-spatial-smoothness.jpg" aria-label="Temporal regularization can indirectly align actions at nearby states">
               <source data-src="static/media/induced-spatial-smoothness.mp4" type="video/mp4">
             </video>
-            <figcaption>During training, however, the next state is not fixed. We hypothesize that nearby states share possible next states, allowing temporal penalties to indirectly align their actions and promote spatial smoothness.</figcaption>
+            <figcaption>During training, however, the next state is not fixed, nor does the policy repeatedly visit only the same current state. We hypothesize that nearby states encountered during training share possible next states, through which temporal penalties can indirectly align their actions and promote spatial smoothness.</figcaption>
           </figure>
         </div>
       </div>
     </section>
     <section class="section result-section" id="spatial" aria-labelledby="spatial-title">
       <div class="container wide-container">
-        <h2 class="title is-3 has-text-centered" id="spatial-title">Spatial regularization at matched smoothness</h2>
+        <h2 class="title is-3 has-text-centered" id="spatial-title">vs. Spatial Regularization <span class="title-qualifier">(Matched Smoothness)</span></h2>
         <div class="comparison-controls">
           <button id="comparison-prev" class="button" type="button" aria-controls="spatial-video" title="Previous algorithm and task">Prev.</button>
           <span id="comparison-condition" aria-live="polite">PPO / Hopper</span>
@@ -119,20 +111,20 @@
         </div>
         <figure>
           <div class="comparison-labels" aria-hidden="true"><span>CAPS spatial-only</span><span>LipsNet++</span><span>CATS</span></div>
-          <video id="spatial-video" class="result-video" muted playsinline preload="none" width="1872" height="502" poster="static/media/matched-ppo-hopper-all.jpg" aria-label="CAPS spatial-only, LipsNet++, and CATS on PPO Hopper at comparable smoothness">
-            <source data-src="static/media/matched-ppo-hopper-all.mp4" type="video/mp4">
+          <video id="spatial-video" class="result-video" muted playsinline preload="none" width="1936" height="502" poster="static/media/presentation/matched-ppo-hopper-all.jpg" aria-label="CAPS spatial-only, LipsNet++, and CATS on PPO Hopper at comparable smoothness">
+            <source data-src="static/media/presentation/matched-ppo-hopper-all.mp4" type="video/mp4">
           </video>
-          <figcaption>At comparable action smoothness, CATS preserves more return than the spatial regularizers shown here.</figcaption>
+          <figcaption>By avoiding direct spatial regularization, CATS preserves more return than the spatial regularizers shown here at comparable action smoothness.</figcaption>
         </figure>
       </div>
     </section>
     <section class="section result-section" id="sensitivity" aria-labelledby="sensitivity-title">
       <div class="container wide-container">
         <h2 class="title is-3 has-text-centered" id="sensitivity-title">Spatial smoothness without a spatial penalty</h2>
-        <p class="sensitivity-note">(Lower sensitivity indicates greater spatial smoothness.)</p>
+        <p class="sensitivity-note">(Lower sensitivity indicates better spatial smoothness.)</p>
         <figure class="sensitivity-figure">
           <a href="static/media/policy-sensitivity.png"><img src="static/media/policy-sensitivity.png" alt="Policy sensitivity under observation noise for PPO and SAC on Ant, Hopper, Walker, LunarLander, and Pendulum, with 95% confidence intervals." width="1800" height="553" loading="lazy"></a>
-          <figcaption>CATS achieves policy sensitivity comparable to several explicit spatial regularization methods. On Hopper, CATS and LipsNet++ have comparable sensitivity, but only CATS preserves task performance.</figcaption>
+          <figcaption>CATS achieves policy sensitivity comparable to several explicit spatial regularization methods without an additional spatial penalty, yet better preserves return (see <a href="https://arxiv.org/pdf/2610.07910#page=3.95">Table I</a>). These results suggest that performance degradation stems from directly constraining action changes across multiple state-space directions, rather than from spatial smoothness itself.</figcaption>
         </figure>
       </div>
     </section>
@@ -152,10 +144,10 @@
         </div>
         <figure class="compact-media">
           <div class="comparison-labels two-labels" aria-hidden="true"><span>PPO</span><span>CATS</span></div>
-          <video id="noise-video" class="result-video" muted playsinline preload="none" width="1848" height="742" poster="static/media/noise-0.5.jpg" aria-label="PPO and CATS on Hopper with observation noise scale 0.5">
-            <source data-src="static/media/noise-0.5.mp4" type="video/mp4">
+          <video id="noise-video" class="result-video" muted playsinline preload="none" width="1884" height="742" poster="static/media/presentation/noise-0.5.jpg" aria-label="PPO and CATS on Hopper with observation noise scale 0.5">
+            <source data-src="static/media/presentation/noise-0.5.mp4" type="video/mp4">
           </video>
-          <figcaption>CATS remains substantially smoother across noise scales while maintaining comparable or higher return than PPO.</figcaption>
+          <figcaption>The induced spatial smoothness allows CATS to remain substantially smoother across noise scales while maintaining comparable or higher return than PPO.</figcaption>
         </figure>
       </div>
     </section>
@@ -165,18 +157,28 @@
         <div class="real-views compact-media">
           <figure>
             <h3 class="view-title" id="main-view-title">Main view</h3>
-            <video id="real-main-video" class="result-video" data-sync-group="real" muted loop playsinline preload="none" width="1996" height="846" poster="../robotics_sim/assets/reach_real_comparison.png" aria-labelledby="main-view-title">
-              <source data-src="../robotics_sim/assets/reach_real_ppo_vs_cats.mp4" type="video/mp4">
+            <div class="comparison-labels two-labels" aria-hidden="true"><span>PPO</span><span>CATS</span></div>
+            <video id="real-main-video" class="result-video" data-sync-group="real" muted loop playsinline preload="none" width="1968" height="540" poster="static/media/presentation/real-main.jpg" aria-label="Main view: PPO on the left and CATS on the right">
+              <source data-src="static/media/presentation/real-main.mp4" type="video/mp4">
             </video>
           </figure>
           <figure>
             <h3 class="view-title" id="additional-view-title">Additional view</h3>
-            <video id="real-additional-video" class="result-video" data-sync-group="real" muted loop playsinline preload="none" width="1996" height="666" poster="../robotics_sim/assets/reach_context_comparison.png" aria-labelledby="additional-view-title">
-              <source data-src="../robotics_sim/assets/reach_context_ppo_vs_cats.mp4" type="video/mp4">
+            <div class="comparison-labels two-labels" aria-hidden="true"><span>PPO</span><span>CATS</span></div>
+            <video id="real-additional-video" class="result-video" data-sync-group="real" muted loop playsinline preload="none" width="1968" height="540" poster="static/media/presentation/real-additional.jpg" aria-label="Additional view: PPO on the left and CATS on the right">
+              <source data-src="static/media/presentation/real-additional.mp4" type="video/mp4">
             </video>
           </figure>
         </div>
-        <p class="result-caption">We compare PPO and CATS on real-world Reach, where CATS retains smooth control without an explicit spatial penalty. We recorded an additional camera view to show PPO's small but persistent oscillations more clearly.</p>
+        <p class="result-caption">On real-world Reach, PPO's abrupt movements prevented the end effector from remaining near the target, reducing task performance. In contrast, CATS better preserved task performance while maintaining smooth control. We recorded an additional camera view to show PPO's small but persistent oscillations more clearly.</p>
+      </div>
+    </section>
+    <section class="section conclusion-section" id="conclusion" aria-labelledby="conclusion-title">
+      <div class="container is-max-desktop">
+        <div class="conclusion-content">
+          <h2 class="title is-3 has-text-centered" id="conclusion-title">Conclusion</h2>
+          <p>Our findings show that temporal regularization can provide both temporal and spatial smoothness while better preserving return under strong smoothing. More broadly, these findings motivate designing smoothness regularization around transition directions relevant to control, avoiding unnecessary constraints on action changes needed for task performance. Linear ramp-up complements this direction by allowing the policy to learn rewarding behavior before smoothing its actions, rather than seeking rewarding behavior under smoothness constraints. CATS demonstrates the practical value of these findings through smooth control in simulation and on a physical robot with little additional complexity.</p>
+        </div>
       </div>
     </section>
     <section class="section citation-section" id="citation" aria-labelledby="citation-title">
@@ -200,7 +202,7 @@
   </main>
   <footer class="footer">
     <div class="container has-text-centered">
-      <p>Website adapted from <a href="https://nerfies.github.io/">Nerfies</a>, under <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>. Presentation inspired by <a href="https://gwanwoosong.github.io/cgq/">Chunk-Guided Q-Learning</a>.</p>
+      <p>Website adapted from <a href="https://nerfies.github.io/">Nerfies</a>, under <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>.</p>
     </div>
   </footer>
 </body>

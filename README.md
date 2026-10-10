@@ -4,7 +4,7 @@
 
 College of Software, Kyung Hee University
 
-[Paper](https://arxiv.org/abs/2610.07910) | [Project page](project-page/index.html) | [Benchmark experiments](benchmark/README.md) | [Robot simulation](robotics_sim/README.md)
+[Paper](https://arxiv.org/abs/2610.07910) | [Project page](https://dmach1ne.github.io/CATS/) | [Benchmark experiments](benchmark/README.md) | [Robot simulation](robotics_sim/README.md)
 
 Official implementation of **CATS (Conditioning for Action using only Temporal Smoothness)**.
 

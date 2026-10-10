@@ -8,11 +8,46 @@ const spatialVideo = document.querySelector('#spatial-video');
 const comparisonConditions = [['ppo', 'hopper'], ['ppo', 'walker'], ['sac', 'hopper'], ['sac', 'walker']];
 let comparisonIndex = 0;
 
+function setMetricLabels(selector, entries) {
+  const fields = entries[0].reward === undefined
+    ? [['success5', 'S@5cm', 1, '%', true], ['success', 'S@10cm', 1, '%', true], ['smoothness', 'sm', 3, '', false]]
+    : [['reward', 'R', 1, '', true], ['smoothness', 'sm', 3, '', false]];
+  for (const group of document.querySelectorAll(selector)) {
+    group.removeAttribute('aria-hidden');
+    group.replaceChildren(...entries.map(entry => {
+      const item = document.createElement('span');
+      item.className = 'method-label';
+      const name = document.createElement('span');
+      name.textContent = entry.label;
+      const metric = document.createElement('small');
+      metric.className = 'video-metrics';
+      metric.append('(');
+      fields.forEach(([key, label, digits, suffix, higherIsBetter], index) => {
+        const values = entries.map(peer => Number(peer[key].toFixed(digits)));
+        const best = higherIsBetter ? Math.max(...values) : Math.min(...values);
+        const value = document.createElement(Number(entry[key].toFixed(digits)) === best ? 'strong' : 'span');
+        value.textContent = entry[key].toFixed(digits) + suffix;
+        metric.append(`${index ? ', ' : ''}${label}: `, value);
+      });
+      metric.append(')');
+      if (entry.targets !== undefined) {
+        metric.title = `${entry.targets} targets in this video; within 5 cm: ${entry.successes5}, within 10 cm: ${entry.successes}; held for one second`;
+      }
+      item.append(name, document.createTextNode(' '), metric);
+      return item;
+    }));
+  }
+}
+
+setMetricLabels('#spatial .comparison-labels', videoMetrics.spatial['ppo-hopper']);
+setMetricLabels('#noise .comparison-labels', videoMetrics.noise['0.5']);
+setMetricLabels('#real .comparison-labels', videoMetrics.real);
+
 function comparisonPath() {
   const [algorithm, task] = comparisonConditions[comparisonIndex];
-  spatialVideo.width = compactScreen.matches ? 624 : 1872;
-  spatialVideo.height = compactScreen.matches ? 1506 : 502;
-  return `static/media/matched-${algorithm}-${task}-all${compactScreen.matches ? '-mobile' : ''}`;
+  spatialVideo.width = compactScreen.matches ? 624 : 1936;
+  spatialVideo.height = compactScreen.matches ? 1570 : 502;
+  return `static/media/presentation/matched-${algorithm}-${task}-all${compactScreen.matches ? '-mobile' : ''}`;
 }
 const initialComparisonPath = comparisonPath();
 spatialVideo.querySelector('source').dataset.src = `${initialComparisonPath}.mp4`;
@@ -200,6 +235,7 @@ function updateComparison() {
   const [algorithm, task] = comparisonConditions[comparisonIndex];
   const condition = `${algorithm.toUpperCase()} / ${task === 'hopper' ? 'Hopper' : 'Walker'}`;
   document.querySelector('#comparison-condition').textContent = condition;
+  setMetricLabels('#spatial .comparison-labels', videoMetrics.spatial[`${algorithm}-${task}`]);
   switchVideo(spatialVideo, comparisonPath(),
     `CAPS spatial-only, LipsNet++, and CATS on ${condition} at comparable smoothness`);
 }
@@ -223,7 +259,8 @@ function selectNoiseScale(button) {
     peer.setAttribute('aria-pressed', String(peer === button));
   }
   const scale = button.dataset.scale;
-  switchVideo(noiseVideo, `static/media/noise-${scale}`,
+  setMetricLabels('#noise .comparison-labels', videoMetrics.noise[scale]);
+  switchVideo(noiseVideo, `static/media/presentation/noise-${scale}`,
     `PPO and CATS on Hopper with observation noise scale ${scale}`);
 }
 noiseScale.addEventListener('click', event => {
