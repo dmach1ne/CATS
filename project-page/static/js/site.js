@@ -3,7 +3,6 @@
 const videos = [...document.querySelectorAll('video.result-video')];
 const visible = new Set();
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-const compactScreen = window.matchMedia('(max-width: 640px)');
 const spatialVideo = document.querySelector('#spatial-video');
 const comparisonConditions = [['ppo', 'hopper'], ['ppo', 'walker'], ['sac', 'hopper'], ['sac', 'walker']];
 let comparisonIndex = 0;
@@ -45,9 +44,9 @@ setMetricLabels('#real .comparison-labels', videoMetrics.real);
 
 function comparisonPath() {
   const [algorithm, task] = comparisonConditions[comparisonIndex];
-  spatialVideo.width = compactScreen.matches ? 624 : 1936;
-  spatialVideo.height = compactScreen.matches ? 1570 : 502;
-  return `static/media/presentation/matched-${algorithm}-${task}-all${compactScreen.matches ? '-mobile' : ''}`;
+  spatialVideo.width = 1936;
+  spatialVideo.height = 502;
+  return `static/media/presentation/matched-${algorithm}-${task}-all`;
 }
 const initialComparisonPath = comparisonPath();
 spatialVideo.querySelector('source').dataset.src = `${initialComparisonPath}.mp4`;
@@ -249,7 +248,6 @@ document.querySelector('#comparison-prev').addEventListener('click', () => {
   updateComparison();
 });
 spatialVideo.addEventListener('ended', nextComparison);
-compactScreen.addEventListener('change', updateComparison);
 
 const noiseScale = document.querySelector('#noise-scale');
 const noiseVideo = document.querySelector('#noise-video');
