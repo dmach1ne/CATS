@@ -10,16 +10,6 @@ Base PPO, CAPS and CATS.
 | ![Reach simulation](assets/reach.png) | ![Place Cube simulation](assets/place_cube.png) |
 | Move the end effector to a target in free space. | Start with a grasped cube and place it at a target on the table. |
 
-### Reach: PPO vs. CATS
-
-**Main view**
-
-[![Reach real-robot comparison](assets/reach_real_ppo_vs_cats.gif)](assets/reach_real_ppo_vs_cats.mp4)
-
-**Additional view**
-
-[![Reach additional-view comparison](assets/reach_context_ppo_vs_cats.gif)](assets/reach_context_ppo_vs_cats.mp4)
-
 [Setup](#setup) | [Policy](#policy-and-observations) |
 [Control](#actions-and-control) | [Tasks](#tasks-and-rewards) |
 [Regularization](#regularization) | [Training and Evaluation](#training-and-evaluation) |

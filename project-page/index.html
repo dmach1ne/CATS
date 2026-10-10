@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="CATS: Revisiting Temporal Regularization for Smooth Control in Deep Reinforcement Learning.">
+  <meta name="theme-color" content="#ffffff">
+  <title>CATS | Revisiting Temporal Regularization for Smooth Control</title>
+  <link rel="stylesheet" href="static/css/bulma.min.css">
+  <link rel="stylesheet" href="static/css/site.css">
+  <script defer src="static/js/site.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#overview">Skip to content</a>
+  <header class="hero">
+    <div class="hero-body">
+      <div class="container is-max-desktop has-text-centered">
+        <h1 class="title publication-title">Revisiting Temporal Regularization for Smooth Control<br class="desktop-break"> in Deep Reinforcement Learning</h1>
+        <div class="publication-authors">
+          <span class="author-block"><a href="https://dmach1ne.github.io/">SungJae Ahn</a>,</span>
+          <span class="author-block"><a href="https://sites.google.com/khu.ac.kr/jeongwoonlee/home">Jeong Woon Lee</a>,</span>
+          <span class="author-block"><a href="https://kwakkyoleen.github.io/">Kyoleen Kwak</a>,</span>
+          <span class="author-block"><a href="https://sites.google.com/view/hyoseok-hwang">Hyoseok Hwang</a></span>
+        </div>
+        <p class="affiliation">College of Software, Kyung Hee University</p>
+        <div class="publication-links">
+          <a class="button is-dark is-rounded" href="https://arxiv.org/pdf/2610.07910"><img class="link-icon" src="static/icons/file-text.svg" alt="">Paper</a>
+          <a class="button is-dark is-rounded" href="https://arxiv.org/abs/2610.07910">arXiv</a>
+          <a class="button is-dark is-rounded" href="https://github.com/dmach1ne/CATS"><img class="link-icon" src="static/icons/code-xml.svg" alt="">Code</a>
+        </div>
+        <nav class="section-links" aria-label="Page sections">
+          <a href="#overview">Overview</a>
+          <a href="#method">Method</a>
+          <a href="#spatial">Results</a>
+          <a href="#real">Real robot</a>
+          <a href="#citation">BibTeX</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+  <main>
+    <section class="section teaser" id="overview" aria-label="Shared next-state overview">
+      <div class="container is-max-desktop">
+        <figure class="concept-overview">
+          <video id="shared-next-state-video" class="result-video" muted loop playsinline preload="none" width="1440" height="636" poster="static/media/shared-next-state.jpg" aria-label="Temporal penalties align actions through a shared next state">
+            <source data-src="static/media/shared-next-state.mp4" type="video/mp4">
+          </video>
+          <figcaption>The temporal penalty aligns the current action with the action at a next state sampled from the next-state distribution. When two current states share possible next states, their actions can therefore become similar indirectly.</figcaption>
+        </figure>
+      </div>
+    </section>
+    <section class="section method-section" id="method" aria-labelledby="method-title">
+      <div class="container is-max-desktop">
+        <h2 class="title is-3 has-text-centered" id="method-title">Action oscillation in deep RL</h2>
+        <p class="section-intro">Deep RL policies can produce nonsmooth action oscillations that hinder deployment on physical robots. Reducing these oscillations calls for two policy properties: <em>temporal smoothness</em>, low policy sensitivity to state inputs received over time, and <em>spatial smoothness</em>, low policy sensitivity to small input changes caused by observation noise.</p>
+        <div class="two-column-media motivation-media">
+          <figure>
+            <video id="oscillation-concept-video" class="result-video" muted loop playsinline preload="none" width="480" height="480" poster="static/media/action-oscillation.jpg" aria-label="Illustration of oscillating action directions">
+              <source data-src="static/media/action-oscillation.mp4" type="video/mp4">
+            </video>
+            <figcaption class="figure-note">Arrow sizes are adjusted to make direction changes easier to see.</figcaption>
+          </figure>
+          <figure>
+            <video id="ant-motivation-video" class="result-video" muted loop playsinline preload="none" width="598" height="480" poster="static/media/ant-oscillation.jpg" aria-label="Action oscillation in a PPO Ant policy">
+              <source data-src="static/media/ant-oscillation.mp4" type="video/mp4">
+            </video>
+          </figure>
+        </div>
+      </div>
+    </section>
+    <section class="section method-section" id="spatial-motivation" aria-labelledby="spatial-motivation-title">
+      <div class="container wide-container">
+        <h2 class="title is-3 has-text-centered" id="spatial-motivation-title">Why broad spatial constraints can hurt performance</h2>
+        <p class="section-intro">Although policy inputs are temporally related, many existing methods characterize smoothness over the state space. Such spatial regularization imposes broad, direct constraints that may suppress important action changes.</p>
+        <div class="two-column-media temporal-media">
+          <figure>
+            <h3 class="concept-title spatial-color">Spatial regularization</h3>
+            <video id="spatial-concept-video" class="result-video concept-video" muted loop playsinline preload="none" width="1200" height="832" poster="static/media/spatial-regularization.jpg" aria-label="Spatial regularization constrains action differences across state-space directions">
+              <source data-src="static/media/spatial-regularization.mp4" type="video/mp4">
+            </video>
+          </figure>
+          <figure>
+            <h3 class="concept-title">CAPS spatial-only</h3>
+            <video id="caps-example-video" class="result-video concept-video" muted loop playsinline preload="none" width="924" height="742" poster="static/media/example-ppo-hopper-caps_spatial.jpg" aria-label="CAPS spatial-only on PPO Hopper">
+              <source data-src="static/media/example-ppo-hopper-caps_spatial.mp4" type="video/mp4">
+            </video>
+          </figure>
+        </div>
+      </div>
+    </section>
+    <section class="section method-section" id="temporal" aria-labelledby="temporal-title">
+      <div class="container wide-container">
+        <h2 class="title is-3 has-text-centered" id="temporal-title">Revisiting temporal regularization</h2>
+        <div class="two-column-media temporal-media">
+          <figure>
+            <h3 class="concept-title temporal-color">Temporal regularization</h3>
+            <video id="temporal-concept-video" class="result-video concept-video" muted loop playsinline preload="none" width="1440" height="776" poster="static/media/temporal-regularization.jpg" aria-label="Temporal regularization follows sampled next-state directions">
+              <source data-src="static/media/temporal-regularization.mp4" type="video/mp4">
+            </video>
+            <figcaption>Because temporal regularization only constrains actions along transitions, it has been regarded as unrelated to spatial smoothness. Prior methods have thus added spatial penalties, reintroducing broad constraints and extra cost.</figcaption>
+          </figure>
+          <figure>
+            <h3 class="concept-title induced-color">Induced spatial smoothness</h3>
+            <video id="induced-concept-video" class="result-video concept-video" muted loop playsinline preload="none" width="1440" height="776" poster="static/media/induced-spatial-smoothness.jpg" aria-label="Temporal regularization can indirectly align actions at nearby states">
+              <source data-src="static/media/induced-spatial-smoothness.mp4" type="video/mp4">
+            </video>
+            <figcaption>During training, however, the next state is not fixed. We hypothesize that nearby states share possible next states, allowing temporal penalties to indirectly align their actions and promote spatial smoothness.</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+    <section class="section result-section" id="spatial" aria-labelledby="spatial-title">
+      <div class="container wide-container">
+        <h2 class="title is-3 has-text-centered" id="spatial-title">Spatial regularization at matched smoothness</h2>
+        <div class="comparison-controls">
+          <button id="comparison-prev" class="button" type="button" aria-controls="spatial-video" title="Previous algorithm and task">Prev.</button>
+          <span id="comparison-condition" aria-live="polite">PPO / Hopper</span>
+          <button id="comparison-next" class="button" type="button" aria-controls="spatial-video" title="Next algorithm and task">Next</button>
+        </div>
+        <figure>
+          <div class="comparison-labels" aria-hidden="true"><span>CAPS spatial-only</span><span>LipsNet++</span><span>CATS</span></div>
+          <video id="spatial-video" class="result-video" muted playsinline preload="none" width="1872" height="502" poster="static/media/matched-ppo-hopper-all.jpg" aria-label="CAPS spatial-only, LipsNet++, and CATS on PPO Hopper at comparable smoothness">
+            <source data-src="static/media/matched-ppo-hopper-all.mp4" type="video/mp4">
+          </video>
+          <figcaption>At comparable action smoothness, CATS preserves more return than the spatial regularizers shown here.</figcaption>
+        </figure>
+      </div>
+    </section>
+    <section class="section result-section" id="sensitivity" aria-labelledby="sensitivity-title">
+      <div class="container wide-container">
+        <h2 class="title is-3 has-text-centered" id="sensitivity-title">Spatial smoothness without a spatial penalty</h2>
+        <p class="sensitivity-note">(Lower sensitivity indicates greater spatial smoothness.)</p>
+        <figure class="sensitivity-figure">
+          <a href="static/media/policy-sensitivity.png"><img src="static/media/policy-sensitivity.png" alt="Policy sensitivity under observation noise for PPO and SAC on Ant, Hopper, Walker, LunarLander, and Pendulum, with 95% confidence intervals." width="1800" height="553" loading="lazy"></a>
+          <figcaption>CATS achieves policy sensitivity comparable to several explicit spatial regularization methods. On Hopper, CATS and LipsNet++ have comparable sensitivity, but only CATS preserves task performance.</figcaption>
+        </figure>
+      </div>
+    </section>
+    <section class="section result-section" id="noise" aria-labelledby="noise-title">
+      <div class="container is-max-desktop">
+        <h2 class="title is-3 has-text-centered" id="noise-title">Under observation noise</h2>
+        <div class="noise-controls">
+          <span id="noise-scale-label">Noise scale &sigma;</span>
+          <div id="noise-scale" class="noise-scale-buttons" role="group" aria-labelledby="noise-scale-label">
+            <button type="button" data-scale="0.0" aria-pressed="false" aria-controls="noise-video">0.0</button>
+            <button type="button" data-scale="0.1" aria-pressed="false" aria-controls="noise-video">0.1</button>
+            <button type="button" data-scale="0.2" aria-pressed="false" aria-controls="noise-video">0.2</button>
+            <button type="button" data-scale="0.3" aria-pressed="false" aria-controls="noise-video">0.3</button>
+            <button type="button" data-scale="0.4" aria-pressed="false" aria-controls="noise-video">0.4</button>
+            <button type="button" data-scale="0.5" aria-pressed="true" aria-controls="noise-video">0.5</button>
+          </div>
+        </div>
+        <figure class="compact-media">
+          <div class="comparison-labels two-labels" aria-hidden="true"><span>PPO</span><span>CATS</span></div>
+          <video id="noise-video" class="result-video" muted playsinline preload="none" width="1848" height="742" poster="static/media/noise-0.5.jpg" aria-label="PPO and CATS on Hopper with observation noise scale 0.5">
+            <source data-src="static/media/noise-0.5.mp4" type="video/mp4">
+          </video>
+          <figcaption>CATS remains substantially smoother across noise scales while maintaining comparable or higher return than PPO.</figcaption>
+        </figure>
+      </div>
+    </section>
+    <section class="section result-section" id="real" aria-labelledby="real-title">
+      <div class="container is-max-desktop">
+        <h2 class="title is-3 has-text-centered" id="real-title">Smooth control after sim-to-real transfer</h2>
+        <div class="real-views compact-media">
+          <figure>
+            <h3 class="view-title" id="main-view-title">Main view</h3>
+            <video id="real-main-video" class="result-video" data-sync-group="real" muted loop playsinline preload="none" width="1996" height="846" poster="../robotics_sim/assets/reach_real_comparison.png" aria-labelledby="main-view-title">
+              <source data-src="../robotics_sim/assets/reach_real_ppo_vs_cats.mp4" type="video/mp4">
+            </video>
+          </figure>
+          <figure>
+            <h3 class="view-title" id="additional-view-title">Additional view</h3>
+            <video id="real-additional-video" class="result-video" data-sync-group="real" muted loop playsinline preload="none" width="1996" height="666" poster="../robotics_sim/assets/reach_context_comparison.png" aria-labelledby="additional-view-title">
+              <source data-src="../robotics_sim/assets/reach_context_ppo_vs_cats.mp4" type="video/mp4">
+            </video>
+          </figure>
+        </div>
+        <p class="result-caption">We compare PPO and CATS on real-world Reach, where CATS retains smooth control without an explicit spatial penalty. We recorded an additional camera view to show PPO's small but persistent oscillations more clearly.</p>
+      </div>
+    </section>
+    <section class="section citation-section" id="citation" aria-labelledby="citation-title">
+      <div class="container is-max-desktop">
+        <div class="citation-heading">
+          <h2 class="title is-3" id="citation-title">BibTeX</h2>
+          <button id="copy-citation" class="button copy-button" type="button" aria-label="Copy BibTeX" title="Copy BibTeX"><img src="static/icons/copy.svg" alt="" width="19" height="19"></button>
+          <span id="copy-status" class="copy-status" role="status" aria-live="polite"></span>
+        </div>
+        <pre><code id="bibtex">@misc{ahn2026cats,
+  title         = {Revisiting Temporal Regularization for Smooth Control in Deep Reinforcement Learning},
+  author        = {SungJae Ahn and Jeong Woon Lee and Kyoleen Kwak and Hyoseok Hwang},
+  year          = {2026},
+  eprint        = {2610.07910},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.LG},
+  url           = {https://arxiv.org/abs/2610.07910}
+}</code></pre>
+      </div>
+    </section>
+  </main>
+  <footer class="footer">
+    <div class="container has-text-centered">
+      <p>Website adapted from <a href="https://nerfies.github.io/">Nerfies</a>, under <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>. Presentation inspired by <a href="https://gwanwoosong.github.io/cgq/">Chunk-Guided Q-Learning</a>.</p>
+    </div>
+  </footer>
+</body>
+</html>
