@@ -124,7 +124,7 @@
         <p class="sensitivity-note">(Lower sensitivity indicates better spatial smoothness.)</p>
         <figure class="sensitivity-figure">
           <a href="static/media/policy-sensitivity.png"><img src="static/media/policy-sensitivity.png" alt="Policy sensitivity under observation noise for PPO and SAC on Ant, Hopper, Walker, LunarLander, and Pendulum, with 95% confidence intervals." width="1800" height="553" loading="lazy"></a>
-          <figcaption>CATS achieves policy sensitivity comparable to several explicit spatial regularization methods without an additional spatial penalty, yet better preserves return (see <a href="https://arxiv.org/pdf/2610.07910#page=3.95">Table I</a>). These results suggest that performance degradation stems from directly constraining action changes across multiple state-space directions, rather than from spatial smoothness itself.</figcaption>
+          <figcaption>CATS achieves policy sensitivity comparable to several explicit spatial regularization methods <strong>without an additional spatial penalty</strong>, yet better preserves return (see <a href="https://arxiv.org/pdf/2610.07910#page=3.95">Table I</a>). These results suggest that performance degradation stems from directly constraining action changes across multiple state-space directions, rather than from spatial smoothness itself.</figcaption>
         </figure>
       </div>
     </section>
