@@ -136,7 +136,7 @@
           <object id="sensitivity-chart" type="image/svg+xml" data="static/media/policy-sensitivity.svg" aria-label="Policy sensitivity with selectable method curves">
             <img src="static/media/policy-sensitivity.png" alt="Policy sensitivity under observation noise, with 95% confidence intervals." width="1800" height="553">
           </object>
-          <figcaption>CATS achieves policy sensitivity comparable to several explicit spatial regularization methods <strong>without an additional spatial penalty</strong>, yet better preserves return (see <a href="https://arxiv.org/pdf/2610.07910#page=3.95">Table I</a>). These results suggest that performance degradation stems from directly constraining action changes across multiple state-space directions, rather than from spatial smoothness itself.</figcaption>
+          <figcaption>CATS achieves policy sensitivity comparable to several explicit spatial regularization methods <strong>without an additional spatial penalty</strong>, yet better preserves return (see <a href="https://arxiv.org/pdf/2610.07910#page=3.95">Table I</a>). These results <strong>1)</strong> show that spatial smoothness is not exclusive to spatial regularization and <strong>2)</strong> suggest that performance loss stems from directly restricting action changes across multiple state-space directions, not from spatial smoothness itself.</figcaption>
         </figure>
       </div>
     </section>
