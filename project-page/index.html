@@ -124,13 +124,14 @@
         <h2 class="title is-3 has-text-centered" id="sensitivity-title">Spatial smoothness without a spatial penalty</h2>
         <p class="sensitivity-note">(Lower sensitivity indicates better spatial smoothness.)</p>
         <figure class="sensitivity-figure">
-          <div class="sensitivity-legend" role="group" aria-label="Compare a method with CATS">
-            <button type="button" data-method="Base" aria-pressed="false" title="Compare Base with CATS" style="--method-color: #5b6268"><span class="legend-symbol" aria-hidden="true">&#9679;</span>Base</button>
-            <button type="button" data-method="CAPS" aria-pressed="false" title="Compare CAPS with CATS" style="--method-color: #1565b5"><span class="legend-symbol" aria-hidden="true">&#9632;</span>CAPS</button>
-            <button type="button" data-method="L2C2" aria-pressed="false" title="Compare L2C2 with CATS" style="--method-color: #168447"><span class="legend-symbol" aria-hidden="true">&#9670;</span>L2C2</button>
-            <button type="button" data-method="ASAP" aria-pressed="false" title="Compare ASAP with CATS" style="--method-color: #d18424"><span class="legend-symbol" aria-hidden="true">&#10010;</span>ASAP</button>
-            <button type="button" data-method="LipsNet++" aria-pressed="false" title="Compare LipsNet++ with CATS" style="--method-color: #8b4a9c"><span class="legend-symbol" aria-hidden="true">&#10005;</span>LipsNet++</button>
-            <button type="button" data-method="CATS" aria-pressed="false" title="Highlight CATS" style="--method-color: #c43b4d"><span class="legend-symbol" aria-hidden="true">&#9650;</span>CATS</button>
+          <div class="sensitivity-legend" role="group" aria-label="Select methods to compare with CATS">
+            <button type="button" data-method="Base" aria-pressed="false" title="Toggle Base comparison" style="--method-color: #5b6268"><img src="static/media/marker-base.svg" alt="" width="32" height="16">Base</button>
+            <button type="button" data-method="CAPS" aria-pressed="false" title="Toggle CAPS comparison" style="--method-color: #1565b5"><img src="static/media/marker-caps.svg" alt="" width="32" height="16">CAPS</button>
+            <button type="button" data-method="L2C2" aria-pressed="false" title="Toggle L2C2 comparison" style="--method-color: #168447"><img src="static/media/marker-l2c2.svg" alt="" width="32" height="16">L2C2</button>
+            <button type="button" data-method="ASAP" aria-pressed="false" title="Toggle ASAP comparison" style="--method-color: #d18424"><img src="static/media/marker-asap.svg" alt="" width="32" height="16">ASAP</button>
+            <button type="button" data-method="LipsNet++" aria-pressed="false" title="Toggle LipsNet++ comparison" style="--method-color: #8b4a9c"><img src="static/media/marker-lipsnetpp.svg" alt="" width="32" height="16">LipsNet++</button>
+            <button type="button" data-method="CATS" aria-pressed="true" title="CATS is always shown" style="--method-color: #c43b4d" disabled><img src="static/media/marker-cats.svg" alt="" width="32" height="16">CATS</button>
+            <button type="button" id="sensitivity-reset" title="Show all methods">Reset</button>
           </div>
           <object id="sensitivity-chart" type="image/svg+xml" data="static/media/policy-sensitivity.svg" aria-label="Policy sensitivity with selectable method curves">
             <img src="static/media/policy-sensitivity.png" alt="Policy sensitivity under observation noise, with 95% confidence intervals." width="1800" height="553">

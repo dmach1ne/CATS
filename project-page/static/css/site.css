@@ -108,13 +108,14 @@ figcaption, .result-caption { max-width: 960px; margin-left: auto; margin-right:
 #noise .comparison-labels { gap: 1.910828%; }
 #real .comparison-labels { gap: 2.439024%; }
 .sensitivity-figure img { display: block; width: 100%; height: auto; }
-.sensitivity-legend { display: flex; justify-content: center; flex-wrap: wrap; gap: 4px 12px; margin-bottom: 12px; }
-.sensitivity-legend button { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 4px 7px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: #404040; font: inherit; font-size: 14px; cursor: pointer; }
-.sensitivity-legend button[aria-pressed="true"] { border-bottom-color: var(--method-color); }
-.sensitivity-legend button[data-muted="true"] { color: #909090; }
-.sensitivity-legend button[data-muted="true"] .legend-symbol { opacity: .35; }
-.legend-symbol { position: relative; display: inline-block; width: 26px; color: var(--method-color); text-align: center; font-size: 11px; }
-.legend-symbol::before { content: ""; position: absolute; top: 50%; left: 0; right: 0; border-top: 1px solid currentColor; }
+.sensitivity-legend { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.sensitivity-legend button { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 6px 10px; border: 1px solid #c8ccd0; border-radius: 4px; background: #fff; color: #404040; font: inherit; font-size: 14px; cursor: pointer; }
+.sensitivity-legend button:hover:not(:disabled) { background: #f2f4f5; border-color: #7f868c; }
+.sensitivity-legend button[aria-pressed="true"] { border-color: var(--method-color); background: color-mix(in srgb, var(--method-color) 9%, white); box-shadow: inset 0 0 0 1px var(--method-color); }
+.sensitivity-legend button:disabled { opacity: 1; cursor: default; }
+.sensitivity-legend button[data-muted="true"] { color: #777; }
+.sensitivity-legend button[data-muted="true"] img { opacity: .4; }
+.sensitivity-legend button img { width: 32px; height: 16px; }
 #sensitivity-chart { display: block; width: 100%; aspect-ratio: 612.574995 / 174.465961; }
 .sensitivity-note { margin: -16px 0 22px; text-align: center; font-size: 14px; line-height: 1.5; color: #666; }
 .conclusion-section { padding-bottom: 0; }
