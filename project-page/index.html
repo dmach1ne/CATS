@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="static/css/bulma.min.css">
   <link rel="stylesheet" href="static/css/site.css">
   <script defer src="static/js/video-metrics.js"></script>
+  <script defer src="static/js/sensitivity.js"></script>
   <script defer src="static/js/site.js"></script>
 </head>
 <body>
@@ -123,7 +124,17 @@
         <h2 class="title is-3 has-text-centered" id="sensitivity-title">Spatial smoothness without a spatial penalty</h2>
         <p class="sensitivity-note">(Lower sensitivity indicates better spatial smoothness.)</p>
         <figure class="sensitivity-figure">
-          <a href="static/media/policy-sensitivity.png"><img src="static/media/policy-sensitivity.png" alt="Policy sensitivity under observation noise for PPO and SAC on Ant, Hopper, Walker, LunarLander, and Pendulum, with 95% confidence intervals." width="1800" height="553" loading="lazy"></a>
+          <div class="sensitivity-legend" role="group" aria-label="Compare a method with CATS">
+            <button type="button" data-method="Base" aria-pressed="false" title="Compare Base with CATS" style="--method-color: #5b6268"><span class="legend-symbol" aria-hidden="true">&#9679;</span>Base</button>
+            <button type="button" data-method="CAPS" aria-pressed="false" title="Compare CAPS with CATS" style="--method-color: #1565b5"><span class="legend-symbol" aria-hidden="true">&#9632;</span>CAPS</button>
+            <button type="button" data-method="L2C2" aria-pressed="false" title="Compare L2C2 with CATS" style="--method-color: #168447"><span class="legend-symbol" aria-hidden="true">&#9670;</span>L2C2</button>
+            <button type="button" data-method="ASAP" aria-pressed="false" title="Compare ASAP with CATS" style="--method-color: #d18424"><span class="legend-symbol" aria-hidden="true">&#10010;</span>ASAP</button>
+            <button type="button" data-method="LipsNet++" aria-pressed="false" title="Compare LipsNet++ with CATS" style="--method-color: #8b4a9c"><span class="legend-symbol" aria-hidden="true">&#10005;</span>LipsNet++</button>
+            <button type="button" data-method="CATS" aria-pressed="false" title="Highlight CATS" style="--method-color: #c43b4d"><span class="legend-symbol" aria-hidden="true">&#9650;</span>CATS</button>
+          </div>
+          <object id="sensitivity-chart" type="image/svg+xml" data="static/media/policy-sensitivity.svg" aria-label="Policy sensitivity with selectable method curves">
+            <img src="static/media/policy-sensitivity.png" alt="Policy sensitivity under observation noise, with 95% confidence intervals." width="1800" height="553">
+          </object>
           <figcaption>CATS achieves policy sensitivity comparable to several explicit spatial regularization methods <strong>without an additional spatial penalty</strong>, yet better preserves return (see <a href="https://arxiv.org/pdf/2610.07910#page=3.95">Table I</a>). These results suggest that performance degradation stems from directly constraining action changes across multiple state-space directions, rather than from spatial smoothness itself.</figcaption>
         </figure>
       </div>

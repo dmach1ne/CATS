@@ -108,6 +108,14 @@ figcaption, .result-caption { max-width: 960px; margin-left: auto; margin-right:
 #noise .comparison-labels { gap: 1.910828%; }
 #real .comparison-labels { gap: 2.439024%; }
 .sensitivity-figure img { display: block; width: 100%; height: auto; }
+.sensitivity-legend { display: flex; justify-content: center; flex-wrap: wrap; gap: 4px 12px; margin-bottom: 12px; }
+.sensitivity-legend button { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 4px 7px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: #404040; font: inherit; font-size: 14px; cursor: pointer; }
+.sensitivity-legend button[aria-pressed="true"] { border-bottom-color: var(--method-color); }
+.sensitivity-legend button[data-muted="true"] { color: #909090; }
+.sensitivity-legend button[data-muted="true"] .legend-symbol { opacity: .35; }
+.legend-symbol { position: relative; display: inline-block; width: 26px; color: var(--method-color); text-align: center; font-size: 11px; }
+.legend-symbol::before { content: ""; position: absolute; top: 50%; left: 0; right: 0; border-top: 1px solid currentColor; }
+#sensitivity-chart { display: block; width: 100%; aspect-ratio: 612.574995 / 174.465961; }
 .sensitivity-note { margin: -16px 0 22px; text-align: center; font-size: 14px; line-height: 1.5; color: #666; }
 .conclusion-section { padding-bottom: 0; }
 .conclusion-content p { font-size: 16px; line-height: 1.8; text-align: center; }
