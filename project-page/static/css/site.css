@@ -27,23 +27,6 @@ section { scroll-margin-top: 20px; }
 .container.is-max-desktop { max-width: 960px !important; }
 .hero-body { padding: 48px 24px 28px; }
 .publication-title { font-size: 34px; line-height: 1.16; font-weight: 700; margin-bottom: 24px !important; color: #363636; }
-.publication-title > span { display: block; }
-.concept-overview figcaption { font-size: 14px; }
-@media (min-width: 641px) {
-  .publication-title > span, .concept-overview figcaption { white-space: nowrap; }
-}
-@media (min-width: 801px) and (max-width: 1100px) {
-  .publication-title { font-size: 27px; }
-  .concept-overview figcaption { font-size: 12px; }
-}
-@media (min-width: 641px) and (max-width: 800px) {
-  .publication-title { font-size: 23px; }
-  .concept-overview figcaption { font-size: 10px; }
-}
-@media (min-width: 641px) and (max-width: 700px) {
-  .publication-title { font-size: 21px; }
-  .concept-overview figcaption { font-size: 9px; }
-}
 .publication-authors { font-size: 20px; line-height: 1.7; color: #1686c9; }
 .author-block { display: inline-block; margin: 0 3px; }
 .author-block a { text-underline-offset: 3px; text-decoration-thickness: 1px; }

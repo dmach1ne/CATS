@@ -10,15 +10,22 @@
   function prepareReveal(document) {
     const svg = document.documentElement;
     const namespace = 'http://www.w3.org/2000/svg';
-    const columns = Array.from({length: 5}, () => ({elements: [], left: Infinity, right: -Infinity}));
-    for (const element of document.querySelectorAll('[data-method]')) {
+    const measured = [...document.querySelectorAll('[data-method]')].map(element => {
       const box = element.getBBox();
       const matrix = svg.getCTM().inverse().multiply(element.getCTM());
       const corners = [[box.x, box.y], [box.x + box.width, box.y + box.height]]
         .map(([x, y]) => new DOMPoint(x, y).matrixTransform(matrix));
       const left = Math.min(...corners.map(point => point.x));
       const right = Math.max(...corners.map(point => point.x));
-      const column = columns[Math.min(4, Math.max(0, Math.floor((left + right) / 2 / (svg.viewBox.baseVal.width / 5))))];
+      return {element, left, right, center: (left + right) / 2};
+    });
+    const centers = [];
+    for (const item of measured.filter(item => item.right - item.left > svg.viewBox.baseVal.width / 10).sort((a, b) => a.center - b.center)) {
+      if (!centers.some(center => Math.abs(center - item.center) < 10)) centers.push(item.center);
+    }
+    const columns = centers.map(center => ({center, elements: [], left: Infinity, right: -Infinity}));
+    for (const {element, left, right, center} of measured) {
+      const column = columns.reduce((nearest, candidate) => Math.abs(candidate.center - center) < Math.abs(nearest.center - center) ? candidate : nearest);
       column.elements.push(element);
       column.left = Math.min(column.left, left - 2);
       column.right = Math.max(column.right, right + 2);
@@ -37,6 +44,7 @@
       defs.append(clip);
       for (const element of column.elements) {
         const wrapper = document.createElementNS(namespace, 'g');
+        wrapper.dataset.revealPanel = String(index);
         wrapper.setAttribute('clip-path', `url(#${clip.id})`);
         element.before(wrapper);
         wrapper.append(element);
