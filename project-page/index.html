@@ -193,6 +193,33 @@
         </div>
       </div>
     </section>
+    <section class="section reward-penalty-section" id="reward-penalties" aria-labelledby="reward-penalty-title">
+      <div class="container is-max-desktop">
+        <details class="reward-penalty-details">
+          <summary id="reward-penalty-title">Why not use smoothing rewards?</summary>
+          <div class="reward-penalty-content">
+            <p>Reward penalties are a common way to encourage temporal smoothness, but tuning their weights is a well-known challenge. As discussed in our paper's <a href="https://arxiv.org/pdf/2610.07910#page=2">Related Work</a>, prior studies report that increasing penalty weights can instead increase action oscillation under sparse rewards. Our additional Reach experiments, <strong>not included in the paper</strong>, show that increasing penalty weights can likewise increase action oscillation rather than reduce it, even with dense rewards. This can also reduce task success, further complicating the tuning process.</p>
+            <p class="reward-penalty-table-caption" id="reward-penalty-table-caption">Values are mean (standard deviation) across five training seeds. Success requires remaining within 5 cm of the target for one second.</p>
+            <div class="reward-penalty-table-wrap" role="region" aria-label="Reach reward-penalty comparison" tabindex="0">
+              <table class="reward-penalty-table" aria-describedby="reward-penalty-table-caption">
+                <caption class="is-sr-only">Reach reward-penalty results</caption>
+                <thead>
+                  <tr><th scope="col">Method</th><th scope="col">Action-rate multiplier</th><th scope="col">Joint-velocity multiplier</th><th scope="col">Success (%) &uarr;</th><th scope="col">Smoothness &darr;</th></tr>
+                </thead>
+                <tbody>
+                  <tr><th scope="row">Base</th><td>&ndash;</td><td>&ndash;</td><td>88.5 (13.1)</td><td>4.345 (2.333)</td></tr>
+                  <tr><th scope="row">CATS</th><td>&ndash;</td><td>&ndash;</td><td><strong>100.0 (0.0)</strong></td><td><strong>0.106 (0.020)</strong></td></tr>
+                  <tr><th scope="row">Reward penalty</th><td>1&times;</td><td>1&times;</td><td><u>99.7 (0.6)</u></td><td><u>0.161 (0.047)</u></td></tr>
+                  <tr><th scope="row">Reward penalty</th><td>1&times;</td><td>10&times;</td><td>72.8 (42.7)</td><td>0.426 (0.156)</td></tr>
+                  <tr><th scope="row">Reward penalty</th><td>10&times;</td><td>1&times;</td><td>96.8 (5.7)</td><td>0.197 (0.080)</td></tr>
+                  <tr><th scope="row">Reward penalty</th><td>10&times;</td><td>10&times;</td><td>71.6 (39.2)</td><td>0.176 (0.089)</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </details>
+      </div>
+    </section>
     <section class="section citation-section" id="citation" aria-labelledby="citation-title">
       <div class="container is-max-desktop">
         <div class="citation-heading">

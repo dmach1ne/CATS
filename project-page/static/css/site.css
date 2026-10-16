@@ -120,6 +120,25 @@ figcaption, .result-caption { max-width: 960px; margin-left: auto; margin-right:
 .sensitivity-note { margin: -16px 0 22px; text-align: center; font-size: 14px; line-height: 1.5; color: #666; }
 .conclusion-section { padding-bottom: 0; }
 .conclusion-content p { font-size: 16px; line-height: 1.8; text-align: center; }
+.reward-penalty-section { padding-bottom: 0; }
+.reward-penalty-details { border-top: 1px solid #dedede; border-bottom: 1px solid #dedede; }
+.reward-penalty-details summary { padding: 18px 0; font-size: 20px; line-height: 1.5; font-weight: 700; color: #363636; cursor: pointer; }
+.reward-penalty-details summary:hover { color: #1686c9; }
+.reward-penalty-content { padding-bottom: 18px; }
+.reward-penalty-content p { font-size: 16px; line-height: 1.75; margin: 0 0 18px; }
+.reward-penalty-content .reward-penalty-table-caption { font-size: 14px; line-height: 1.6; margin: 22px 0 12px; color: #626262; }
+.reward-penalty-table-wrap { max-width: 100%; overflow-x: auto; margin: 0 0 10px; }
+.reward-penalty-table-wrap:focus-visible { outline: 3px solid #1686c9; outline-offset: 3px; }
+.reward-penalty-table { width: 100%; min-width: 580px; border-collapse: collapse; font-size: 14px; line-height: 1.5; font-variant-numeric: tabular-nums; }
+.reward-penalty-table th, .reward-penalty-table td { padding: 12px 10px; text-align: center; vertical-align: middle; border-bottom: 1px solid #e5e5e5; }
+.reward-penalty-table th:not([align]), .reward-penalty-table td:not([align]) { text-align: center; }
+.reward-penalty-table th:first-child:not([align]) { text-align: left; }
+.reward-penalty-table thead th { border-top: 2px solid #555; border-bottom: 1px solid #777; }
+.reward-penalty-table tbody th { font-weight: 400; text-align: left; white-space: nowrap; }
+.reward-penalty-table td { white-space: nowrap; }
+.reward-penalty-table tbody tr:last-child th, .reward-penalty-table tbody tr:last-child td { border-bottom: 2px solid #555; }
+.reward-penalty-content .reward-penalty-table-note, .reward-penalty-content .additional-results-note { font-size: 14px; line-height: 1.6; color: #626262; }
+.reward-penalty-content .additional-results-note { margin-bottom: 0; }
 .citation-section { padding-top: 60px; }
 .citation-heading { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
 .citation-heading .title { margin: 0; }
